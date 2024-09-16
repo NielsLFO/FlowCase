@@ -1,0 +1,241 @@
+.dashboard {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    font-family: Arial, sans-serif;
+}
+
+.header {
+    background-color: #333;
+    color: #fff;
+    padding: 10px 20px;
+}
+
+.nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.leftOptions button,
+.rightOptions button {
+    background: none;
+    border: none;
+    color: #fff;
+    padding: 10px 20px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: background-color 0.3s;
+}
+
+.leftOptions button.activeOption,
+.rightOptions .settingsButton.activeButton {
+    background-color: #555;
+}
+
+.rightOptions .signOutButton {
+    background-color: #e74c3c;
+    color: #fff;
+    border-radius: 5px;
+}
+
+.rightOptions .settingsButton {
+    background: none;
+    border: none;
+    color: #fff;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.rightOptions .settingsButton.activeButton {
+    background-color: #555;
+}
+
+.content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    padding: 20px;
+}
+
+.mainContent {
+    display: flex;
+    margin-bottom: 20px;
+}
+
+/* Estilo común para los divs dentro de mainContent */
+.mainContent > div {
+    flex: 1; /* Asegura que todos los divs tengan el mismo ancho */
+    margin-right: 20px; /* Espacio entre los divs */
+    border: 1px solid #ddd; /* Borde para separar los divs */
+    padding: 15px; /* Espacio interno para el contenido */
+    border-radius: 8px; /* Bordes redondeados */
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Sombra para darle un efecto de profundidad */
+}
+
+.mainContent > div:last-child {
+    margin-right: 0; /* El último div no tendrá margen derecho */
+}
+
+/* Reducir el tamaño del formulario de Today Work */
+.formSection {
+    width: 100%; /* Ajustado para ocupar el ancho completo disponible */
+    padding-right: 20px;
+}
+
+.chartSection {
+    width: 100%; /* Ajustado para ocupar el ancho completo disponible */
+    position: relative; /* Posicionar el contenedor del temporizador de manera relativa */
+}
+
+/* Añade un nuevo estilo para el div del temporizador */
+.timer {
+    font-size: 20px; /* Tamaño de fuente del temporizador */
+    font-weight: bold; /* Texto en negrita */
+    color: #3498db; /* Color del texto del temporizador */
+    background-color: #f4f4f4; /* Fondo del temporizador */
+    padding: 10px 15px; /* Espacio interno para el temporizador */
+    border-radius: 8px; /* Bordes redondeados */
+    border: 2px solid #ccc; /* Borde del temporizador */
+    text-align: center; /* Centra el texto del temporizador */
+    margin-top: 20px; /* Espacio superior */
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); /* Sombra para darle un efecto de profundidad */
+}
+
+.formSection form {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.formSection form div {
+    display: flex;
+    flex-direction: column;
+}
+
+.formSection label {
+    margin-bottom: 5px;
+}
+
+.formSection input,
+.formSection select,
+.formSection textarea {
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    /*width: 100%;*/
+}
+
+.formSection textarea {
+    resize: vertical;
+}
+
+.formSection button {
+    background-color: #3498db;
+    color: #fff;
+    border: none;
+    padding: 10px 15px;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.formSection button:hover {
+    background-color: #2980b9;
+}
+
+.tableSection {
+    width: 100%;
+}
+
+.table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.table th,
+.table td {
+    border: 1px solid #ddd;
+    padding: 8px;
+    text-align: left;
+}
+
+.table th {
+    background-color: #f4f4f4;
+}
+
+.table tbody tr:nth-child(even) {
+    background-color: #f9f9f9;
+}
+
+.table tbody tr:hover {
+    background-color: #f1f1f1;
+}
+
+/* Estilos para el formulario de cambio de contraseña */
+.changePasswordForm {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    padding: 20px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    background-color: #f9f9f9;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    width: 100%;
+    max-width: 500px; /* Limita el ancho máximo del formulario */
+    margin: 0 auto; /* Centra el formulario horizontalmente */
+}
+
+.changePasswordForm div {
+    display: flex;
+    flex-direction: column;
+}
+
+.changePasswordForm label {
+    margin-bottom: 5px;
+    font-weight: bold;
+    color: #333; /* Asegura que el texto del label sea legible */
+    margin-top: 10px;
+}
+
+.changePasswordForm input {
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    /*width: 100%;*/
+}
+
+.changePasswordForm input[type="password"] {
+    font-size: 16px;
+}
+
+.changePasswordForm button {
+    background-color: #3498db;
+    color: #fff;
+    border: none;
+    padding: 10px 15px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 16px;
+    margin-top: 10px; /* Espacio superior para separar el botón del contenido anterior */
+    margin-right: 5px;
+}
+
+.changePasswordForm button:hover {
+    background-color: #2980b9;
+}
+
+.changePasswordForm .formMessage {
+    color: #e74c3c;
+    font-size: 14px;
+    margin-top: 10px;
+}
+
+.changePasswordForm .cancelButton {
+    background-color: #e74c3c;
+}
+
+.changePasswordForm .cancelButton:hover {
+    background-color: #c0392b;
+}
