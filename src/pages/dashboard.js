@@ -43,6 +43,11 @@ export default function Dashboard() {
 
     const handleFormSubmit = (e) => {
         e.preventDefault();
+        // Validar que se hayan seleccionado Task y Type
+        if (!formData.task || !formData.type) {
+            alert('Please select both Task and Type.');
+            return;
+        }
         // Obtener la hora actual
         const currentTime = new Date().toLocaleTimeString();
         setDataRows(prev => [...prev, { ...formData, time: currentTime }]);
@@ -70,6 +75,7 @@ export default function Dashboard() {
             setSelectedOption('Today Work');
         } else {
             console.log('New passwords do not match');
+            alert('New passwords do not match.');
         }
     };
 
@@ -80,7 +86,6 @@ export default function Dashboard() {
 
     const handleSettingsButtonClick = () => {
         setShowPasswordChangeForm(prev => !prev);
-
         // Si el formulario ya está mostrado, selecciona "Today Work"
         if (showPasswordChangeForm) {
             setSelectedOption('Today Work');
@@ -151,6 +156,48 @@ export default function Dashboard() {
         }
     };
 
+    // Definir las opciones dinámicas para el campo "Type"
+    const typeOptions = {
+        task_production: [
+            { value: 'item1', label: 'Item 1' },
+            { value: 'item2', label: 'Item 2' },
+            { value: 'item3', label: 'Item 3' },
+            { value: 'item4', label: 'Item 4' },
+            { value: 'item5', label: 'Item 5' },
+        ],
+        task_call: [
+            { value: 'item6', label: 'Item 6' },
+            { value: 'item7', label: 'Item 7' },
+            { value: 'item8', label: 'Item 8' },
+            { value: 'item9', label: 'Item 9' },
+            { value: 'item10', label: 'Item 10' },
+        ],
+        task_meeting: [
+            { value: 'item11', label: 'Item 11' },
+            { value: 'item12', label: 'Item 12' },
+            { value: 'item13', label: 'Item 13' },
+            { value: 'item14', label: 'Item 14' },
+            { value: 'item15', label: 'Item 15' },
+        ],
+        task_other_task: [
+            { value: 'item16', label: 'Item 16' },
+            { value: 'item17', label: 'Item 17' },
+            { value: 'item18', label: 'Item 18' },
+            { value: 'item19', label: 'Item 19' },
+            { value: 'item20', label: 'Item 20' },
+        ],
+        task_idle_time: [
+            { value: 'item21', label: 'Item 21' },
+            { value: 'item22', label: 'Item 22' },
+            { value: 'item23', label: 'Item 23' },
+            { value: 'item24', label: 'Item 24' },
+            { value: 'item25', label: 'Item 25' },
+        ],
+    };
+
+    // Obtener las opciones de "Type" basadas en la tarea seleccionada
+    const availableTypeOptions = typeOptions[formData.task] || [];
+
     return (
         <div className={styles.dashboard}>
             <header className={styles.header}>
@@ -191,25 +238,24 @@ export default function Dashboard() {
                                 <div>
                                     <h2>Case Flow</h2>
                                     <label>Task:</label>
-                                    <select name="type" value={formData.task} onChange={handleFormChange}>
-                                        <option value="">Select</option>
-                                        <option value="item1">Production</option>
-                                        <option value="item2">Call</option>
-                                        <option value="item3">Meeting</option>
-                                        <option value="item4">Other task</option>
-                                        <option value="item5">Idle time</option>
+                                    <select name="task" value={formData.task} onChange={handleFormChange}>
+                                        <option value="">Select Task</option>
+                                        <option value="task_production">Production</option>
+                                        <option value="task_call">Call</option>
+                                        <option value="task_meeting">Meeting</option>
+                                        <option value="task_other_task">Other task</option>
+                                        <option value="task_idle_time">Idle time</option>
                                     </select>
                                 </div>
                                 <div>
                                     <label>Type:</label>
-                                    <select name="type" value={formData.type} onChange={handleFormChange}>
-                                        <option value="">Select</option>
-                                        <option value="item1">New case</option>
-                                        <option value="item2">Item 2</option>
-                                        <option value="item3">Item 3</option>
-                                        <option value="item4">Item 4</option>
-                                        <option value="item5">Item 5</option>
-                                        <option value="item6">Item 6</option>
+                                    <select name="type" value={formData.type} onChange={handleFormChange} disabled={!formData.task}>
+                                        <option value="">Select Type</option>
+                                        {availableTypeOptions.map(option => (
+                                            <option key={option.value} value={option.value}>
+                                                {option.label}
+                                            </option>
+                                        ))}
                                     </select>
                                 </div>
                                 <div>
