@@ -21,7 +21,7 @@ export default function Dashboard() {
         type: '',
         alias: '',
         comments: '',
-        completed: 'play',
+        completed: 'Started',
     });
     const [dataRows, setDataRows] = useState([]);
     const [showPasswordChangeForm, setShowPasswordChangeForm] = useState(false);
@@ -48,6 +48,11 @@ export default function Dashboard() {
             alert('Please select both Task and Type.');
             return;
         }
+        // Validar que si Type es 'Other', el campo de comentarios no esté vacío
+        if (formData.type === 'Other' && !formData.comments) { // Suponiendo que 'item5' corresponde a "Other"
+            alert('Please fill in the comments when selecting "Other".');
+            return;
+        }
         // Obtener la hora actual
         const currentTime = new Date().toLocaleTimeString();
         setDataRows(prev => [...prev, { ...formData, time: currentTime }]);
@@ -56,7 +61,7 @@ export default function Dashboard() {
             type: '',
             alias: '',
             comments: '',
-            completed: 'play',
+            completed: 'Started',
             time: '',
         });
     };
@@ -94,9 +99,14 @@ export default function Dashboard() {
         }
     };
 
-    const completedCases = dataRows.length;
     const targetCases = 6;
 
+    const completedCases = dataRows.filter(row => 
+        row.task === 'Production' && 
+        row.type === 'New case' && 
+        row.alias.trim() !== ''
+    ).length;
+    
     const chartData = {
         labels: ['Cases Completed'],
         datasets: [
@@ -110,7 +120,7 @@ export default function Dashboard() {
             },
         ],
     };
-
+    
     const chartOptions = {
         responsive: true,
         scales: {
@@ -158,40 +168,52 @@ export default function Dashboard() {
 
     // Definir las opciones dinámicas para el campo "Type"
     const typeOptions = {
-        task_production: [
-            { value: 'item1', label: 'Item 1' },
-            { value: 'item2', label: 'Item 2' },
-            { value: 'item3', label: 'Item 3' },
-            { value: 'item4', label: 'Item 4' },
-            { value: 'item5', label: 'Item 5' },
+        Production: [
+            { value: 'New case', label: 'New case' },
+            { value: 'Clinical rework', label: 'Clinical rework' },
+            { value: 'QA rework', label: 'QA rework' },
+            { value: 'Doctor rework', label: 'Doctor rework' },
+            { value: 'QA review', label: 'QA review' },
+            { value: 'Doctor rework review', label: 'Doctor rework review' },
+            { value: 'Final MFG review', label: 'Final MFG review' },
         ],
-        task_call: [
-            { value: 'item6', label: 'Item 6' },
-            { value: 'item7', label: 'Item 7' },
-            { value: 'item8', label: 'Item 8' },
-            { value: 'item9', label: 'Item 9' },
-            { value: 'item10', label: 'Item 10' },
+        Call: [
+            { value: 'Support from TL', label: 'Support from TL' },
+            { value: 'Support from clinical', label: 'Support from clinical' },
+            { value: 'Support from QA', label: 'Support from QA' },
+            { value: 'Feedback from TL', label: 'Feedback from TL' },
+            { value: 'Feedback from clinical', label: 'Feedback from clinical' },
+            { value: 'Feedback from QA', label: 'Feedback from QA' },
         ],
-        task_meeting: [
-            { value: 'item11', label: 'Item 11' },
-            { value: 'item12', label: 'Item 12' },
-            { value: 'item13', label: 'Item 13' },
-            { value: 'item14', label: 'Item 14' },
-            { value: 'item15', label: 'Item 15' },
+        Meeting: [
+            { value: 'OTP team huddle', label: 'OTP team huddle' },
+            { value: 'Training', label: 'Training' },
+            { value: '1:1', label: '1:1' },
+            { value: 'Monthly all hands', label: 'Monthly all hands' },
+            { value: 'How its made', label: 'How its made' },
+            { value: 'Coffee talk', label: 'Coffee talk' },
+            { value: 'CR town hall', label: 'CR town hall' },
+            { value: 'UKR global stand-up', label: 'UKR global stand-up' },
+            { value: 'UKR team', label: 'UKR team' },
+            { value: 'Other', label: 'Other' },
         ],
-        task_other_task: [
-            { value: 'item16', label: 'Item 16' },
-            { value: 'item17', label: 'Item 17' },
-            { value: 'item18', label: 'Item 18' },
-            { value: 'item19', label: 'Item 19' },
-            { value: 'item20', label: 'Item 20' },
+        Other_Task: [
+            { value: 'Projects', label: 'Projects' },
+            { value: 'Backup', label: 'Backup' },
+            { value: 'Certification', label: 'Certification' },
+            { value: 'Mentoring', label: 'Mentoring' },
+            { value: 'Other', label: 'Other' },
         ],
-        task_idle_time: [
-            { value: 'item21', label: 'Item 21' },
-            { value: 'item22', label: 'Item 22' },
-            { value: 'item23', label: 'Item 23' },
-            { value: 'item24', label: 'Item 24' },
-            { value: 'item25', label: 'Item 25' },
+        Idle_Time: [
+            { value: 'Waiting for case', label: 'Waiting for case' },
+            { value: 'Waiting for support', label: 'Waiting for support' },
+            { value: 'Electricity problem', label: 'Electricity problem' },
+            { value: 'Internet problem', label: 'Internet problem' },
+            { value: 'Lunch', label: 'Lunch' },
+            { value: 'Break', label: 'Break' },
+            { value: 'Reposition', label: 'Reposition' },
+            { value: 'Personal needs', label: 'Personal needs' },
+            { value: 'Other', label: 'Other' },
         ],
     };
 
@@ -240,11 +262,11 @@ export default function Dashboard() {
                                     <label>Task:</label>
                                     <select name="task" value={formData.task} onChange={handleFormChange}>
                                         <option value="">Select Task</option>
-                                        <option value="task_production">Production</option>
-                                        <option value="task_call">Call</option>
-                                        <option value="task_meeting">Meeting</option>
-                                        <option value="task_other_task">Other task</option>
-                                        <option value="task_idle_time">Idle time</option>
+                                        <option value="Production">Production</option>
+                                        <option value="Call">Call</option>
+                                        <option value="Meeting">Meeting</option>
+                                        <option value="Other_Task">Other task</option>
+                                        <option value="Idle_Time">Idle time</option>
                                     </select>
                                 </div>
                                 <div>
@@ -269,9 +291,9 @@ export default function Dashboard() {
                                 <div>
                                     <label>Completed:</label>
                                     <select name="completed" value={formData.completed} onChange={handleFormChange}>
-                                        <option value="play">Start</option>
+                                        <option value="Start">Start</option>
                                         <option value="stop">Stop</option>
-                                        <option value="finish">Finish</option>
+                                        <option value="Finish">Finish</option>
                                     </select>
                                 </div>
                                 <button type="submit">Add Register</button>
