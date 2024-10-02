@@ -17,11 +17,11 @@ ChartJS.register(
 export default function Dashboard() {
     const [selectedOption, setSelectedOption] = useState('Today Work');
     const [formData, setFormData] = useState({
-        task: '',
-        type: '',
+        task: 'Production',
+        type: 'New case',
         alias: '',
         comments: '',
-        completed: 'Started',
+        status: 'Started',
     });
     const [dataRows, setDataRows] = useState([]);
     const [showPasswordChangeForm, setShowPasswordChangeForm] = useState(false);
@@ -43,28 +43,96 @@ export default function Dashboard() {
 
     const handleFormSubmit = (e) => {
         e.preventDefault();
+    
         // Validar que se hayan seleccionado Task y Type
         if (!formData.task || !formData.type) {
             alert('Please select both Task and Type.');
             return;
         }
+    
         // Validar que si Type es 'Other', el campo de comentarios no esté vacío
-        if (formData.type === 'Other' && !formData.comments) { // Suponiendo que 'item5' corresponde a "Other"
+        if (formData.type === 'Other' && !formData.comments) {
             alert('Please fill in the comments when selecting "Other".');
             return;
         }
+        
         // Obtener la hora actual
-        const currentTime = new Date().toLocaleTimeString();
-        setDataRows(prev => [...prev, { ...formData, time: currentTime }]);
-        setFormData({
-            task: '',
-            type: '',
-            alias: '',
-            comments: '',
-            completed: 'Started',
-            time: '',
-        });
+        const currentTime = getCurrentDateTime();;
+
+        // Verificar si hay filas de datos
+        if (dataRows.length > 0) {
+            const lastRowIndex = dataRows.length - 1; // Índice de la última fila
+            const lastRow = dataRows[lastRowIndex]; // Última fila
+
+            // Verificar el estado de la última fila
+            if (lastRow.status === 'Started') {
+                if (lastRow.alias !== formData.alias) {
+                    alert('You must complete the previous task before adding a new one.');
+                    return;
+                } else if (lastRow.task === formData.task && lastRow.type === formData.type && lastRow.alias === formData.alias && (formData.status === 'Stop' || formData.status === 'Finished')) {
+                    // Mantener el start time original
+                    const startTime = new Date(lastRow.start_time); // start_time debe tener fecha y hora en formato "YYYY-MM-DD HH:MM:SS"
+                    const endTime = new Date(); // Obtener la hora actual como Date
+                    const timeDifference = endTime - startTime; // Diferencia en milisegundos
+                    const elapsedMinutes = Math.floor(timeDifference / 60000); // Convertir a minutos
+                    // Actualizar la fila con el nuevo status y end time
+                    const updatedRow = {
+                        ...lastRow,
+                        comments: formData.comments,
+                        status: formData.status,
+                        end_time: currentTime, // Registrar la nueva hora de finalización
+                        total_time: `${elapsedMinutes} min`, // Calcular el tiempo transcurrido
+                    };
+
+                    // Actualizar el estado de las filas de datos
+                    const updatedDataRows = [...dataRows];
+                    updatedDataRows[lastRowIndex] = updatedRow; // Usar el índice para actualizar la fila
+                    setDataRows(updatedDataRows);
+                    // Limpiar el formulario después de agregar el registro
+                    setFormData({
+                        task: '',
+                        type: '',
+                        alias: '',
+                        comments: '',
+                        status: 'Started',
+                    });
+                }
+            }else{
+                // Agregar nueva fila
+                setDataRows(prev => [...prev, { ...formData, start_time: currentTime, end_time: "00:00:00", total_time: "00:00:00" }]);
+            }
+        }else{
+            // Agregar nueva fila
+            setDataRows(prev => [...prev, { ...formData, start_time: currentTime, end_time: "00:00:00", total_time: "00:00:00" }]);
+        };
     };
+
+    function getCurrentDateTime() {
+        const currentDate = new Date();
+        const year = currentDate.getFullYear();
+        const month = String(currentDate.getMonth() + 1).padStart(2, '0'); // Enero es 0
+        const day = String(currentDate.getDate()).padStart(2, '0');
+        const hours = String(currentDate.getHours()).padStart(2, '0');
+        const minutes = String(currentDate.getMinutes()).padStart(2, '0');
+        const seconds = String(currentDate.getSeconds()).padStart(2, '0');
+        return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
+    }
+
+    // Función para obtener las opciones dinámicas de estado
+    const getStatusOptions = () => {
+        if (dataRows.length > 0) {
+            const lastStatus = dataRows[dataRows.length - 1].status;
+            if (lastStatus === 'Started') {
+                return ['Finished', 'Stop'];
+            } else if (lastStatus === 'Stop' || lastStatus === 'Finished') {
+                return ['Started'];
+            }
+        }
+        return ['Started'];
+    };
+    
+    const availableStatusOptions = getStatusOptions();
+    
 
     const handlePasswordChangeSubmit = (e) => {
         e.preventDefault();
@@ -86,7 +154,7 @@ export default function Dashboard() {
 
     const handleOptionChange = (option) => {
         setSelectedOption(option);
-        setShowPasswordChangeForm(false); // Ocultar formulario de cambio de contraseña al cambiar de opción
+        setShowPasswordChangeForm(false);
     };
 
     const handleSettingsButtonClick = () => {
@@ -104,7 +172,8 @@ export default function Dashboard() {
     const completedCases = dataRows.filter(row => 
         row.task === 'Production' && 
         row.type === 'New case' && 
-        row.alias.trim() !== ''
+        row.alias.trim() !== '' &&
+        row.status === "Finished"
     ).length;
     
     const chartData = {
@@ -220,6 +289,25 @@ export default function Dashboard() {
     // Obtener las opciones de "Type" basadas en la tarea seleccionada
     const availableTypeOptions = typeOptions[formData.task] || [];
 
+    //Apartir de aqui va el codigo para la opcion de history
+    const [searchData, setSearchData] = useState({
+        startDate: '',
+        endDate: '',
+    });
+
+    // Función para manejar los cambios en el formulario de búsqueda
+    const handleSearchFormChange = (e) => {
+        const { name, value } = e.target;
+        setSearchData(prev => ({ ...prev, [name]: value }));
+    };
+
+    // Función para manejar la búsqueda (aún sin funcionalidad)
+    const handleSearchSubmit = (e) => {
+        e.preventDefault();
+        // Aquí puedes agregar la lógica para realizar la búsqueda
+        console.log('Searching from', searchData.startDate, 'to', searchData.endDate);
+    };
+
     return (
         <div className={styles.dashboard}>
             <header className={styles.header}>
@@ -281,19 +369,24 @@ export default function Dashboard() {
                                     </select>
                                 </div>
                                 <div>
-                                    <label>Alias:</label>
-                                    <input type="text" name="alias" value={formData.alias} onChange={handleFormChange} />
+                                    {/* Mostrar alias solo si task es "Production" */}
+                                    {formData.task === 'Production' && (
+                                        <>
+                                            <label htmlFor="alias" className={styles.label}>Alias:</label>
+                                            <input type="text" name="alias" id="alias" value={formData.alias} onChange={handleFormChange} className={styles.input} />
+                                        </>
+                                    )}
                                 </div>
                                 <div>
                                     <label>Comments:</label>
                                     <textarea name="comments" value={formData.comments} onChange={handleFormChange} />
                                 </div>
                                 <div>
-                                    <label>Completed:</label>
-                                    <select name="completed" value={formData.completed} onChange={handleFormChange}>
-                                        <option value="Start">Start</option>
-                                        <option value="stop">Stop</option>
-                                        <option value="Finish">Finish</option>
+                                    <label htmlFor="status" className={styles.label}>Status:</label>
+                                    <select name="status" id="status" value={formData.status} onChange={handleFormChange} className={styles.input}>
+                                        {availableStatusOptions.map(status => (
+                                            <option key={status} value={status}>{status}</option>
+                                        ))}
                                     </select>
                                 </div>
                                 <button type="submit">Add Register</button>
@@ -312,8 +405,34 @@ export default function Dashboard() {
                         </div>
                     </div>
                 )}
-                {selectedOption === 'History' && !showPasswordChangeForm && (
-                    <h1>History</h1>
+                {selectedOption === 'History' && !showPasswordChangeForm &&(
+                    <form onSubmit={handleSearchSubmit} className={styles.searchForm}>
+                        <div>
+                            <label htmlFor="startDate" className={styles.searchLabel}>Start Day:</label>
+                            <input
+                                type="date"
+                                id="startDate"
+                                name="startDate"
+                                value={searchData.startDate}
+                                onChange={handleSearchFormChange}
+                                className={styles.searchInput} // Aplica el estilo del input
+                            />
+                        </div>
+                        <div>
+                            <label htmlFor="endDate" className={styles.searchLabel}>End Date:</label>
+                            <input
+                                type="date"
+                                id="endDate"
+                                name="endDate"
+                                value={searchData.endDate}
+                                onChange={handleSearchFormChange}
+                                className={styles.searchInput} // Aplica el estilo del input
+                            />
+                        </div>
+                        <button type="submit" className={styles.searchButton}>Search</button>
+                    </form>
+                
+
                 )}
                 {showPasswordChangeForm && (
                     <div className={styles.changePasswordForm}>
@@ -363,8 +482,10 @@ export default function Dashboard() {
                                     <th>Type</th>
                                     <th>Alias</th>
                                     <th>Comments</th>
-                                    <th>Completed</th>
-                                    <th>Time</th> {/* Nueva columna para la hora */}
+                                    <th>Status</th>
+                                    <th>Start Time</th> 
+                                    <th>End Time</th> 
+                                    <th>Total Time</th> 
                                 </tr>
                             </thead>
                             <tbody>
@@ -374,8 +495,10 @@ export default function Dashboard() {
                                         <td>{row.type}</td>
                                         <td>{row.alias}</td>
                                         <td>{row.comments}</td>
-                                        <td>{row.completed}</td>
-                                        <td>{row.time}</td> {/* Mostrar la hora */}
+                                        <td>{row.status}</td>
+                                        <td>{row.start_time}</td> 
+                                        <td>{row.end_time}</td> 
+                                        <td>{row.total_time}</td> 
                                     </tr>
                                 ))}
                             </tbody>

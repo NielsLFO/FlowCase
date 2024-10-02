@@ -239,3 +239,48 @@
 .changePasswordForm .cancelButton:hover {
     background-color: #c0392b;
 }
+
+/*Estilos para el form de busqueda*/
+
+/* Estilos para el formulario de búsqueda */
+.searchForm {
+    display: flex;
+    flex-direction: row; /* Cambiar a fila */
+    gap: 15px; /* Espacio entre los elementos */
+    padding: 20px;
+    border: 1px solid #e0e0e0; /* Borde ligero */
+    border-radius: 8px; /* Bordes redondeados */
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Sombra sutil */
+    background-color: #ffffff; /* Fondo blanco */
+    align-items: center; /* Alinear verticalmente al centro */
+}
+
+/* Estilos para las etiquetas */
+.searchLabel {
+    margin-right: 5px; /* Espacio a la derecha de la etiqueta */
+    font-weight: bold; /* Negrita */
+    color: #333; /* Color gris oscuro */
+}
+
+/* Estilos para los inputs */
+.searchInput {
+    padding: 10px; /* Espaciado interno */
+    border: 1px solid #ccc; /* Borde ligero */
+    border-radius: 4px; /* Bordes redondeados */
+    font-size: 16px; /* Tamaño de fuente */
+    transition: border-color 0.3s; /* Transición suave para el color del borde */
+}
+
+/* Estilos para el botón de búsqueda */
+.searchButton {
+    background-color: #3498db; /* Color de fondo azul */
+    color: #ffffff; /* Texto blanco */
+    border: none; /* Sin borde */
+    padding: 10px 15px; /* Espaciado interno */
+    border-radius: 4px; /* Bordes redondeados */
+    cursor: pointer; /* Cambia el cursor a mano */
+    font-size: 16px; /* Tamaño de fuente */
+    transition: background-color 0.3s; /* Transición suave para el color de fondo */
+}
+
+
