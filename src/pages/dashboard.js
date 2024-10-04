@@ -74,6 +74,7 @@ export default function Dashboard() {
         const availableTaskOptions = taskOptionsByRole[userRole] || [];
 
         // Efecto para actualizar el rol cuando cambie la variable de rol simulada
+        //talvez aqui sirva la validacion de revisar antes de cambiar de estado 
         useEffect(() => {
             setUserRole(roleFromDatabase);
         }, [roleFromDatabase]);
