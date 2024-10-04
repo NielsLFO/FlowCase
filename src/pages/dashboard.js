@@ -67,7 +67,7 @@ export default function Dashboard() {
             role2: ['Task_A', 'Task B', 'Task C'], // Opciones para el role2
             role3: ['Task X', 'Task Y', 'Task Z'], // Opciones para el role3
             role4: ['Task M', 'Task N', 'Task O'], // Opciones para el role4
-            role5: ['Task U', 'Task V', 'Task W']  // Opciones para el role5
+            role5: ['Task U', 'Task V', 'Task W']  // Opciones para el role
         };
 
         // Obtener las opciones de "Task" basadas en el rol actual del usuario
