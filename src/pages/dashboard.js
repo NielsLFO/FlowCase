@@ -14,6 +14,7 @@ ChartJS.register(
     LinearScale
 );
 export default function Dashboard() {
+
     //#region States 
         /*********************************************************************************************/
         /***                                    state variables                                    ***/
@@ -33,7 +34,7 @@ export default function Dashboard() {
                 newPassword: '',
                 confirmPassword: '',
             });
-    //#region 
+    //#endregion
 
     //#region Changes Events
         /*********************************************************************************************/
@@ -55,30 +56,46 @@ export default function Dashboard() {
         /***                                        Roll                                           ***/
         /*********************************************************************************************/
 
-        const roleFromDatabase = 'role1'; // Aquí puedes cambiar manualmente para simular roles ** No cambiar de roll hasta que el ultimo registro se haya cerrado crear validacion para esto 
-        alert("ffff");
+        const roleFromDatabase = 'Clinical_Ops'; // Aquí puedes cambiar manualmente para simular roles ** No cambiar de roll hasta que el ultimo registro se haya cerrado crear validacion para esto 
+
 
         // Estado para el rol que será obtenido de la base de datos
         const [userRole, setUserRole] = useState(roleFromDatabase);
 
-        // Definir las opciones de Task basadas en el rol
+        // Opciones de Task basadas en el rol
         const taskOptionsByRole = {
-            role1: ['Production', 'Call', 'Meeting', 'Other_Task', 'Idle_Time'],
-            role2: ['Task_A', 'Task B', 'Task C'], // Opciones para el role2
-            role3: ['Task X', 'Task Y', 'Task Z'], // Opciones para el role3
-            role4: ['Task M', 'Task N', 'Task O'], // Opciones para el role4
-            role5: ['Task U', 'Task V', 'Task W']  // Opciones para el role
+            OTP: ['Production', 'Call', 'Meeting', 'Other_Task', 'Idle_Time'],
+            Clinical_Ops: ['Production', 'Call', 'Meeting', 'Other_Task', 'Idle_Time'], 
+            Clinical_Exc: ['Production', 'Call', 'Meeting', 'Other_Task', 'Idle_Time'],
+            Ortho: ['Production', 'Support', 'Meeting', 'Other task', 'Idle_Time'], 
+            QC_OTP: ['Production', 'Call', 'Meeting', 'Other_Task', 'Idle_Time'],  
+            Detailer_Finisher: ['Production', 'Call', 'Meeting', 'Other_Task', 'Idle_Time'],  
+            Clinical_Analyst: ['Production', 'Call', 'Meeting', 'Other_Task', 'Idle_Time'],  
+            CAD: ['Production', 'Call', 'Meeting', 'Other_Task', 'Idle_Time'],  
+            QC_OTP: ['Production', 'Call', 'Meeting', 'Other_Task', 'Idle_Time'],  
+ 
         };
 
         // Obtener las opciones de "Task" basadas en el rol actual del usuario
         const availableTaskOptions = taskOptionsByRole[userRole] || [];
 
         // Efecto para actualizar el rol cuando cambie la variable de rol simulada
-        //talvez aqui sirva la validacion de revisar antes de cambiar de estado 
+        const checkAndUpdateRole = () => {
+            const lastRowIndex = dataRows.length - 1; // Índice de la última fila
+            const lastRow = dataRows[lastRowIndex];
+            if (dataRows.length > 0) {
+                if (userRole !== roleFromDatabase && (formData.status === 'Stop' || formData.status === 'Finished')) {
+                    alert("Please be advised that your Team Lead has changed your user role. You will now work in the following role: " + roleFromDatabase);
+                    //setUserRole(roleFromDatabase);
+                }
+            } else {
+                setUserRole(roleFromDatabase);
+            }
+        };
+        // Efecto para actualizar el rol cuando cambie la variable roleFromDatabase
         useEffect(() => {
-            setUserRole(roleFromDatabase);
+            checkAndUpdateRole();
         }, [roleFromDatabase]);
-
     //#endregion
 
     //#region Values for type options according to task roll
@@ -86,7 +103,7 @@ export default function Dashboard() {
         /*********************************************************************************************/
         /***                                 Type base on Roll                                     ***/
         /*********************************************************************************************/
-            const typeOptions = {
+            const typeOptions_OTP = {
                 Production: [
                     { value: 'New case', label: 'New case' },
                     { value: 'Clinical rework', label: 'Clinical rework' },
@@ -134,8 +151,50 @@ export default function Dashboard() {
                     { value: 'Personal needs', label: 'Personal needs' },
                     { value: 'Other', label: 'Other' },
                 ],
-                Task_A: [
-                    { value: 'Rex', label: 'Rex' },
+            };
+            const typeOptions_Clinical_Ops = {
+                Production: [
+                    { value: 'Full review', label: 'Full review' },
+                    { value: 'Second review', label: 'Second review' },
+                    { value: 'Doctor rework review', label: 'Doctor rework review' },
+                ],
+                Call: [
+                    { value: 'Clinical outreach', label: 'Clinical outreach' },
+                    { value: 'Support to OTP', label: 'Support to OTP' },
+                    { value: 'Support to QA', label: 'Support to QA' },
+                    { value: 'Feedback to OTP', label: 'Feedback to OTP' },
+                    { value: 'Feedback to QA', label: 'Feedback to QA' },
+                    { value: 'Internal support requested', label: 'Internal support requested' },
+                    { value: 'Internal support provided', label: 'Internal support provided' },
+                ],
+                Meeting: [
+                    { value: 'OTP team huddle', label: 'OTP team huddle' },
+                    { value: 'Clinical team huddle', label: 'Clinical team huddle' },
+                    { value: 'Clinical general meeting', label: 'Clinical general meeting' },
+                    { value: 'Training', label: 'Trainingnds' },
+                    { value: '1:1', label: '1:1' },
+                    { value: 'Lightplan review', label: 'Lightplan review' },
+                    { value: 'Monthly all hands', label: 'Monthly all hands' },
+                    { value: 'How it´s made', label: 'How it´s made' },
+                    { value: 'Coffee talk', label: 'Coffee talk' },
+                    { value: 'CR town hall', label: 'CR town hall' },
+                    { value: 'Other', label: 'Other' },
+                ],
+                Other_Task: [
+                    { value: 'Internal assessment', label: 'Internal assessment' },
+                    { value: 'Reviews audit', label: 'Reviews audit' },
+                    { value: 'Clinical escalation', label: 'Clinical escalation' },
+                    { value: 'Infographics', label: 'Infographics' },
+                    { value: 'KB', label: 'KB' },
+                    { value: 'Low score', label: 'Low score' },
+                    { value: 'OTP rework audit', label: 'OTP rework audit' },
+                    { value: 'Certification', label: 'Certification' },
+                    { value: 'Mentoring', label: 'Mentoring' },
+                    { value: 'Project', label: 'Project' },
+                    { value: 'Other', label: 'Other' },
+                ],
+                Idle_Time: [
+                    { value: 'Waiting for case', label: 'Waiting for case' },
                     { value: 'Waiting for support', label: 'Waiting for support' },
                     { value: 'Electricity problem', label: 'Electricity problem' },
                     { value: 'Internet problem', label: 'Internet problem' },
@@ -146,7 +205,371 @@ export default function Dashboard() {
                     { value: 'Other', label: 'Other' },
                 ],
             };
-            const availableTypeOptions = typeOptions[formData.task] || []; // Obtener las opciones de "Type" basadas en la tarea 
+            const typeOptions_Clinical_Exc = {
+                Production: [
+                    { value: 'Full review', label: 'Full review' },
+                    { value: 'Second review', label: 'Second review' },
+                    { value: 'Doctor rework review', label: 'Doctor rework review' },
+                ],
+                Call: [
+                    { value: 'Clinical outreach', label: 'Clinical outreach' },
+                    { value: 'Support to OTP', label: 'Support to OTP' },
+                    { value: 'Support to QA', label: 'Support to QA' },
+                    { value: 'Feedback to OTP', label: 'Feedback to OTP' },
+                    { value: 'Feedback to QA', label: 'Feedback to QA' },
+                    { value: 'Internal support requested', label: 'Internal support requested' },
+                    { value: 'Internal support provided', label: 'Internal support provided' },
+                ],
+                Meeting: [
+                    { value: 'OTP team huddle', label: 'OTP team huddle' },
+                    { value: 'Clinical team huddle', label: 'Clinical team huddle' },
+                    { value: 'Clinical general meeting', label: 'Clinical general meeting' },
+                    { value: 'Training', label: 'Trainingnds' },
+                    { value: '1:1', label: '1:1' },
+                    { value: 'Lightplan review', label: 'Lightplan review' },
+                    { value: 'Monthly all hands', label: 'Monthly all hands' },
+                    { value: 'How it´s made', label: 'How it´s made' },
+                    { value: 'Coffee talk', label: 'Coffee talk' },
+                    { value: 'CR town hall', label: 'CR town hall' },
+                    { value: 'Other', label: 'Other' },
+                ],
+                Other_Task: [
+                    { value: 'Internal assessment', label: 'Internal assessment' },
+                    { value: 'Reviews audit', label: 'Reviews audit' },
+                    { value: 'Clinical escalation', label: 'Clinical escalation' },
+                    { value: 'Infographics', label: 'Infographics' },
+                    { value: 'KB', label: 'KB' },
+                    { value: 'Low score', label: 'Low score' },
+                    { value: 'OTP rework audit', label: 'OTP rework audit' },
+                    { value: 'Certification', label: 'Certification' },
+                    { value: 'Mentoring', label: 'Mentoring' },
+                    { value: 'Project', label: 'Project' },
+                    { value: 'Outreach IA', label: 'Outreach IA' },
+                    { value: 'Personal needs', label: 'Personal needs' },
+                    { value: 'Other', label: 'Other' },
+                ],
+                Idle_Time: [
+                    { value: 'Waiting for case', label: 'Waiting for case' },
+                    { value: 'Waiting for support', label: 'Waiting for support' },
+                    { value: 'Electricity problem', label: 'Electricity problem' },
+                    { value: 'Internet problem', label: 'Internet problem' },
+                    { value: 'Lunch', label: 'Lunch' },
+                    { value: 'Break', label: 'Break' },
+                    { value: 'Reposition', label: 'Reposition' },
+                    { value: 'Other', label: 'Other' },
+                ],
+            };
+            const typeOptions_Ortho = {
+                Production: [
+                    { value: 'Full review', label: 'Full review' },
+                    { value: 'Second review', label: 'Second review' },
+                    { value: 'Doctor rework review', label: 'Doctor rework review' },
+                ],
+                Support: [
+                    { value: 'Support to CS', label: 'Support to CS' },
+                    { value: 'Support to OTP', label: 'Support to OTP' },
+                    { value: 'Support to QA', label: 'Support to QA' },
+                    { value: 'Support to OE', label: 'Support to OE' },
+                    { value: 'Support to clinical', label: 'Support to clinical' },
+                    { value: 'Internal assessment', label: 'Internal assessment' },
+                ],
+                Meeting: [
+                    { value: 'OE team huddle', label: 'OE team huddle' },
+                    { value: 'OTP team huddle', label: 'OTP team huddle' },
+                    { value: 'Clinical team huddle', label: 'Clinical team huddle' },
+                    { value: 'Training', label: 'Training' },
+                    { value: '1:1', label: '1:1' },
+                    { value: 'Monthly all hands', label: 'Monthly all hands' },
+                    { value: 'How it´s made', label: 'How it´s made' },
+                    { value: 'Coffee talk', label: 'Coffee talk' },
+                    { value: 'CR town hall', label: 'CR town hall' },
+                    { value: 'UKR global stand-up', label: 'UKR global stand-up' },
+                    { value: 'UKR team', label: 'UKR team' },
+                    { value: 'Other', label: 'Other' },
+                ],
+                Other_Task: [
+                    { value: 'KB', label: 'KB' },
+                    { value: 'Project', label: 'Project' },
+                    { value: 'Other', label: 'Other' },
+                ],
+                Idle_Time: [
+                    { value: 'Waiting for case', label: 'Waiting for case' },
+                    { value: 'Waiting for support', label: 'Waiting for support' },
+                    { value: 'Electricity problem', label: 'Electricity problem' },
+                    { value: 'Internet problem', label: 'Internet problem' },
+                    { value: 'Lunch', label: 'Lunch' },
+                    { value: 'Break', label: 'Break' },
+                    { value: 'Reposition', label: 'Reposition' },
+                    { value: 'Personal needs', label: 'Personal needs' },
+                    { value: 'Other', label: 'Other' },
+                ],
+            };
+            const typeOptions_QC_OTP = {
+                Production: [
+                    { value: 'QA review 1', label: 'QA review 1' },
+                    { value: 'QA review 2', label: 'QA review 2' },
+                    { value: 'QA review 3', label: 'QA review 3' },
+                    { value: 'MFG rework', label: 'MFG rework' },
+                    { value: 'Doctor rework 1', label: 'Doctor rework 1' },
+                    { value: 'Doctor rework 2', label: 'Doctor rework 2' },
+                    { value: 'Doctor rework 3', label: 'Doctor rework 3' },
+                    { value: 'Final MFG review', label: 'Final MFG review' },
+                ],
+                Call: [
+                    { value: 'Support to OTP', label: 'Support to OTP' },
+                    { value: 'Support from TL', label: 'Support from TL' },
+                    { value: 'Support from clinical', label: 'Support from clinical' },
+                ],
+                Meeting: [
+                    { value: 'OTP team huddle', label: 'OTP team huddle' },
+                    { value: 'QA team huddle', label: 'QA team huddle' },
+                    { value: 'Training', label: 'Trainingnds' },
+                    { value: '1:1', label: '1:1' },
+                    { value: 'Monthly all hands', label: 'Monthly all hands' },
+                    { value: 'How it´s made', label: 'How it´s made' },
+                    { value: 'Coffee talk', label: 'Coffee talk' },
+                    { value: 'CR town hall', label: 'CR town hall' },
+                    { value: 'Other', label: 'Other' },
+                ],
+                Other_Task: [
+                    { value: 'Projects', label: 'Projects' },
+                    { value: 'Backup', label: 'Backup' },
+                    { value: 'Nesting revision', label: 'Nesting revision' },
+                    { value: 'Dr. communication', label: 'Dr. communication' },
+                    { value: 'Certification', label: 'Certification' },
+                    { value: 'Mentoring', label: 'Mentoring' },
+                    { value: 'Other', label: 'Other' },
+                ],
+                Idle_Time: [
+                    { value: 'Waiting for case', label: 'Waiting for case' },
+                    { value: 'Waiting for support', label: 'Waiting for support' },
+                    { value: 'Electricity problem', label: 'Electricity problem' },
+                    { value: 'Internet problem', label: 'Internet problem' },
+                    { value: 'Lunch', label: 'Lunch' },
+                    { value: 'Break', label: 'Break' },
+                    { value: 'Reposition', label: 'Reposition' },
+                    { value: 'Personal needs', label: 'Personal needs' },
+                    { value: 'Other', label: 'Other' },
+                ],
+            };
+            const typeOptions_Detailer_Finisher = {
+                Production: [
+                    { value: 'Detailing', label: 'Detailing' },
+                    { value: 'Short Final MFG', label: 'Short Final MFG' },
+                    { value: 'Final MFG review', label: 'Final MFG review' },
+                    { value: 'Doctor rework', label: 'Doctor rework' },
+                ],
+                Call: [
+                    { value: 'Support from TL', label: 'Support from TL' },
+                    { value: 'Support from clinical', label: 'Support from clinical' },
+                    { value: 'RCF-Low Score from TL', label: 'RCF-Low Score from TL' },
+                ],
+                Meeting: [
+                    { value: 'Prism huddle', label: 'Prism huddle' },
+                    { value: 'Bi weekly Retrospective', label: 'Bi weekly Retrospective' },
+                    { value: 'Training', label: 'Trainingnds' },
+                    { value: '1:1', label: '1:1' },
+                    { value: 'Monthly all hands', label: 'Monthly all hands' },
+                    { value: 'How it´s made', label: 'How it´s made' },
+                    { value: 'Coffee talk', label: 'Coffee talk' },
+                    { value: 'CR town hall', label: 'CR town hall' },
+                    { value: 'Other', label: 'Other' },
+                ],
+                Other_Task: [
+                    { value: 'Projects', label: 'Projects' },
+                    { value: 'Backup', label: 'Backup' },
+                    { value: 'Certification', label: 'Certification' },
+                    { value: 'Mentoring', label: 'Mentoring' },
+                    { value: 'Audit', label: 'Audit' },
+                    { value: 'Other', label: 'Other' },
+                ],
+                Idle_Time: [
+                    { value: 'Waiting for case', label: 'Waiting for case' },
+                    { value: 'Waiting for TL Assistance', label: 'Waiting for TL Assistance' },
+                    { value: 'Electricity problem', label: 'Electricity problem' },
+                    { value: 'Internet problem', label: 'Internet problem' },
+                    { value: 'Lunch', label: 'Lunch' },
+                    { value: 'Break', label: 'Break' },
+                    { value: 'Reposition', label: 'Reposition' },
+                    { value: 'Personal needs', label: 'Personal needs' },
+                    { value: 'Other', label: 'Other' },
+                ],
+            };
+            const typeOptions_Clinical_Analyst = {
+                Production: [
+                    { value: 'Clinical Analysis', label: 'Clinical Analysis' },
+                    { value: 'Second Clinical Analysis', label: 'Second Clinical Analysis' },
+                ],
+                Call: [
+                    { value: 'Internal Support to PRISM', label: 'Internal Support to PRISM' },
+                    { value: 'Internal Support to TL PRISM', label: 'Internal Support to TL PRISM' },
+                    { value: 'Clinical Coordinator Support', label: 'Clinical Coordinator Support' },
+                    { value: 'Feedback to PRISM', label: 'Feedback to PRISM' },
+                ],
+                Meeting: [
+                    { value: 'Prism huddle', label: 'Prism huddle' },
+                    { value: 'Bi weekly Retrospective', label: 'Bi weekly Retrospective' },
+                    { value: 'Clinical team huddle', label: 'Clinical team huddle' },
+                    { value: 'Training', label: 'Trainingnds' },
+                    { value: '1:1', label: '1:1' },
+                    { value: 'Monthly all hands', label: 'Monthly all hands' },
+                    { value: 'How it´s made', label: 'How it´s made' },
+                    { value: 'Coffee talk', label: 'Coffee talk' },
+                    { value: 'CR town hall', label: 'CR town hall' },
+                    { value: 'Other', label: 'Other' },
+                ],
+                Other_Task: [
+                    { value: 'IA Resolve', label: 'IA Resolve' },
+                    { value: 'Special Task', label: 'Special Task' },
+                    { value: 'Certification', label: 'Certification' },
+                    { value: 'Mentoring', label: 'Mentoring' },
+                    { value: 'Project', label: 'Project' },
+                    { value: 'Other', label: 'Other' },
+                ],
+                Idle_Time: [
+                    { value: 'Waiting for case', label: 'Waiting for case' },
+                    { value: 'Waiting for support', label: 'Waiting for support' },
+                    { value: 'Electricity problem', label: 'Electricity problem' },
+                    { value: 'Internet problem', label: 'Internet problem' },
+                    { value: 'Lunch', label: 'Lunch' },
+                    { value: 'Break', label: 'Break' },
+                    { value: 'Reposition', label: 'Reposition' },
+                    { value: 'Personal needs', label: 'Personal needs' },
+                    { value: 'Other', label: 'Other' },
+                ],
+            };
+            const typeOptions_CAD = {
+                Production: [
+                    { value: 'Segmentation', label: 'Segmentation' },
+                    { value: 'IDB design', label: 'IDB design' },
+                    { value: 'Segmentation review', label: 'Segmentation review' },
+                    { value: 'IDB review', label: 'IDB review' },
+                    { value: 'Final MFG review', label: 'Final MFG review' },
+                    { value: 'Order entry', label: 'Order entry' },
+                    { value: 'OE+segmentation', label: 'OE+segmentation' },
+                ],
+                Call: [
+                    { value: 'Support from TL', label: 'Support from TL' },
+                    { value: 'Support from QA', label: 'Support from QA' },
+                    { value: 'Feedback from TL', label: 'Feedback from TL' },
+                    { value: 'Feedback from QA', label: 'Feedback from QA' },
+                ],
+                Meeting: [
+                    { value: 'CAD team huddle', label: 'CAD team huddle' },
+                    { value: 'Training', label: 'Trainingnds' },
+                    { value: '1:1', label: '1:1' },
+                    { value: 'Monthly all hands', label: 'Monthly all hands' },
+                    { value: 'How it´s made', label: 'How it´s made' },
+                    { value: 'Coffee talk', label: 'Coffee talk' },
+                    { value: 'CR town hall', label: 'CR town hall' },
+                    { value: 'UKR global stand-up', label: 'UKR global stand-up' },
+                    { value: 'UKR team', label: 'UKR team' },
+                    { value: 'Other', label: 'Other' },
+                ],
+                Other_Task: [
+                    { value: 'Projects', label: 'Projects' },
+                    { value: 'Backup', label: 'Backup' },
+                    { value: 'Certification', label: 'Certification' },
+                    { value: 'Mentoring', label: 'Mentoring' },
+                    { value: 'Plating', label: 'Plating' },
+                    { value: 'Reorder', label: 'Reorder' },
+                    { value: 'Camera review', label: 'Camera review' },
+                    { value: 'Scan association', label: 'Scan association' },
+                    { value: 'Physical rework', label: 'Physical rework' },
+                    { value: 'Other', label: 'Other' },
+                ],
+                Idle_Time: [
+                    { value: 'Waiting for case', label: 'Waiting for case' },
+                    { value: 'Waiting for support', label: 'Waiting for support' },
+                    { value: 'Electricity problem', label: 'Electricity problem' },
+                    { value: 'Internet problem', label: 'Internet problem' },
+                    { value: 'Lunch', label: 'Lunch' },
+                    { value: 'Break', label: 'Break' },
+                    { value: 'Reposition', label: 'Reposition' },
+                    { value: 'Personal needs', label: 'Personal needs' },
+                    { value: 'Other', label: 'Other' },
+                ],
+            };
+            const typeOptions_QC_CAD = {
+                Production: [
+                    { value: 'Segmentation', label: 'Segmentation' },
+                    { value: 'IDB design', label: 'IDB design' },
+                    { value: 'Segmentation review', label: 'Segmentation review' },
+                    { value: 'IDB review', label: 'IDB review' },
+                    { value: 'Final MFG review', label: 'Final MFG review' },
+                    { value: 'Order entry', label: 'Order entry' },
+                ],
+                Call: [
+                    { value: 'Support to CAD', label: 'Support to CAD' },
+                    { value: 'Support from TL', label: 'Support from TL' },
+                    { value: 'Support from clinical', label: 'Support from clinical' },
+                ],
+                Meeting: [
+                    { value: 'QC-CAD team huddle', label: 'QC-CAD team huddle' },
+                    { value: 'Training', label: 'Trainingnds' },
+                    { value: '1:1', label: '1:1' },
+                    { value: 'Monthly all hands', label: 'Monthly all hands' },
+                    { value: 'How it´s made', label: 'How it´s made' },
+                    { value: 'Coffee talk', label: 'Coffee talk' },
+                    { value: 'CR town hall', label: 'CR town hall' },
+                    { value: 'UKR global stand-up', label: 'UKR global stand-up' },
+                    { value: 'UKR team', label: 'UKR team' },
+                    { value: 'Other', label: 'Other' },
+                ],
+                Other_Task: [
+                    { value: 'Projects', label: 'Projects' },
+                    { value: 'Backup', label: 'Backup' },
+                    { value: 'Certification', label: 'Certification' },
+                    { value: 'Mentoring', label: 'Mentoring' },
+                    { value: 'Scan association', label: 'Scan association' },
+                    { value: 'Internal assessment', label: 'Internal assessment' },
+                    { value: 'Treatment notes', label: 'Treatment notes' },
+                    { value: 'Salesforce', label: 'Salesforce' },
+                    { value: 'Segment. review', label: 'Segment. review' },
+                    { value: 'IDB review', label: 'IDB review' },
+                    { value: 'Plating review', label: 'Plating review' },
+                    { value: 'Camera review', label: 'Camera review' },
+                    { value: 'OSO', label: 'OSO' },
+                    { value: 'Other', label: 'Other' },
+                ],
+                Idle_Time: [
+                    { value: 'Waiting for case', label: 'Waiting for case' },
+                    { value: 'Waiting for support', label: 'Waiting for support' },
+                    { value: 'Electricity problem', label: 'Electricity problem' },
+                    { value: 'Internet problem', label: 'Internet problem' },
+                    { value: 'Lunch', label: 'Lunch' },
+                    { value: 'Break', label: 'Break' },
+                    { value: 'Reposition', label: 'Reposition' },
+                    { value: 'Personal needs', label: 'Personal needs' },
+                    { value: 'Other', label: 'Other' },
+                ],
+            };
+            const availableTypeOptions = roll_available_Type_Options(); // Obtener las opciones de "Type" basadas en la tarea 
+
+            function roll_available_Type_Options(){
+                switch (userRole) {
+                    case "OTP":
+                        return typeOptions_OTP[formData.task];  
+                    case "Clinical_Ops":
+                        return typeOptions_Clinical_Ops[formData.task];  
+                    case "Clinical_Exc":
+                        return typeOptions_Clinical_Exc[formData.task]; 
+                    case "Ortho":
+                        return typeOptions_Ortho[formData.task];  
+                    case "QC_OTP":
+                        return typeOptions_QC_OTP[formData.task];  
+                    case "Detailer_Finisher":
+                        return typeOptions_Detailer_Finisher[formData.task]; 
+                    case "Clinical_Analyst":
+                        return typeOptions_Clinical_Analyst[formData.task];    
+                    case "CAD":
+                        return typeOptions_CAD[formData.task];    
+                    case "QC_OTP":
+                        return typeOptions_QC_CAD[formData.task];  
+                    default:
+                        return [];
+                }
+            }
     //#endregion
 
     //#region FormSubmit code 
@@ -164,12 +587,12 @@ export default function Dashboard() {
                     alert('Please fill in the comments when selecting "Other".');
                     return;
                 }             
-                if (formData.alias.length !== 5) { // Validar que el alias tenga 5 caracteres
+                if (formData.task === "Production" && formData.alias.length !== 5) { // Validar que el alias tenga 5 caracteres
                     alert("Please, the alias must be 5 characters long.");
                     return;
                 }  
                 const addNewRow = () => {
-                    setDataRows(prev => [...prev, {...formData, start_time: currentTime, end_time: "00:00:00", total_time: "00:00:00", roll:"REX"}]);
+                    setDataRows(prev => [...prev, {...formData, start_time: currentTime, end_time: "00:00:00", total_time: "00:00:00", roll:userRole}]);
                     setFormData({
                         task: formData.task,
                         type: formData.type,
@@ -182,7 +605,6 @@ export default function Dashboard() {
                 if (dataRows.length > 0) { // Verificar si hay filas de datos
                     const lastRowIndex = dataRows.length - 1; // Índice de la última fila
                     const lastRow = dataRows[lastRowIndex]; 
-                    alert(lastRow.roll);
                     if (lastRow.status === 'Started') { 
                         if (lastRow.alias !== formData.alias) {
                             alert('You must complete the previous task before adding a new one.');
@@ -200,7 +622,7 @@ export default function Dashboard() {
                                 status: formData.status,
                                 end_time: currentTime,
                                 total_time: `${elapsedMinutes} min`, 
-                                roll:"REX",
+                                roll:userRole,
                             };
                             // Actualizar el estado de las filas de datos
                             const updatedDataRows = [...dataRows];
@@ -214,12 +636,15 @@ export default function Dashboard() {
                                 comments: '',
                                 status: 'Started',
                             });
+                            checkAndUpdateRole();
                         }
                     }else{
                         addNewRow();
+                        checkAndUpdateRole();
                     }
                 }else{
                     addNewRow();
+                    checkAndUpdateRole();
                 };
             };
             function getCurrentDateTime() {
@@ -368,7 +793,6 @@ export default function Dashboard() {
             },
         };
     //#endregion
-
 
     //#region Code for history section
 
@@ -572,6 +996,7 @@ export default function Dashboard() {
                                     <th>Start Time</th> 
                                     <th>End Time</th> 
                                     <th>Total Time</th> 
+                                    <th>Role</th> 
                                 </tr>
                             </thead>
                             <tbody>
@@ -585,6 +1010,7 @@ export default function Dashboard() {
                                         <td>{row.start_time}</td> 
                                         <td>{row.end_time}</td> 
                                         <td>{row.total_time}</td> 
+                                        <td>{row.roll}</td>
                                     </tr>
                                 ))}
                             </tbody>
