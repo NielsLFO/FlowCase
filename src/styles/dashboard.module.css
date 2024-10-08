@@ -131,7 +131,7 @@
     resize: vertical;
 }
 
-.formSection button {
+.submitButton {
     background-color: #3498db;
     color: #fff;
     border: none;
@@ -140,7 +140,7 @@
     cursor: pointer;
 }
 
-.formSection button:hover {
+.submitButton:hover {
     background-color: #2980b9;
 }
 
@@ -210,7 +210,7 @@
     font-size: 16px;
 }
 
-.changePasswordForm button {
+.submitButton_reset {
     background-color: #3498db;
     color: #fff;
     border: none;
@@ -222,21 +222,35 @@
     margin-right: 5px;
 }
 
-.changePasswordForm button:hover {
+.submitButton_reset:hover{
     background-color: #2980b9;
 }
 
 .changePasswordForm .formMessage {
     color: #e74c3c;
-    font-size: 14px;
-    margin-top: 10px;
+    color: #fff;
+    border: none;
+    padding: 10px 15px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 16px;
+    margin-top: 10px; /* Espacio superior para separar el botón del contenido anterior */
+    margin-right: 5px;
 }
 
-.changePasswordForm .cancelButton {
+.cancelButton {
     background-color: #e74c3c;
+    color: #fff;
+    border: none;
+    padding: 10px 15px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 16px;
+    margin-top: 10px; /* Espacio superior para separar el botón del contenido anterior */
+    margin-right: 5px;
 }
 
-.changePasswordForm .cancelButton:hover {
+.cancelButton:hover {
     background-color: #c0392b;
 }
 
@@ -281,6 +295,10 @@
     cursor: pointer; /* Cambia el cursor a mano */
     font-size: 16px; /* Tamaño de fuente */
     transition: background-color 0.3s; /* Transición suave para el color de fondo */
+}
+
+.searchButton:hover{
+    background-color: #2980b9;
 }
 
 

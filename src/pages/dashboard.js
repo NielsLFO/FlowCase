@@ -3,6 +3,10 @@ import { Bar } from 'react-chartjs-2';
 import { Chart as ChartJS, Title, Tooltip, Legend, BarElement, CategoryScale, LinearScale } from 'chart.js';
 import { FaCog } from 'react-icons/fa'; // Importa el ícono de engranaje
 import styles from '../styles/dashboard.module.css';
+import Snackbar from '@mui/material/Snackbar';
+import Alert from '@mui/material/Alert';
+import AlertTitle from '@mui/material/AlertTitle';
+
 
 // Registrar componentes para el gráfico
 ChartJS.register(
@@ -33,6 +37,13 @@ export default function Dashboard() {
                 oldPassword: '',
                 newPassword: '',
                 confirmPassword: '',
+            });
+            // Estado para el Snackbar y la alerta
+            const [alertConfig, setAlertConfig] = useState({
+                open: false,
+                severity: 'error', // 'success', 'info', 'warning', o 'error'
+                title: 'Error',
+                message: '',
             });
     //#endregion
 
@@ -82,11 +93,11 @@ export default function Dashboard() {
         // Efecto para actualizar el rol cuando cambie la variable de rol simulada
         const checkAndUpdateRole = () => {
             const lastRowIndex = dataRows.length - 1; // Índice de la última fila
-            const lastRow = dataRows[lastRowIndex];
+            const lastRow = dataRows[lastRowIndex];   
             if (dataRows.length > 0) {
-                if (userRole !== roleFromDatabase && (formData.status === 'Stop' || formData.status === 'Finished')) {
+                if (userRole !== roleFromDatabase && (lastRow.status === 'Stop' || lastRow.status === 'Finished')) {
                     alert("Please be advised that your Team Lead has changed your user role. You will now work in the following role: " + roleFromDatabase);
-                    //setUserRole(roleFromDatabase);
+                    setUserRole(roleFromDatabase);
                 }
             } else {
                 setUserRole(roleFromDatabase);
@@ -95,7 +106,7 @@ export default function Dashboard() {
         // Efecto para actualizar el rol cuando cambie la variable roleFromDatabase
         useEffect(() => {
             checkAndUpdateRole();
-        }, [roleFromDatabase]);
+        }, [dataRows]);
     //#endregion
 
     //#region Values for type options according to task roll
@@ -580,19 +591,19 @@ export default function Dashboard() {
             const handleFormSubmit = (e) => {
                 e.preventDefault();
                 if (!formData.task || !formData.type) { // Validar que se hayan seleccionado Task y Type
-                    alert('Please select both Task and Type.');
+                    showAlert('error', 'Error','Please select both Task and Type.');
                     return;
                 }
                 if (formData.type === 'Other' && !formData.comments) { // Validar que si Type es 'Other', el campo de comentarios no esté vacío
-                    alert('Please fill in the comments when selecting "Other".');
+                    showAlert('error', 'Error','Please fill in the comments when selecting "Other".');
                     return;
                 }             
                 if (formData.task === "Production" && formData.alias.length !== 5) { // Validar que el alias tenga 5 caracteres
-                    alert("Please, the alias must be 5 characters long.");
+                    showAlert('error', 'Error', 'Please, the alias must be 5 characters long.');
                     return;
                 }  
                 const addNewRow = () => {
-                    setDataRows(prev => [...prev, {...formData, start_time: currentTime, end_time: "00:00:00", total_time: "00:00:00", roll:userRole}]);
+                    setDataRows(prev => [...prev, {...formData, start_time: currentTime, end_time: "00:00:00", total_time: "00:00:00", roll: userRole}]);
                     setFormData({
                         task: formData.task,
                         type: formData.type,
@@ -600,6 +611,7 @@ export default function Dashboard() {
                         comments: formData.comments,
                         status: 'Finished',
                     });
+                    checkAndUpdateRole();
                 };  
                 const currentTime = getCurrentDateTime(); // Obtener la hora actual
                 if (dataRows.length > 0) { // Verificar si hay filas de datos
@@ -607,7 +619,7 @@ export default function Dashboard() {
                     const lastRow = dataRows[lastRowIndex]; 
                     if (lastRow.status === 'Started') { 
                         if (lastRow.alias !== formData.alias) {
-                            alert('You must complete the previous task before adding a new one.');
+                            showAlert('error', 'Error','You must complete the previous task before adding a new one.');
                             return;
                         } else if (lastRow.task === formData.task && lastRow.type === formData.type && lastRow.alias === formData.alias && (formData.status === 'Stop' || formData.status === 'Finished')) {
                             // Mantener el start time original
@@ -626,8 +638,11 @@ export default function Dashboard() {
                             };
                             // Actualizar el estado de las filas de datos
                             const updatedDataRows = [...dataRows];
-                            updatedDataRows[lastRowIndex] = updatedRow; // Usar el índice para actualizar la fila
-                            setDataRows(updatedDataRows);
+                            updatedDataRows[lastRowIndex] = updatedRow;
+                            setDataRows(updatedDataRows, () => {
+                                checkAndUpdateRole();
+                                
+                            });
                             // Limpiar el formulario después de agregar el registro
                             setFormData({
                                 task: 'Production',
@@ -636,15 +651,12 @@ export default function Dashboard() {
                                 comments: '',
                                 status: 'Started',
                             });
-                            checkAndUpdateRole();
                         }
                     }else{
-                        addNewRow();
-                        checkAndUpdateRole();
+                        addNewRow();                
                     }
                 }else{
                     addNewRow();
-                    checkAndUpdateRole();
                 };
             };
             function getCurrentDateTime() {
@@ -819,6 +831,17 @@ export default function Dashboard() {
             };
     //#endregion
 
+        // Función para abrir el Snackbar
+        const showAlert = (severity, title, message) => {
+            setAlertConfig({ open: true, severity, title, message });
+        };
+    
+        // Función para cerrar el Snackbar
+        const handleClose = (event, reason) => {
+            if (reason === 'clickaway') return; // Evita el cierre accidental
+            setAlertConfig({ ...alertConfig, open: false });
+        };
+
     return (
         <div className={styles.dashboard}>
             <header className={styles.header}>
@@ -854,6 +877,18 @@ export default function Dashboard() {
                 {selectedOption === 'Today Work' && !showPasswordChangeForm && (
                     <div className={styles.mainContent}>
                         <div className={styles.formSection}>
+                             {/* Snackbar para mostrar el mensaje de alerta */}
+                            <Snackbar
+                                open={alertConfig.open}
+                                autoHideDuration={6000}
+                                onClose={handleClose}
+                                anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+                            >
+                                <Alert onClose={handleClose} severity={alertConfig.severity} variant="filled">
+                                    <AlertTitle>{alertConfig.title}</AlertTitle>
+                                    {alertConfig.message}
+                                </Alert>
+                            </Snackbar>
                             <form onSubmit={handleFormSubmit}>
                                 <div>
                                     <h2>Case Flow</h2>
@@ -899,7 +934,7 @@ export default function Dashboard() {
                                         ))}
                                     </select>
                                 </div>
-                                <button type="submit">Add Register</button>
+                                <button className={styles.submitButton} type="submit">Add Register</button>
                             </form>
                         </div>
                         <div className={styles.chartSection}>
@@ -978,8 +1013,8 @@ export default function Dashboard() {
                                     required
                                 />
                             </div>
-                            <button type="submit">Change Password</button>
-                            <button type="button" onClick={() => setShowPasswordChangeForm(false)} className={styles.cancelButton}>Cancel</button>
+                            <button className={styles.submitButton_reset} type="submit">Change Password</button>
+                            <button className={styles.cancelButton} type="button" onClick={() => setShowPasswordChangeForm(false)}>Cancel</button>
                         </form>
                     </div>
                 )}
