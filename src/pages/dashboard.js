@@ -96,8 +96,8 @@ export default function Dashboard() {
             const lastRow = dataRows[lastRowIndex];   
             if (dataRows.length > 0) {
                 if (userRole !== roleFromDatabase && (lastRow.status === 'Stop' || lastRow.status === 'Finished')) {
-                    alert("Please be advised that your Team Lead has changed your user role. You will now work in the following role: " + roleFromDatabase);
                     setUserRole(roleFromDatabase);
+                    showAlert('warning', 'Role Changed', "Please be advised that your Team Lead has changed your user role. You will now be working in the following role: " + roleFromDatabase);
                 }
             } else {
                 setUserRole(roleFromDatabase);
@@ -611,7 +611,6 @@ export default function Dashboard() {
                         comments: formData.comments,
                         status: 'Finished',
                     });
-                    checkAndUpdateRole();
                 };  
                 const currentTime = getCurrentDateTime(); // Obtener la hora actual
                 if (dataRows.length > 0) { // Verificar si hay filas de datos
@@ -638,18 +637,16 @@ export default function Dashboard() {
                             };
                             // Actualizar el estado de las filas de datos
                             const updatedDataRows = [...dataRows];
-                            updatedDataRows[lastRowIndex] = updatedRow;
-                            setDataRows(updatedDataRows, () => {
-                                checkAndUpdateRole();
-                                
-                            });
+                            updatedDataRows[lastRowIndex] = updatedRow; // Usar el índice para actualizar la fila
+                            setDataRows(updatedDataRows);
+                            showAlert('success', 'Task', 'Your last task was updated successfully.');
                             // Limpiar el formulario después de agregar el registro
                             setFormData({
                                 task: 'Production',
                                 type: 'New case',
                                 alias: '',
                                 comments: '',
-                                status: 'Started',
+                                status: 'Started', //////mañana crear el seteo de los formularios segun los roles 
                             });
                         }
                     }else{
@@ -703,7 +700,7 @@ export default function Dashboard() {
                     setSelectedOption('Today Work');
                 } else {
                     console.log('New passwords do not match');
-                    alert('New passwords do not match.');
+                    showAlert('error', 'Password Change', 'New passwords do not match.');
                 }
             };
             const handleOptionChange = (option) => {
@@ -831,6 +828,12 @@ export default function Dashboard() {
             };
     //#endregion
 
+    //#region Code for alert messagess
+
+        /*********************************************************************************************/
+        /***                                   Alert Messages                                      ***/
+        /*********************************************************************************************/
+
         // Función para abrir el Snackbar
         const showAlert = (severity, title, message) => {
             setAlertConfig({ open: true, severity, title, message });
@@ -841,7 +844,8 @@ export default function Dashboard() {
             if (reason === 'clickaway') return; // Evita el cierre accidental
             setAlertConfig({ ...alertConfig, open: false });
         };
-
+    //#endregion
+    
     return (
         <div className={styles.dashboard}>
             <header className={styles.header}>
