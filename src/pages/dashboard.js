@@ -68,9 +68,6 @@ export default function Dashboard() {
         /*********************************************************************************************/
 
         const roleFromDatabase = 'Clinical_Ops'; // Aquí puedes cambiar manualmente para simular roles ** No cambiar de roll hasta que el ultimo registro se haya cerrado crear validacion para esto 
-
-
-        // Estado para el rol que será obtenido de la base de datos
         const [userRole, setUserRole] = useState(roleFromDatabase);
 
         // Opciones de Task basadas en el rol
@@ -590,7 +587,7 @@ export default function Dashboard() {
         /*********************************************************************************************/
             const handleFormSubmit = (e) => {
                 e.preventDefault();
-                if (!formData.task || !formData.type) { // Validar que se hayan seleccionado Task y Type
+                if (!formData.task && !formData.type) { // Validar que se hayan seleccionado Task y Type
                     showAlert('error', 'Error','Please select both Task and Type.');
                     return;
                 }
@@ -643,10 +640,10 @@ export default function Dashboard() {
                             // Limpiar el formulario después de agregar el registro
                             setFormData({
                                 task: 'Production',
-                                type: 'New case',
+                                type: '',
                                 alias: '',
                                 comments: '',
-                                status: 'Started', //////mañana crear el seteo de los formularios segun los roles 
+                                status: 'Started',
                             });
                         }
                     }else{
@@ -898,7 +895,6 @@ export default function Dashboard() {
                                     <h2>Case Flow</h2>
                                     <label>Task:</label>
                                     <select name="task" value={formData.task} onChange={handleFormChange}>
-                                        <option value="">Select Task</option>
                                         {availableTaskOptions.map(task => (
                                             <option key={task} value={task}>
                                                 {task}
@@ -909,7 +905,6 @@ export default function Dashboard() {
                                 <div>
                                     <label>Type:</label>
                                     <select name="type" value={formData.type} onChange={handleFormChange} disabled={!formData.task}>
-                                        <option value="">Select Type</option>
                                         {availableTypeOptions.map(option => (
                                             <option key={option.value} value={option.value}>
                                                 {option.label}
