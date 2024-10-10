@@ -215,5 +215,185 @@
     background-color: #c0392b;
 }
 
-/*Estilos para la seccion de manejo de arreglos de tiempos*/
+/*Estilos para la seccion de manejo de arreglos de tiempos y la tabla*/
 
+/* Contenedor principal */
+.container {
+    display: flex;
+    justify-content: space-between;
+    width: 98%;
+    padding: 20px;
+    background-color: #f2f7fa;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+}
+
+/* Contenedor de la tabla */
+.tableContainer {
+    flex: 1;
+    transition: width 0.3s;
+}
+
+.shrinkTable {
+    flex: 0.7;
+}
+
+.table {
+    width: 100%;
+    border-collapse: collapse;
+    background-color: #ffffff;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.table th,
+.table td {
+    padding: 12px;
+    text-align: left;
+    border-bottom: 1px solid #eaeaea;
+}
+
+.table th {
+    background-color: #4a90e2;
+    color: white;
+    font-weight: bold;
+}
+
+.table tr:nth-child(even) {
+    background-color: #f6f9fc;
+}
+
+/* Contenedor del formulario de búsqueda */
+.container_searchForm{
+    padding: 20px; /* Espaciado interno */
+    background-color: #ffffff; /* Color de fondo blanco */
+    border: 1px solid #e1e1e1; /* Borde gris claro */
+    border-radius: 8px; /* Esquinas redondeadas */
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); /* Sombra suave */
+    margin-bottom: 20px; /* Espacio debajo del contenedor */ 
+}
+.searchForm {
+    display: flex;
+    align-items: center;
+}
+
+.searchForm label {
+    margin-right: 10px;
+}
+
+.searchForm .searchInput {
+    margin-right: 15px;
+    padding: 10px;
+    border: 1px solid #d1d5db;
+    border-radius: 4px;
+    font-size: 16px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    transition: border-color 0.3s;
+    flex: 1;
+    width: 20rem;
+}
+
+.searchForm .searchInput:focus {
+    border-color: #4a90e2;
+    outline: none;
+}
+
+/* Botón de búsqueda con un nuevo color azul suave */
+.searchButton {
+    padding: 10px 16px;
+    font-size: 1rem;
+    cursor: pointer;
+    background-color: #007BFF; /* Azul suave */
+    color: white;
+    border: none;
+    border-radius: 4px;
+    transition: background-color 0.3s, transform 0.2s;
+}
+
+.searchButton:hover {
+    background-color: #0056b3; /* Azul más oscuro */
+    transform: translateY(-2px);
+}
+
+/* Estilo del contenedor de formulario de edición */
+.editFormContainer {
+    flex: 0.3;
+    padding: 20px;
+    border-left: 1px solid #eaeaea;
+    background-color: #ffffff;
+    border-radius: 8px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+    display: flex;
+    flex-direction: column;
+    margin-left: 10px;
+}
+
+.editFormContainer input {
+    width: 97%;
+    padding: 10px;
+    margin-bottom: 15px;
+    border: 1px solid #d1d5db;
+    border-radius: 4px;
+    font-size: 16px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    transition: border-color 0.3s;
+}
+
+.editList {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 15px;
+    border: 1px solid #d1d5db;
+    border-radius: 4px;
+    font-size: 16px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    transition: border-color 0.3s;
+}
+
+.editFormContainer input:focus,
+.editFormContainer select:focus {
+    border-color: #4a90e2;
+    outline: none;
+}
+
+/* Botón de búsqueda con un nuevo color azul suave */
+.editButton {
+    padding: 10px 16px;
+    font-size: 1rem;
+    cursor: pointer;
+    background-color: #17a2b8; /* Azul suave */
+    color: white;
+    border: none;
+    border-radius: 4px;
+    transition: background-color 0.3s, transform 0.2s;
+}
+
+/* Botón de búsqueda con un nuevo color azul suave */
+.cancel_Edit_Button {
+    padding: 10px 16px;
+    font-size: 1rem;
+    cursor: pointer;
+    background-color: #c0392b; /* Azul suave */
+    color: white;
+    border: none;
+    border-radius: 4px;
+    transition: background-color 0.3s, transform 0.2s;
+}
+
+/* Botones dentro de la tabla */
+.tableContainer button {
+    padding: 8px 12px;
+    font-size: 0.9rem;
+    background-color: #FF9800; /* Naranja suave */
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s, transform 0.2s;
+}
+
+.tableContainer button:hover {
+    background-color: #F57C00; /* Naranja más oscuro */
+    transform: translateY(-1px);
+}
