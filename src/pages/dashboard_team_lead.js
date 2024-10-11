@@ -719,6 +719,7 @@ export default function Dashboard() {
             endDate: '',
             technician: '',
         });
+        const [highlightedRow, setHighlightedRow] = useState(null);
         const [tableData, setTableData] = useState([]);
         const [isEditing, setIsEditing] = useState(false);
         const [editingIndex, setEditingIndex] = useState(null);
@@ -770,6 +771,7 @@ export default function Dashboard() {
             setIsEditing(true);
             setEditingIndex(index);
             setEditData(tableData[index]);
+            setHighlightedRow(index); // Establece el índice de la fila seleccionada
         };
 
         const handleEditFormChange = (e) => {
@@ -788,9 +790,11 @@ export default function Dashboard() {
             setIsEditing(false);
             setEditingIndex(null);
             setEditData({});
+            setHighlightedRow(null);
         };
         const handleCancelClick = () => {
             setIsEditing(false); // Oculta el formulario al hacer clic en "Cancel"
+            setHighlightedRow(null);
         };
 
         // Obtener las opciones de tarea para el rol seleccionado
@@ -1183,29 +1187,32 @@ export default function Dashboard() {
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    {tableData.map((entry, index) => (
-                                        <tr key={index}>
-                                            <td>{entry.technician}</td>
-                                            <td>{entry.task}</td>
-                                            <td>{entry.type}</td>
-                                            <td>{entry.alias}</td>
-                                            <td>{entry.comments}</td>
-                                            <td>{entry.status}</td>
-                                            <td>{entry.startTime}</td>
-                                            <td>{entry.endTime}</td>
-                                            <td>{entry.totalTime}</td>
-                                            <td>{entry.role}</td>
-                                            <td>
-                                                <button onClick={() => handleModifyClick(index)}>Modify</button>
-                                            </td>
-                                        </tr>
-                                    ))}
-                                </tbody>
+    {tableData.map((entry, index) => (
+        <tr
+            key={index}
+            style={{ backgroundColor: index === highlightedRow ? '#f0f8ff' : 'transparent' }} // Cambia el color según la fila seleccionada
+        >
+            <td>{entry.technician}</td>
+            <td>{entry.task}</td>
+            <td>{entry.type}</td>
+            <td>{entry.alias}</td>
+            <td>{entry.comments}</td>
+            <td>{entry.status}</td>
+            <td>{entry.startTime}</td>
+            <td>{entry.endTime}</td>
+            <td>{entry.totalTime}</td>
+            <td>{entry.role}</td>
+            <td>
+                <button onClick={() => handleModifyClick(index)}>Modify</button>
+            </td>
+        </tr>
+    ))}
+</tbody>
                             </table>
                         </div>
 
                         {isEditing && (
-                            <div className={styles.editFormContainer}>
+                            <div className={styles.editFormContainer}> 
                                 <form onSubmit={handleEditSubmit}>
                                     <h3>Edit Row</h3>
                                     <input 
