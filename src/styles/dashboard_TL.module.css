@@ -66,41 +66,41 @@
 
 /* Estilo común para los divs dentro de mainContent */
 .mainContent > div {
-    flex: 1; /* Asegura que todos los divs tengan el mismo ancho */
-    margin-right: 20px; /* Espacio entre los divs */
-    border: 1px solid #ddd; /* Borde para separar los divs */
-    padding: 15px; /* Espacio interno para el contenido */
-    border-radius: 8px; /* Bordes redondeados */
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Sombra para darle un efecto de profundidad */
+    flex: 1; 
+    margin-right: 20px; 
+    border: 1px solid #ddd; 
+    padding: 15px; 
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); 
 }
 
 .mainContent > div:last-child {
-    margin-right: 0; /* El último div no tendrá margen derecho */
+    margin-right: 0; 
 }
 
 /* Reducir el tamaño del formulario de Today Work */
 .formSection {
-    width: 100%; /* Ajustado para ocupar el ancho completo disponible */
+    width: 100%; 
     padding-right: 20px;
 }
 
 .chartSection {
-    width: 100%; /* Ajustado para ocupar el ancho completo disponible */
-    position: relative; /* Posicionar el contenedor del temporizador de manera relativa */
+    width: 100%; 
+    position: relative; 
 }
 
 /* Añade un nuevo estilo para el div del temporizador */
 .timer {
-    font-size: 20px; /* Tamaño de fuente del temporizador */
-    font-weight: bold; /* Texto en negrita */
-    color: #3498db; /* Color del texto del temporizador */
-    background-color: #f4f4f4; /* Fondo del temporizador */
-    padding: 10px 15px; /* Espacio interno para el temporizador */
-    border-radius: 8px; /* Bordes redondeados */
-    border: 2px solid #ccc; /* Borde del temporizador */
-    text-align: center; /* Centra el texto del temporizador */
-    margin-top: 20px; /* Espacio superior */
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); /* Sombra para darle un efecto de profundidad */
+    font-size: 20px; 
+    font-weight: bold; 
+    color: #3498db; 
+    background-color: #f4f4f4; 
+    padding: 10px 15px; 
+    border-radius: 8px; 
+    border: 2px solid #ccc; 
+    text-align: center; 
+    margin-top: 20px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); 
 }
 
 /*Estilos para la table*/
@@ -144,8 +144,8 @@
     background-color: #f9f9f9;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     width: 100%;
-    max-width: 500px; /* Limita el ancho máximo del formulario */
-    margin: 0 auto; /* Centra el formulario horizontalmente */
+    max-width: 500px; 
+    margin: 0 auto; 
 }
 
 .changePasswordForm div {
@@ -156,7 +156,7 @@
 .changePasswordForm label {
     margin-bottom: 5px;
     font-weight: bold;
-    color: #333; /* Asegura que el texto del label sea legible */
+    color: #333; 
     margin-top: 10px;
 }
 
@@ -179,7 +179,7 @@
     border-radius: 4px;
     cursor: pointer;
     font-size: 16px;
-    margin-top: 10px; /* Espacio superior para separar el botón del contenido anterior */
+    margin-top: 10px; 
     margin-right: 5px;
 }
 
@@ -195,7 +195,7 @@
     border-radius: 4px;
     cursor: pointer;
     font-size: 16px;
-    margin-top: 10px; /* Espacio superior para separar el botón del contenido anterior */
+    margin-top: 10px; 
     margin-right: 5px;
 }
 
@@ -207,7 +207,7 @@
     border-radius: 4px;
     cursor: pointer;
     font-size: 16px;
-    margin-top: 10px; /* Espacio superior para separar el botón del contenido anterior */
+    margin-top: 10px; 
     margin-right: 5px;
 }
 
@@ -266,12 +266,12 @@
 
 /* Contenedor del formulario de búsqueda */
 .container_searchForm{
-    padding: 20px; /* Espaciado interno */
-    background-color: #ffffff; /* Color de fondo blanco */
-    border: 1px solid #e1e1e1; /* Borde gris claro */
-    border-radius: 8px; /* Esquinas redondeadas */
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); /* Sombra suave */
-    margin-bottom: 20px; /* Espacio debajo del contenedor */ 
+    padding: 20px; 
+    background-color: #ffffff; 
+    border: 1px solid #e1e1e1; 
+    border-radius: 8px; 
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); 
+    margin-bottom: 20px; 
 }
 .searchForm {
     display: flex;
@@ -299,12 +299,12 @@
     outline: none;
 }
 
-/* Botón de búsqueda con un nuevo color azul suave */
+/* Botón de búsqueda*/
 .searchButton {
     padding: 10px 16px;
     font-size: 1rem;
     cursor: pointer;
-    background-color: #007BFF; /* Azul suave */
+    background-color: #007BFF;
     color: white;
     border: none;
     border-radius: 4px;
@@ -312,7 +312,7 @@
 }
 
 .searchButton:hover {
-    background-color: #0056b3; /* Azul más oscuro */
+    background-color: #0056b3; 
     transform: translateY(-2px);
 }
 
@@ -357,7 +357,7 @@
     outline: none;
 }
 
-/* Botón de búsqueda con un nuevo color azul suave */
+/* Botón de búsqueda */
 .editButton {
     padding: 10px 16px;
     font-size: 1rem;
@@ -369,12 +369,12 @@
     transition: background-color 0.3s, transform 0.2s;
 }
 
-/* Botón de búsqueda con un nuevo color azul suave */
+/* Botón de búsqueda cancelar */
 .cancel_Edit_Button {
     padding: 10px 16px;
     font-size: 1rem;
     cursor: pointer;
-    background-color: #c0392b; /* Azul suave */
+    background-color: #c0392b; 
     color: white;
     border: none;
     border-radius: 4px;
@@ -385,7 +385,7 @@
 .tableContainer button {
     padding: 8px 12px;
     font-size: 0.9rem;
-    background-color: #FF9800; /* Naranja suave */
+    background-color: #FF9800; 
     color: white;
     border: none;
     border-radius: 4px;
@@ -394,6 +394,109 @@
 }
 
 .tableContainer button:hover {
-    background-color: #F57C00; /* Naranja más oscuro */
+    background-color: #F57C00; 
     transform: translateY(-1px);
+}
+
+/*Estilos para la seccion de roles*/
+.container_roll {
+    padding: 20px;
+    width: 95%; /* Ancho máximo del contenedor */
+    margin: 0 auto;
+    font-family: Arial, sans-serif;
+    background-color: #f9f9f9;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.container_roll h2 {
+    text-align: center;
+    color: #333;
+    margin-bottom: 20px;
+}
+
+.container_roll table {
+    width: 100%; /* Ancho completo */
+    border-collapse: collapse; /* Sin espacios entre bordes */
+    margin-bottom: 20px; /* Espacio debajo de la tabla */
+    min-width: 800px; /* Ancho mínimo de la tabla */
+}
+
+.container_roll th,
+.container_roll td {
+    padding: 12px; /* Espaciado interno */
+    border: 1px solid #ddd; /* Borde gris claro */
+}
+
+/* Estilo para la columna de nombre */
+.container_roll th:first-child,
+.container_roll td:first-child {
+    width: 200px; /* Ancho específico para la columna de nombres */
+    text-align: left; /* Alinear texto a la izquierda */
+}
+
+/* Establecer un ancho fijo para las columnas restantes */
+.container_roll th:not(:first-child),
+.container_roll td:not(:first-child) {
+    width: calc((100% - 200px) / 8); /* Resto del ancho dividido entre 8 columnas */
+}
+
+/* Alternativamente, si prefieres un ancho fijo para cada columna */
+.container_roll th:not(:first-child),
+.container_roll td:not(:first-child) {
+    width: 100px; /* Ancho fijo para cada columna, ajusta según sea necesario */
+}
+
+.container_roll th {
+    background-color: #007bff; /* Color de fondo azul para encabezados */
+    color: white; /* Color de texto blanco */
+}
+
+.container_roll td {
+    background-color: white; /* Color de fondo blanco para celdas */
+}
+
+/* Centrar checkboxes en las celdas */
+.container_roll td input[type="checkbox"] {
+    margin: 0 auto; /* Centrar el checkbox */
+    display: block; /* Hacer que el checkbox se comporte como un bloque */
+}
+
+/* Alinear el texto de las celdas de checkbox al centro */
+.container_roll th,
+.container_roll td {
+    text-align: center; /* Centrar texto (incluyendo checkboxes) */
+}
+
+.container_roll tr:nth-child(even) {
+    background-color: #f2f2f2; /* Color de fondo para filas pares */
+}
+
+.container_roll tr:hover {
+    background-color: #e9ecef; /* Color de fondo al pasar el mouse */
+}
+
+.container_roll input[type="checkbox"] {
+    cursor: pointer; /* Cambiar cursor al pasar sobre checkbox */
+}
+
+.container_roll .saveButton {
+    background-color: #007bff; /* Color de fondo azul para el botón */
+    color: white; /* Color de texto blanco */
+    padding: 10px 20px; /* Espaciado interno del botón */
+    border: none; /* Sin borde */
+    border-radius: 4px; /* Bordes redondeados */
+    cursor: pointer; /* Cambiar cursor al pasar sobre el botón */
+    font-size: 16px; /* Tamaño de fuente */
+    display: block; /* Hacer que el botón se comporte como un bloque */
+    margin: 0 auto; /* Centrar el botón */
+    transition: background-color 0.3s; /* Transición suave para el color de fondo */
+}
+
+.container_roll .saveButton:hover {
+    background-color: #0056b3; /* Color de fondo al pasar el mouse por el botón */
+}
+
+.container_roll .saveButton:focus {
+    outline: none; /* Sin borde de enfoque */
 }

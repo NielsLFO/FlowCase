@@ -754,9 +754,9 @@ export default function Dashboard() {
                 alias: '12345',
                 comments: 'Comments Example',
                 status: 'Finished',
-                startTime: '09:00 AM',
-                endTime: '10:00 AM',
-                totalTime: '1 hour',
+                startTime: '2024-10-11 10:12:05',
+                endTime: '2024-10-11 10:12:15',
+                totalTime: '0 min',
                 role: 'Clinical_Ops', // Cambia a un valor real más tarde
             };
             setTableData((prevData) => [...prevData, newEntry]);
@@ -784,14 +784,65 @@ export default function Dashboard() {
 
         const handleEditSubmit = (e) => {
             e.preventDefault();
-            const updatedData = [...tableData];
-            updatedData[editingIndex] = editData;
-            setTableData(updatedData);
+        
+            // Validar que el alias tenga 5 caracteres si task es "Production"
+            if (editData.task === "Production" && editData.alias.length !== 5) {
+                showAlert('error', 'Error', 'Please, the alias must be 5 characters long.');
+                return;
+            }
+        
+            // Validar que el campo de comentarios no esté vacío si type es 'Other'
+            if (editData.type === 'Other' && !editData.comments) {
+                showAlert('error', 'Error', 'Please fill in the comments when selecting "Other".');
+                return;
+            }
+        
+            // Expresión regular para el formato "YYYY-MM-DD HH:MM:SS"
+            const dateTimeFormat = /^\d{4}-\d{2}-\d{2}\s\d{2}:\d{2}:\d{2}$/;
+
+            // Validar que las fechas coincida con el formato
+            if (!dateTimeFormat.test(editData.startTime)) {
+                showAlert('error', 'Error', 'The start date must be in the format YYYY-MM-DD HH:MM:SS.');
+                return;
+            }
+
+            if (!dateTimeFormat.test(editData.endTime)) {
+                showAlert('error', 'Error', 'The end time must be in the format YYYY-MM-DD HH:MM:SS.');
+                return;
+            }
+
+            // Convertir startTime y endTime a objetos Date para comparar
+            const startTime = new Date(editData.startTime);
+            const endTime = new Date(editData.endTime);
+
+            // Verificar que startTime sea menor que endTime
+            if (startTime >= endTime) {
+                showAlert('error', 'Error', 'The start time must be earlier than the end time.');
+                return;
+            }
+
+            // Actualizar el tableData con los nuevos datos
+            const timeDifference = endTime - startTime; 
+            const elapsedMinutes = Math.floor(timeDifference / 60000); // Convertir a minutos
+
+            // Resetear alias si task no es "Production"
+            const updatedData = {
+                ...editData,
+                alias: editData.task === "Production" ? editData.alias : "", 
+                totalTime: `${elapsedMinutes} min`,
+            };
+            const newTableData = [...tableData];
+            newTableData[editingIndex] = updatedData;
+            setTableData(newTableData);
+        
+            // Resetear el estado de edición
             setIsEditing(false);
             setEditingIndex(null);
             setEditData({});
             setHighlightedRow(null);
+            showAlert('success', 'Update', 'The register was updated successfully.');
         };
+        
         const handleCancelClick = () => {
             setIsEditing(false); // Oculta el formulario al hacer clic en "Cancel"
             setHighlightedRow(null);
@@ -804,6 +855,73 @@ export default function Dashboard() {
         const getStatusOptions = () => {
             return ['Finished', 'Stop'] || [];
         };
+
+        // Este efecto se ejecuta cada vez que cambie `editData.task`
+        useEffect(() => {
+            // Obtener las opciones disponibles para `type` basado en el `role` y `task`
+            const typeOptions = roll_available_Type_Options(editData.role, editData.task);
+
+            // Si hay opciones disponibles, establecer el primer valor como `type` por defecto
+            if (typeOptions.length > 0) {
+                setEditData((prevState) => ({
+                    ...prevState,
+                    type: typeOptions[0].value,
+                }));
+            }
+        }, [editData.task]); // Ejecutar cada vez que cambie `editData.task`
+
+
+    //#endregion
+
+    //#region Code for role managing
+
+        /*********************************************************************************************/
+        /***                    All The Validations needed for managing roles                      ***/
+        /*********************************************************************************************/
+
+            // Lista de técnicos
+            const technicians = [
+                "Técnico 1", "Técnico 2", "Técnico 3", "Técnico 4", 
+                "Técnico 5", "Técnico 6", "Técnico 7", "Técnico 8", 
+                "Técnico 9", "Técnico 10", "Técnico 11", "Técnico 12"
+            ];
+
+            // Estado para los roles de cada técnico
+            const [roles, setRoles] = useState(
+                technicians.map(name => ({
+                    name,
+                    OTP: true,
+                    Clinical_Ops: false,
+                    Clinical_Exc: false,
+                    Ortho: false,
+                    QC_OTP: false,
+                    Detailer_Finisher: false,
+                    Clinical_Analyst: false,
+                    CAD: false,
+                }))
+            );
+
+            // Manejar el cambio de checkbox para un técnico específico
+            const handleCheckboxChange = (technicianIndex, role) => {
+                const updatedRoles = [...roles];
+                updatedRoles[technicianIndex][role] = !updatedRoles[technicianIndex][role];
+                setRoles(updatedRoles);
+            };
+
+            // Manejar el cambio de checkbox del encabezado
+            const handleHeaderCheckboxChange = (role) => {
+                const updatedRoles = roles.map(tecnico => ({
+                    ...tecnico,
+                    [role]: !tecnico[role],
+                }));
+                setRoles(updatedRoles);
+            };
+
+            // Guardar cambios
+            const saveChanges = () => {
+                console.log("Datos guardados:", roles);
+                alert("Cambios guardados exitosamente.");
+            };
     //#endregion
 
     //#region Code for alert messagess
@@ -862,22 +980,21 @@ export default function Dashboard() {
                 </nav>
             </header>
             <main className={styles.content}>
+                {/* Snackbar para mostrar el mensaje de alerta */}
+                <Snackbar
+                    open={alertConfig.open}
+                    autoHideDuration={6000}
+                    onClose={handleClose}
+                    anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+                >
+                    <Alert onClose={handleClose} severity={alertConfig.severity} variant="filled">
+                        <AlertTitle>{alertConfig.title}</AlertTitle>
+                        {alertConfig.message}
+                    </Alert>
+                </Snackbar>
                 {selectedOption === 'Today Team Work' && !showPasswordChangeForm && (
                     <div className={styles.mainContent}>
-                        {/* Snackbar para mostrar el mensaje de alerta */}
-                        <Snackbar
-                            open={alertConfig.open}
-                            autoHideDuration={6000}
-                            onClose={handleClose}
-                            anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
-                        >
-                            <Alert onClose={handleClose} severity={alertConfig.severity} variant="filled">
-                                <AlertTitle>{alertConfig.title}</AlertTitle>
-                                {alertConfig.message}
-                            </Alert>
-                        </Snackbar>
                         <div className={styles.formSection}>
-
                         {/* Weekly Production Section */}
                         <div className={styles.timerSection}>
                             <h2>Current Individual Production</h2>
@@ -1187,27 +1304,27 @@ export default function Dashboard() {
                                     </tr>
                                 </thead>
                                 <tbody>
-    {tableData.map((entry, index) => (
-        <tr
-            key={index}
-            style={{ backgroundColor: index === highlightedRow ? '#f0f8ff' : 'transparent' }} // Cambia el color según la fila seleccionada
-        >
-            <td>{entry.technician}</td>
-            <td>{entry.task}</td>
-            <td>{entry.type}</td>
-            <td>{entry.alias}</td>
-            <td>{entry.comments}</td>
-            <td>{entry.status}</td>
-            <td>{entry.startTime}</td>
-            <td>{entry.endTime}</td>
-            <td>{entry.totalTime}</td>
-            <td>{entry.role}</td>
-            <td>
-                <button onClick={() => handleModifyClick(index)}>Modify</button>
-            </td>
-        </tr>
-    ))}
-</tbody>
+                                    {tableData.map((entry, index) => (
+                                        <tr
+                                            key={index}
+                                            style={{ backgroundColor: index === highlightedRow ? '#f0f8ff' : 'transparent' }} // Cambia el color según la fila seleccionada
+                                        >
+                                            <td>{entry.technician}</td>
+                                            <td>{entry.task}</td>
+                                            <td>{entry.type}</td>
+                                            <td>{entry.alias}</td>
+                                            <td>{entry.comments}</td>
+                                            <td>{entry.status}</td>
+                                            <td>{entry.startTime}</td>
+                                            <td>{entry.endTime}</td>
+                                            <td>{entry.totalTime}</td>
+                                            <td>{entry.role}</td>
+                                            <td>
+                                                <button onClick={() => handleModifyClick(index)}>Modify</button>
+                                            </td>
+                                        </tr>
+                                    ))}
+                                </tbody>
                             </table>
                         </div>
 
@@ -1228,7 +1345,6 @@ export default function Dashboard() {
                                         name="task"
                                         value={editData.task}
                                         onChange={handleEditFormChange}
-                                        required
                                         className={styles.editList} // Clase para los estilos
                                     >
                                         {getTaskOptions(editData.role).map((task, index) => (
@@ -1241,7 +1357,6 @@ export default function Dashboard() {
                                         name="type"
                                         value={editData.type}
                                         onChange={handleEditFormChange}
-                                        required
                                         className={styles.editList} // Clase para los estilos
                                     >
                                         {roll_available_Type_Options(editData.role, editData.task).map((typeObj, index) => (
@@ -1250,29 +1365,29 @@ export default function Dashboard() {
                                             </option>
                                         ))}
                                     </select>
-                                    <input 
-                                        type="text"
-                                        name="alias"
-                                        value={editData.alias}
-                                        onChange={handleEditFormChange}
-                                        placeholder="Alias"
-                                        required
-                                        className={styles.searchInput} // Clase para los estilos
-                                    />
+                                    {/* Mostrar alias solo si task es "Production" */}
+                                    {editData.task === 'Production' && (
+                                        <input 
+                                            type="text"
+                                            name="alias"
+                                            value={editData.alias}
+                                            onChange={handleEditFormChange}
+                                            placeholder="Alias"
+                                            className={styles.searchInput} // Clase para los estilos
+                                        />
+                                    )}
                                     <input 
                                         type="text"
                                         name="comments"
                                         value={editData.comments}
                                         onChange={handleEditFormChange}
                                         placeholder="Comments"
-                                        required
                                         className={styles.searchInput} // Clase para los estilos
                                     />
                                     <select 
                                         name="status" // Asegúrate de que el nombre sea "status" aquí
                                         value={editData.status}
                                         onChange={handleEditFormChange}
-                                        required
                                         className={styles.editList} // Clase para los estilos
                                     >
                                         {getStatusOptions().map((typeObj, index) => (
@@ -1306,7 +1421,47 @@ export default function Dashboard() {
                         )}
                     </div>
                 )}
-
+                {selectedOption === 'Role Management' && !showPasswordChangeForm && (
+                    <div id="container_roll" className={styles.container_roll}>
+                    <h2>Role Management</h2>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Técnico</th>
+                                {['OTP', 'Clinical_Ops', 'Clinical_Exc', 'Ortho', 'QC_OTP', 'Detailer_Finisher', 'Clinical_Analyst', 'CAD'].map(role => (
+                                    <th key={role}>
+                                        <div style={{ textAlign: 'center' }}>
+                                            {role}<br />
+                                            <input 
+                                                type="checkbox" 
+                                                checked={roles.every(tecnico => tecnico[role])} 
+                                                onChange={() => handleHeaderCheckboxChange(role)} 
+                                            />
+                                        </div>
+                                    </th>
+                                ))}
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {roles.map((tecnico, index) => (
+                                <tr key={tecnico.name}>
+                                    <td>{tecnico.name}</td>
+                                    {['OTP', 'Clinical_Ops', 'Clinical_Exc', 'Ortho', 'QC_OTP', 'Detailer_Finisher', 'Clinical_Analyst', 'CAD'].map(role => (
+                                        <td key={role}>
+                                            <input 
+                                                type="checkbox" 
+                                                checked={tecnico[role]} 
+                                                onChange={() => handleCheckboxChange(index, role)} 
+                                            />
+                                        </td>
+                                    ))}
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                    <button onClick={saveChanges} className={styles.saveButton}>Guardar Cambios</button>
+                </div>
+                )}
                 {showPasswordChangeForm && (
                     <div className={styles.changePasswordForm}>
                         <h2>Change Password</h2>
