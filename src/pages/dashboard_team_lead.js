@@ -6,6 +6,7 @@ import styles from '../styles/dashboard_TL.module.css';
 import Snackbar from '@mui/material/Snackbar';
 import Alert from '@mui/material/Alert';
 import AlertTitle from '@mui/material/AlertTitle';
+import { useRouter } from 'next/router';
 
 
 // Registrar componentes para el gráfico
@@ -881,9 +882,9 @@ export default function Dashboard() {
 
             // Lista de técnicos
             const technicians = [
-                "Técnico 1", "Técnico 2", "Técnico 3", "Técnico 4", 
-                "Técnico 5", "Técnico 6", "Técnico 7", "Técnico 8", 
-                "Técnico 9", "Técnico 10", "Técnico 11", "Técnico 12"
+                "Tech #1", "Tech #2", "Tech #3", "Tech #4", 
+                "Tech #5", "Tech #6", "Tech #7", "Tech #8", 
+                "Tech #9", "Tech #10", "Tech #11", "Tech #12"
             ];
 
             // Estado para los roles de cada técnico
@@ -904,24 +905,43 @@ export default function Dashboard() {
             // Manejar el cambio de checkbox para un técnico específico
             const handleCheckboxChange = (technicianIndex, role) => {
                 const updatedRoles = [...roles];
-                updatedRoles[technicianIndex][role] = !updatedRoles[technicianIndex][role];
+
+                // Deseleccionar todos los roles de ese técnico
+                Object.keys(updatedRoles[technicianIndex]).forEach(r => {
+                    if (r !== 'name') updatedRoles[technicianIndex][r] = false;
+                });
+
+                // Seleccionar solo el rol actual
+                updatedRoles[technicianIndex][role] = true;
+                
                 setRoles(updatedRoles);
             };
 
             // Manejar el cambio de checkbox del encabezado
             const handleHeaderCheckboxChange = (role) => {
-                const updatedRoles = roles.map(tecnico => ({
-                    ...tecnico,
-                    [role]: !tecnico[role],
-                }));
+                const updatedRoles = roles.map(tecnico => {
+                    const newRoles = { ...tecnico };
+                    
+                    // Deseleccionar todos los roles de este técnico
+                    Object.keys(newRoles).forEach(r => {
+                        if (r !== 'name') newRoles[r] = false;
+                    });
+
+                    // Seleccionar el rol actual
+                    newRoles[role] = true;
+                    
+                    return newRoles;
+                });
+
                 setRoles(updatedRoles);
             };
 
             // Guardar cambios
             const saveChanges = () => {
                 console.log("Datos guardados:", roles);
-                alert("Cambios guardados exitosamente.");
+                showAlert('success', 'Role Change', 'The role was updated successfully.');
             };
+
     //#endregion
 
     //#region Code for alert messagess
@@ -942,6 +962,20 @@ export default function Dashboard() {
     };
     //#endregion
 
+    //#region Code for login out
+
+        /*********************************************************************************************/
+        /***                                     Login Out                                         ***/
+        /*********************************************************************************************/
+
+        const router = useRouter(); // Create router instance
+
+        const handleSignOut = () => {
+            console.log('User signed out'); // Handle sign out logic if needed
+            router.push('/'); // Redirect to the index page
+        };
+
+    //#endregion
     return (
         <div className={styles.dashboard}>
             <header className={styles.header}>
@@ -967,7 +1001,10 @@ export default function Dashboard() {
                         </button>
                     </div>
                     <div className={styles.rightOptions}>
-                        <button className={`${styles.signOutButton} ${showPasswordChangeForm ? styles.activeButton : ''}`} onClick={() => console.log('User signed out')}>
+                        <button
+                            className={`${styles.signOutButton} ${showPasswordChangeForm ? styles.activeButton : ''}`}
+                            onClick={handleSignOut}
+                        >
                             Sign Out
                         </button>
                         <button
@@ -1459,7 +1496,7 @@ export default function Dashboard() {
                             ))}
                         </tbody>
                     </table>
-                    <button onClick={saveChanges} className={styles.saveButton}>Guardar Cambios</button>
+                    <button onClick={saveChanges} className={styles.saveButton}>Save Changes</button>
                 </div>
                 )}
                 {showPasswordChangeForm && (

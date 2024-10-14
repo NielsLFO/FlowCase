@@ -6,6 +6,7 @@ import styles from '../styles/dashboard.module.css';
 import Snackbar from '@mui/material/Snackbar';
 import Alert from '@mui/material/Alert';
 import AlertTitle from '@mui/material/AlertTitle';
+import { useRouter } from 'next/router';
 
 
 // Registrar componentes para el gráfico
@@ -26,7 +27,7 @@ export default function Dashboard() {
             const [selectedOption, setSelectedOption] = useState('Today Work');
             const [formData, setFormData] = useState({
                 task: 'Production',
-                type: 'New case',
+                type: '',
                 alias: '',
                 comments: '',
                 status: 'Started',
@@ -67,10 +68,9 @@ export default function Dashboard() {
         /***                                        Roll                                           ***/
         /*********************************************************************************************/
 
-        const roleFromDatabase = 'Clinical_Ops'; // Aquí puedes cambiar manualmente para simular roles ** No cambiar de roll hasta que el ultimo registro se haya cerrado crear validacion para esto 
+        const roleFromDatabase = 'OTP'; // Aqui va a refrescar el roll desde la db
         const [userRole, setUserRole] = useState(roleFromDatabase);
 
-        // Opciones de Task basadas en el rol
         const taskOptionsByRole = {
             OTP: ['Production', 'Call', 'Meeting', 'Other_Task', 'Idle_Time'],
             Clinical_Ops: ['Production', 'Call', 'Meeting', 'Other_Task', 'Idle_Time'], 
@@ -89,21 +89,35 @@ export default function Dashboard() {
 
         // Efecto para actualizar el rol cuando cambie la variable de rol simulada
         const checkAndUpdateRole = () => {
-            const lastRowIndex = dataRows.length - 1; // Índice de la última fila
+            const lastRowIndex = dataRows.length - 1;
             const lastRow = dataRows[lastRowIndex];   
             if (dataRows.length > 0) {
                 if (userRole !== roleFromDatabase && (lastRow.status === 'Stop' || lastRow.status === 'Finished')) {
                     setUserRole(roleFromDatabase);
+                    updatetypevalue();
                     showAlert('warning', 'Role Changed', "Please be advised that your Team Lead has changed your user role. You will now be working in the following role: " + roleFromDatabase);
                 }
             } else {
                 setUserRole(roleFromDatabase);
+                updatetypevalue();
             }
         };
-        // Efecto para actualizar el rol cuando cambie la variable roleFromDatabase
+        // Efecto para actualizar el rol cuando cambie el role
         useEffect(() => {
             checkAndUpdateRole();
         }, [dataRows]);
+
+        const updatetypevalue = () => {
+            const typeOptions = roll_available_Type_Options(roleFromDatabase);
+            setFormData({
+                task: 'Production',
+                type: typeOptions[0].value,
+                alias: '',
+                comments: '',
+                status: 'Started',
+            });
+        }
+
     //#endregion
 
     //#region Values for type options according to task roll
@@ -552,10 +566,10 @@ export default function Dashboard() {
                     { value: 'Other', label: 'Other' },
                 ],
             };
-            const availableTypeOptions = roll_available_Type_Options(); // Obtener las opciones de "Type" basadas en la tarea 
+            const availableTypeOptions = roll_available_Type_Options(roleFromDatabase); // Obtener las opciones de "Type" basadas en la tarea 
 
-            function roll_available_Type_Options(){
-                switch (userRole) {
+            function roll_available_Type_Options(roleFromDatabase){
+                switch (roleFromDatabase) {
                     case "OTP":
                         return typeOptions_OTP[formData.task];  
                     case "Clinical_Ops":
@@ -587,15 +601,15 @@ export default function Dashboard() {
         /*********************************************************************************************/
             const handleFormSubmit = (e) => {
                 e.preventDefault();
-                if (!formData.task && !formData.type) { // Validar que se hayan seleccionado Task y Type
+                if (!formData.task && !formData.type) { 
                     showAlert('error', 'Error','Please select both Task and Type.');
                     return;
                 }
-                if (formData.type === 'Other' && !formData.comments) { // Validar que si Type es 'Other', el campo de comentarios no esté vacío
+                if (formData.type === 'Other' && !formData.comments) {
                     showAlert('error', 'Error','Please fill in the comments when selecting "Other".');
                     return;
                 }             
-                if (formData.task === "Production" && formData.alias.length !== 5) { // Validar que el alias tenga 5 caracteres
+                if (formData.task === "Production" && formData.alias.length !== 5) { 
                     showAlert('error', 'Error', 'Please, the alias must be 5 characters long.');
                     return;
                 }  
@@ -638,19 +652,17 @@ export default function Dashboard() {
                             setDataRows(updatedDataRows);
                             showAlert('success', 'Task', 'Your last task was updated successfully.');
                             // Limpiar el formulario después de agregar el registro
-                            setFormData({
-                                task: 'Production',
-                                type: '',
-                                alias: '',
-                                comments: '',
-                                status: 'Started',
-                            });
+                            checkAndUpdateRole();
+                        }else{
+                            showAlert('error', 'Error','You must complete the previous task before adding a new one.'); 
                         }
                     }else{
-                        addNewRow();                
+                        addNewRow(); 
+                        checkAndUpdateRole();               
                     }
                 }else{
                     addNewRow();
+                    checkAndUpdateRole();
                 };
             };
             function getCurrentDateTime() {
@@ -843,6 +855,20 @@ export default function Dashboard() {
         };
     //#endregion
     
+    //#region Code for login out
+
+        /*********************************************************************************************/
+        /***                                     Login Out                                         ***/
+        /*********************************************************************************************/
+
+        const router = useRouter(); // Create router instance
+
+        const handleSignOut = () => {
+            console.log('User signed out'); // Handle sign out logic if needed
+            router.push('/'); // Redirect to the index page
+        };
+
+    //#endregion
     return (
         <div className={styles.dashboard}>
             <header className={styles.header}>
@@ -862,7 +888,10 @@ export default function Dashboard() {
                         </button>
                     </div>
                     <div className={styles.rightOptions}>
-                        <button className={`${styles.signOutButton} ${showPasswordChangeForm ? styles.activeButton : ''}`} onClick={() => console.log('User signed out')}>
+                        <button
+                            className={`${styles.signOutButton} ${showPasswordChangeForm ? styles.activeButton : ''}`}
+                            onClick={handleSignOut}
+                        >
                             Sign Out
                         </button>
                         <button

@@ -2,13 +2,31 @@
 
 .main {
   display: flex;
-  flex-direction: row;
+  flex-direction: column;
   justify-content: center;
   align-items: center;
+  height: 100vh;
   padding: 4rem 1rem;
-  min-height: 100vh;
-  background: linear-gradient(110deg, #2c3e50 35%, #2980b9 65%); /* Azul oscuro a azul profesional */
+  box-sizing: border-box; /* Incluye el padding en el height */
+  background: linear-gradient(110deg, #2c3e50 35%, #2980b9 65%);
+  background-size: 200% 200%; /* Aumenta el tamaño del fondo para permitir el desplazamiento */
+  animation: gradientShift 5s ease infinite; /* Añadido para animar el fondo */
+  margin: -10px; /* Asegúrate de que no haya margen adicional */
+  overflow: hidden;
 }
+
+@keyframes gradientShift {
+  0% {
+    background-position: 0% 50%; /* Posición inicial */
+  }
+  50% {
+    background-position: 100% 50%; /* Posición intermedia */
+  }
+  100% {
+    background-position: 0% 50%; /* Regresar a la posición inicial */
+  }
+}
+
 
 .leftColumn {
   background-color: #f9f9f9; /* Blanco suave */
