@@ -68,7 +68,7 @@ export default function Dashboard() {
         /***                                        Roll                                           ***/
         /*********************************************************************************************/
 
-        const roleFromDatabase = 'OTP'; // Aqui va a refrescar el roll desde la db
+        const roleFromDatabase = 'Clinical_Ops'; // Aqui va a refrescar el roll desde la db
         const [userRole, setUserRole] = useState(roleFromDatabase);
 
         const taskOptionsByRole = {
@@ -657,12 +657,10 @@ export default function Dashboard() {
                             showAlert('error', 'Error','You must complete the previous task before adding a new one.'); 
                         }
                     }else{
-                        addNewRow(); 
-                        checkAndUpdateRole();               
+                        addNewRow();              
                     }
                 }else{
                     addNewRow();
-                    checkAndUpdateRole();
                 };
             };
             function getCurrentDateTime() {
