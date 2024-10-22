@@ -1,39 +1,10 @@
-import mongoose from 'mongoose';
+import mysql from 'mysql2/promise';
 
-const MONGODB_URI = process.env.MONGODB_URI;
+const db = mysql.createPool({
+    host: 'localhost',     
+    user: 'root',   
+    password: 'Niels.Morales9086', 
+    database: 'flowcase', 
+});
 
-if (!MONGODB_URI) {
-    throw new Error('Please define the MONGODB_URI environment variable inside .env.local');
-}
-
-/**
- * Global is used here to maintain a cached connection across hot reloads
- * in development. This prevents connections growing exponentially
- * during API Route usage.
- */
-let cached = global.mongoose;
-
-if (!cached) {
-    cached = global.mongoose = { conn: null, promise: null };
-}
-
-async function dbConnect() {
-    if (cached.conn) {
-        return cached.conn;
-    }
-
-    if (!cached.promise) {
-        const opts = {
-            useNewUrlParser: true,
-            useUnifiedTopology: true,
-        };
-
-        cached.promise = mongoose.connect(MONGODB_URI, opts).then((mongoose) => {
-            return mongoose;
-        });
-    }
-    cached.conn = await cached.promise;
-    return cached.conn;
-}
-
-export default dbConnect;
+export default db;

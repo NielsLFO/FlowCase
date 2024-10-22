@@ -68,7 +68,7 @@ export default function Dashboard() {
         /***                                        Roll                                           ***/
         /*********************************************************************************************/
 
-        const roleFromDatabase = 'Clinical_Ops'; // Aqui va a refrescar el roll desde la db
+        const roleFromDatabase = 'OTP'; // Aqui va a refrescar el roll desde la db
         const [userRole, setUserRole] = useState(roleFromDatabase);
 
         const taskOptionsByRole = {
@@ -267,7 +267,6 @@ export default function Dashboard() {
                     { value: 'Mentoring', label: 'Mentoring' },
                     { value: 'Project', label: 'Project' },
                     { value: 'Outreach IA', label: 'Outreach IA' },
-                    { value: 'Personal needs', label: 'Personal needs' },
                     { value: 'Other', label: 'Other' },
                 ],
                 Idle_Time: [
@@ -547,7 +546,7 @@ export default function Dashboard() {
                     { value: 'Internal assessment', label: 'Internal assessment' },
                     { value: 'Treatment notes', label: 'Treatment notes' },
                     { value: 'Salesforce', label: 'Salesforce' },
-                    { value: 'Segment. review', label: 'Segment. review' },
+                    { value: 'Segmentation review', label: 'Segmentation review' },
                     { value: 'IDB review', label: 'IDB review' },
                     { value: 'Plating review', label: 'Plating review' },
                     { value: 'Camera review', label: 'Camera review' },
@@ -623,6 +622,9 @@ export default function Dashboard() {
                         status: 'Finished',
                     });
                 };  
+                const addNewRow2 = () => {
+
+                }; 
                 const currentTime = getCurrentDateTime(); // Obtener la hora actual
                 if (dataRows.length > 0) { // Verificar si hay filas de datos
                     const lastRowIndex = dataRows.length - 1; // Índice de la última fila
@@ -657,7 +659,17 @@ export default function Dashboard() {
                             showAlert('error', 'Error','You must complete the previous task before adding a new one.'); 
                         }
                     }else{
-                        addNewRow();              
+                        const lastRowIndex = dataRows.length - 1; // Índice de la última fila
+                        const lastRow = dataRows[lastRowIndex]; 
+                        setDataRows(prev => [...prev, {...formData, start_time:lastRow.end_time , end_time: "00:00:00", total_time: "00:00:00", roll: userRole}]);
+
+                        setFormData({
+                            task: formData.task,
+                            type: formData.type,
+                            alias: formData.alias,
+                            comments: formData.comments,
+                            status: 'Started',
+                        });            
                     }
                 }else{
                     addNewRow();

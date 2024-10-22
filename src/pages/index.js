@@ -18,18 +18,36 @@ export default function Home() {
         message: '',
     });
 
-    const handleSubmit = (event) => {
+    const handleSubmit = async (event) => {
         event.preventDefault();
         setError('');
-        // Validación de usuario y redirección según rol
-        if (email === 'Niels' && password === '1234') {
-            router.push('/dashboard');
-        } else if (email === 'Daniel' && password === '1234') {
-            router.push('/dashboard_team_lead');
-        } else {
-            // Mostrar mensaje de error si el usuario o la contraseña son incorrectos
-            //setError('Usuario o contraseña incorrectos.');
-            showAlert('error', 'Login Error', 'Incorrect username or password.');
+        try {
+            const res = await fetch('/api/login', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ email, password }),
+            });
+    
+            const data = await res.json();
+    
+            if (data.success) {
+                console.log(data.role);
+                // Redirigir al usuario según su rol
+                if (data.role === 'admin') {
+                    router.push('/dashboard');
+                } else if (data.role === 'team_lead') {
+                    router.push('/dashboard_team_lead');
+                } else if (data.role === 1){
+                    router.push('/dashboard');
+                }
+            } else {
+                showAlert('error', 'Login Error', data.message);
+            }
+        } catch (error) {
+            console.error('Login error:', error);
+            showAlert('error', 'Login Error', 'There was a problem with the server.');
         }
     };
     //#region Code for alert messagess
