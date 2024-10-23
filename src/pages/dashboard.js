@@ -1,12 +1,13 @@
-import React, { useState, useEffect } from 'react'; // Asegúrate de incluir useEffect aquí
+import React, { useState, useEffect, useContext  } from 'react'; 
 import { Bar } from 'react-chartjs-2';
 import { Chart as ChartJS, Title, Tooltip, Legend, BarElement, CategoryScale, LinearScale } from 'chart.js';
-import { FaCog } from 'react-icons/fa'; // Importa el ícono de engranaje
+import { FaCog } from 'react-icons/fa'; 
 import styles from '../styles/dashboard.module.css';
 import Snackbar from '@mui/material/Snackbar';
 import Alert from '@mui/material/Alert';
 import AlertTitle from '@mui/material/AlertTitle';
 import { useRouter } from 'next/router';
+import { UserContext } from '../../context/UserContext';
 
 
 // Registrar componentes para el gráfico
@@ -24,6 +25,7 @@ export default function Dashboard() {
         /*********************************************************************************************/
         /***                                    state variables                                    ***/
         /*********************************************************************************************/
+            const { userEmail, userName, roleId, scheduleId } = useContext(UserContext);
             const [selectedOption, setSelectedOption] = useState('Today Work');
             const [formData, setFormData] = useState({
                 task: 'Production',
@@ -68,55 +70,96 @@ export default function Dashboard() {
         /***                                        Roll                                           ***/
         /*********************************************************************************************/
 
-        const roleFromDatabase = 'OTP'; // Aqui va a refrescar el roll desde la db
+        const [roleFromDatabase, setRoleFromDatabase] = useState(roleId);
         const [userRole, setUserRole] = useState(roleFromDatabase);
 
+        // Definición de las opciones de tareas basadas en el rol
         const taskOptionsByRole = {
-            OTP: ['Production', 'Call', 'Meeting', 'Other_Task', 'Idle_Time'],
+            1: ['Production', 'Call', 'Meeting', 'Other_Task', 'Idle_Time'],
             Clinical_Ops: ['Production', 'Call', 'Meeting', 'Other_Task', 'Idle_Time'], 
             Clinical_Exc: ['Production', 'Call', 'Meeting', 'Other_Task', 'Idle_Time'],
-            Ortho: ['Production', 'Support', 'Meeting', 'Other task', 'Idle_Time'], 
+            Ortho: ['Production', 'Support', 'Meeting', 'Other_Task', 'Idle_Time'], 
             QC_OTP: ['Production', 'Call', 'Meeting', 'Other_Task', 'Idle_Time'],  
             Detailer_Finisher: ['Production', 'Call', 'Meeting', 'Other_Task', 'Idle_Time'],  
             Clinical_Analyst: ['Production', 'Call', 'Meeting', 'Other_Task', 'Idle_Time'],  
             CAD: ['Production', 'Call', 'Meeting', 'Other_Task', 'Idle_Time'],  
-            QC_OTP: ['Production', 'Call', 'Meeting', 'Other_Task', 'Idle_Time'],  
- 
         };
 
         // Obtener las opciones de "Task" basadas en el rol actual del usuario
-        const availableTaskOptions = taskOptionsByRole[userRole] || [];
+        const availableTaskOptions = userRole ? taskOptionsByRole[userRole] || [] : [];
 
-        // Efecto para actualizar el rol cuando cambie la variable de rol simulada
-        const checkAndUpdateRole = () => {
-            const lastRowIndex = dataRows.length - 1;
-            const lastRow = dataRows[lastRowIndex];   
-            if (dataRows.length > 0) {
-                if (userRole !== roleFromDatabase && (lastRow.status === 'Stop' || lastRow.status === 'Finished')) {
-                    setUserRole(roleFromDatabase);
-                    updatetypevalue();
-                    showAlert('warning', 'Role Changed', "Please be advised that your Team Lead has changed your user role. You will now be working in the following role: " + roleFromDatabase);
-                }
-            } else {
-                setUserRole(roleFromDatabase);
-                updatetypevalue();
-            }
-        };
-        // Efecto para actualizar el rol cuando cambie el role
-        useEffect(() => {
-            checkAndUpdateRole();
-        }, [dataRows]);
-
+        // Función para actualizar los valores del tipo
         const updatetypevalue = () => {
             const typeOptions = roll_available_Type_Options(roleFromDatabase);
             setFormData({
                 task: 'Production',
-                type: typeOptions[0].value,
+                type: typeOptions[0]?.value || '', // Asegúrate de manejar el caso donde no hay opciones
                 alias: '',
                 comments: '',
                 status: 'Started',
             });
-        }
+        };
+
+        // Role Consult
+        const role_consult = async () => {
+            if (userEmail) {
+                try {
+                    const res = await fetch('/api/role', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({ email: userEmail }),
+                    });
+
+                    const data = await res.json();
+
+                    if (data.success) {
+                        return data.role; 
+                    } else {
+                        console.error('Failed to fetch role:', data.message);
+                        return null; 
+                    }
+                } catch (error) {
+                    console.error('Error fetching role:', error);
+                    return null; 
+                }
+            }
+            return null; // Retorna null si no hay userEmail
+        };
+
+        // Efecto para obtener el rol y actualizar el estado `userRole` cuando se obtiene
+        useEffect(() => {
+            const fetchRole = async () => {
+                const role = await role_consult(); // Consultar el rol
+                setRoleFromDatabase(role); // Actualiza el estado userRole
+            };
+
+            fetchRole();
+        }, [userEmail, dataRows]); // Dependencias relevantes para actualizar el rol
+
+        // Definir checkAndUpdateRole aquí para que esté en el mismo ámbito que handleFormSubmit
+        const checkAndUpdateRole = () => {
+            const lastRowIndex = dataRows.length - 1;
+            const lastRow = dataRows[lastRowIndex];   
+            alert("userRole: " + userRole + " - " + "roleFromDatabase: " + roleFromDatabase);
+            if (dataRows.length > 0) {
+                if (userRole !== roleFromDatabase && (lastRow.status === 'Stop' || lastRow.status === 'Finished')) {
+                    alert("entreeeeee: " + roleFromDatabase);
+                    setUserRole(roleFromDatabase);
+                    updatetypevalue(); // Aquí se llama a la función correctamente
+                    showAlert('warning', 'Role Changed', "Please be advised that your Team Lead has changed your user role. You will now be working in the following role: " + roleFromDatabase);
+                }
+            } else {
+                setUserRole(roleFromDatabase);
+                updatetypevalue(); // Aquí se llama a la función correctamente
+            }
+        };
+
+        // Efecto para reaccionar a los cambios en roleFromDatabase o userRole
+        useEffect(() => {
+            checkAndUpdateRole();
+        }, [dataRows, roleFromDatabase]); // Reacciona a cambios en roleFromDatabase y dataRows
 
     //#endregion
 
@@ -569,7 +612,7 @@ export default function Dashboard() {
 
             function roll_available_Type_Options(roleFromDatabase){
                 switch (roleFromDatabase) {
-                    case "OTP":
+                    case 1:
                         return typeOptions_OTP[formData.task];  
                     case "Clinical_Ops":
                         return typeOptions_Clinical_Ops[formData.task];  
@@ -622,9 +665,7 @@ export default function Dashboard() {
                         status: 'Finished',
                     });
                 };  
-                const addNewRow2 = () => {
-
-                }; 
+                
                 const currentTime = getCurrentDateTime(); // Obtener la hora actual
                 if (dataRows.length > 0) { // Verificar si hay filas de datos
                     const lastRowIndex = dataRows.length - 1; // Índice de la última fila
@@ -652,7 +693,7 @@ export default function Dashboard() {
                             const updatedDataRows = [...dataRows];
                             updatedDataRows[lastRowIndex] = updatedRow; // Usar el índice para actualizar la fila
                             setDataRows(updatedDataRows);
-                            showAlert('success', 'Task', 'Your last task was updated successfully.');
+                            //showAlert('success', 'Task', 'Your last task was updated successfully.');
                             // Limpiar el formulario después de agregar el registro
                             checkAndUpdateRole();
                         }else{

@@ -1,4 +1,3 @@
-// pages/api/login.js
 import db from '../../lib/db';
 
 export default async function handler(req, res) {
@@ -11,10 +10,8 @@ export default async function handler(req, res) {
     try {
         const [rows] = await db.query('SELECT user_name, email, role_id, schedule_id FROM users WHERE email = ? AND user_password = ?', [email, password]);
         if (rows.length > 0) {
-            // Usuario encontrado
             res.status(200).json({ success: true, user_name: rows[0].user_name, email: rows[0].email, role: rows[0].role_id, schedule_id: rows[0].schedule_id });
         } else {
-            // Usuario no encontrado
             res.status(401).json({ success: false, message: 'Incorrect username or password' });
         }
     } catch (error) {
