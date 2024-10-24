@@ -5,11 +5,8 @@ import styles from "../styles/index.module.css";
 import Snackbar from '@mui/material/Snackbar';
 import Alert from '@mui/material/Alert';
 import AlertTitle from '@mui/material/AlertTitle';
-import { UserContext } from '../../context/UserContext';  // Asegúrate de que la ruta es correcta
-
 
 export default function Home() {
-    const { setUserEmail, setUserName, setRoleId, setScheduleId } = useContext(UserContext);
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
@@ -36,10 +33,10 @@ export default function Home() {
             const data = await res.json();
     
             if (data.success) {
-                setUserEmail(data.email);        
-                setUserName(data.user_name);    
-                setRoleId(data.role);             
-                setScheduleId(data.schedule_id);   
+                localStorage.setItem('userEmail', data.email);
+                localStorage.setItem('roleId', data.role);
+                localStorage.setItem('user_name', data.user_name);
+                localStorage.setItem('schedule_id', data.schedule_id); 
                 // Redirigir al usuario según su rol
                 if (data.role === 'admin') {
                     router.push('/dashboard');
