@@ -25,11 +25,11 @@ export default function Dashboard() {
         /*********************************************************************************************/
             const [selectedOption, setSelectedOption] = useState('Today Work');
             const [formData, setFormData] = useState({
-                task: 'Production',
+                task: '',
                 type: '',
                 alias: '',
                 comments: '',
-                status: 'Started',
+                status: 'Start',
             });
             const [dataRows, setDataRows] = useState([]);
             const [showPasswordChangeForm, setShowPasswordChangeForm] = useState(false);
@@ -64,7 +64,6 @@ export default function Dashboard() {
             const handleTaskChange = async (e) => {
                 const selectedTaskId = e.target.value; // Obtener el ID de la tarea seleccionada
                 setFormData(prevData => ({ ...prevData, task: selectedTaskId }));    
-
                 try {
                     const res = await fetch('/api/task_type', {
                         method: 'POST',
@@ -94,25 +93,27 @@ export default function Dashboard() {
         /*********************************************************************************************/
         const [userEmail, setUserEmail] = useState(null);
         const [userRole, setUserRole] = useState(null);
+        const [userId, setUserId] = useState(null);
         const [taskOptionsByRole, setTaskOptionsByRole] = useState([]);
         // Verificar si estamos en el entorno del cliente
         useEffect(() => {
             if (typeof window !== 'undefined') {
                 const emailFromStorage = localStorage.getItem('userEmail');
                 const roleFromStorage = localStorage.getItem('roleId');
+                const user_id_FromStorage = localStorage.getItem('user_id');
                 setUserEmail(emailFromStorage);
                 setUserRole(roleFromStorage);
+                setUserId(user_id_FromStorage);
             }
         }, []);
-
         // Función para actualizar los valores del tipo
         const updatetypevalue = () => {
             setFormData({
-                task: 'Production',
+                task: '',
                 type:  '', // Asegúrate de manejar el caso donde no hay opciones
                 alias: '',
                 comments: '',
-                status: 'Started',
+                status: 'Start',
             });
         };
 
@@ -137,7 +138,7 @@ export default function Dashboard() {
                             const lastRowIndex = dataRows.length - 1;
                             const lastRow = dataRows[lastRowIndex];
                             if (dataRows.length > 0) {
-                                if (userRole !== role && (lastRow.status === 'Stop' || lastRow.status === 'Finished')) {
+                                if (userRole !== role && (lastRow.status === 'Stop' || lastRow.status === 'Finish')) {
                                     setUserRole(role);
                                     updatetypevalue();
                                     showAlert('warning', 'Role Changed', "Please be advised that your Team Lead has changed your user role. You will now be working in the following role: " + role);
@@ -157,14 +158,6 @@ export default function Dashboard() {
         
             fetchAndUpdateRole();
         }, [dataRows, userRole]);
-        
-        useEffect(() => {
-            // Si `type` está vacío y hay opciones disponibles, selecciona la primera
-            if (!formData.type && AvailableTypeOptions.length > 0) {
-                setFormData(prevData => ({ ...prevData, type: AvailableTypeOptions[0].id }));
-            }
-        }, [AvailableTypeOptions]);
-        
 
     //#endregion
     
@@ -173,80 +166,49 @@ export default function Dashboard() {
         /*********************************************************************************************/
         /***               All The Validations needed for FormSubmit Baase on Rolls                ***/
         /*********************************************************************************************/
-            const handleFormSubmit = (e) => {
-                e.preventDefault();
-                if (!formData.task && !formData.type) { 
-                    showAlert('error', 'Error','Please select both Task and Type.');
-                    return;
-                }
-                if (formData.type === 'Other' && !formData.comments) {
-                    showAlert('error', 'Error','Please fill in the comments when selecting "Other".');
-                    return;
-                }             
-                if (formData.task === "Production" && formData.alias.length !== 5) { 
-                    showAlert('error', 'Error', 'Please, the alias must be 5 characters long.');
-                    return;
-                }  
-                const addNewRow = () => {
-                    setDataRows(prev => [...prev, {...formData, start_time: currentTime, end_time: "00:00:00", total_time: "00:00:00", roll: userRole}]);
-                    setFormData({
-                        task: formData.task,
-                        type: formData.type,
-                        alias: formData.alias,
-                        comments: formData.comments,
-                        status: 'Finished',
-                    });
-                };  
-                
-                const currentTime = getCurrentDateTime(); // Obtener la hora actual
-                if (dataRows.length > 0) { // Verificar si hay filas de datos
-                    const lastRowIndex = dataRows.length - 1; // Índice de la última fila
-                    const lastRow = dataRows[lastRowIndex]; 
-                    if (lastRow.status === 'Started') { 
-                        if (lastRow.alias !== formData.alias) {
-                            showAlert('error', 'Error','You must complete the previous task before adding a new one.');
-                            return;
-                        } else if (lastRow.task === formData.task && lastRow.type === formData.type && lastRow.alias === formData.alias && (formData.status === 'Stop' || formData.status === 'Finished')) {
-                            // Mantener el start time original
-                            const startTime = new Date(lastRow.start_time); // start_time debe tener fecha y hora en formato "YYYY-MM-DD HH:MM:SS"
-                            const endTime = new Date(); 
-                            const timeDifference = endTime - startTime; 
-                            const elapsedMinutes = Math.floor(timeDifference / 60000); // Convertir a minutos
-                            // Actualizar la fila con el nuevo status y end time
-                            const updatedRow = {
-                                ...lastRow,
-                                comments: formData.comments,
-                                status: formData.status,
-                                end_time: currentTime,
-                                total_time: `${elapsedMinutes} min`, 
-                                roll:userRole,
-                            };
-                            // Actualizar el estado de las filas de datos
-                            const updatedDataRows = [...dataRows];
-                            updatedDataRows[lastRowIndex] = updatedRow; // Usar el índice para actualizar la fila
-                            setDataRows(updatedDataRows);
-                            //showAlert('success', 'Task', 'Your last task was updated successfully.');
-                            // Limpiar el formulario después de agregar el registro
-                            resetForm();
-                        }else{
-                            showAlert('error', 'Error','You must complete the previous task before adding a new one.'); 
-                        }
-                    }else{
-                        const lastRowIndex = dataRows.length - 1; // Índice de la última fila
-                        const lastRow = dataRows[lastRowIndex]; 
-                        setDataRows(prev => [...prev, {...formData, start_time:lastRow.end_time , end_time: "00:00:00", total_time: "00:00:00", roll: userRole}]);
-                        setFormData({
-                            task: formData.task,
-                            type: formData.type,
-                            alias: formData.alias,
-                            comments: formData.comments,
-                            status: 'Finished',
-                        });            
+        const handleFormSubmit = async (e) => { 
+            e.preventDefault();
+        
+            if (!formData.task && !formData.type) { 
+                showAlert('error', 'Error', 'Please select both Task and Type.');
+                return;
+            }
+        
+            if (formData.type === 'Other' && !formData.comments) {
+                showAlert('error', 'Error', 'Please fill in the comments when selecting "Other".');
+                return;
+            }             
+        
+            if (formData.task === "Production" && formData.alias.length !== 5) { 
+                showAlert('error', 'Error', 'Please, the alias must be 5 characters long.');
+                return;
+            }  
+    
+            if (dataRows.length > 0) {
+                const lastRowIndex = dataRows.length - 1; 
+                const lastRow = dataRows[lastRowIndex]; 
+                const lastStatus = localStorage.getItem('lastStatus');
+                if (lastStatus === 'Start') {
+                    alert(lastRow.alias + " / " + formData.alias);
+                    if (lastRow.alias !== formData.alias) {
+                        showAlert('error', 'Error', 'You must complete the previous task before adding a new one.');
+                        await updateRow(localStorage.getItem('lastInsertedId')); 
+                        return;
+                    } else if (lastRow.task === formData.task && lastRow.type === formData.type && lastRow.alias === formData.alias && (formData.status === 'Stop' || formData.status === 'Finish')) {
+                        // Llama a la función para actualizar la fila
+                        await updateRow(localStorage.getItem('lastInsertedId')); 
+                    } else {
+                        showAlert('error', 'Error', 'You must complete the previous task before adding a new one.'); 
+                        await updateRow(localStorage.getItem('lastInsertedId')); 
                     }
-                }else{
-                    addNewRow();
-                };
-            };
+                } else {
+                    addNewRow();         
+                }
+            } else {
+                addNewRow();
+            }
+        };
+        
             function getCurrentDateTime() {
                 const currentDate = new Date();
                 const year = currentDate.getFullYear();
@@ -259,33 +221,169 @@ export default function Dashboard() {
             }
             const getStatusOptions = () => {// Función para obtener las opciones dinámicas de estado
                 if (dataRows.length > 0) {
-                    const lastStatus = dataRows[dataRows.length - 1].status;
-                    if (lastStatus === 'Started') {
-                        return ['Finished', 'Stop'];
-                    } else if (lastStatus === 'Stop' || lastStatus === 'Finished') {
-                        return ['Started'];
+                    const lastStatus = localStorage.getItem('lastStatus');
+                    alert("ultima fila: " + lastStatus);
+                    if (lastStatus === 'Start') {
+                        return ['Finish', 'Stop'];
+                    } else if (lastStatus === 'Stop' || lastStatus === 'Finish') {
+                        return ['Start'];
                     }
                 }
-                return ['Started'];
+                return ['Start'];
             };
             const availableStatusOptions = getStatusOptions();
-
-            const resetForm = () => {
-                setFormData({
-                    task: 'Production',
-                    type: '',
-                    alias: '',
-                    comments: '',
-                    status: 'Started',
-                });
-            };
             useEffect(() => {
                 // Si `status` está vacío y hay opciones de estado disponibles, selecciona la primera
                 if (!formData.status && availableStatusOptions.length > 0) {
                     setFormData(prevData => ({ ...prevData, status: availableStatusOptions[0] }));
                 }
             }, [availableStatusOptions]);
+
+            const resetForm = () => {
+                setFormData({
+                    task: '1',
+                    type: '',
+                    alias: '',
+                    comments: '',
+                    status: 'Start',
+                });
+            };
+
+            useEffect(() => {
+                // Si `task` está vacío y hay opciones disponibles, selecciona la primera
+                if (!formData.task && taskOptionsByRole.length > 0) {
+                    setFormData(prevData => ({ ...prevData, task: taskOptionsByRole[0].id }));
+                }
+            }, [taskOptionsByRole]);
+    
+            useEffect(() => {
+                // Si `type` está vacío y hay opciones disponibles, selecciona la primera
+                if (!formData.type && AvailableTypeOptions.length > 0) {
+                    setFormData(prevData => ({ ...prevData, type: AvailableTypeOptions[0].id }));
+                }
+            }, [AvailableTypeOptions]);
+
+
+
+            const fetchDailyReports = async () => {
+                const today = new Date().toISOString().slice(0, 10); // Obtiene la fecha actual en formato YYYY-MM-DD
+                try {
+                    const res = await fetch('/api/production_daily_report', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({ user_id: userId, row_date: today }),
+                    });  
+                    const result = await res.json();    
+                    if (result.success) {
+
+                        return result.reports; 
+                    } else {
+                        throw new Error(result.message || "Error al obtener los registros.");
+                    }
+                } catch (error) {
+                    console.error("Error fetching daily reports:", error);
+                    alert("Error al obtener los registros.");
+                    return []; // Devuelve un arreglo vacío en caso de error
+                }
+            };
+
+            const addNewRow = async () => {
+                const currentTime = getCurrentDateTime(); // Obtener la hora actual
+                try {
+                    const newRowData = {
+                        user_id: userId,
+                        row_date: new Date().toISOString().slice(0, 19).replace('T', ' '), // Formato YYYY-MM-DD HH:mm:ss
+                        task_id: formData.task,
+                        type_id: formData.type,
+                        alias: formData.alias,
+                        commment: formData.comments,
+                        row_status: formData.status,
+                        start_time: currentTime,
+                        total_time: 0, 
+                        role_id: userRole,
+                    };
+                    
+                    // Envía la solicitud POST a la API
+                    const response = await fetch('/api/register_rows', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify(newRowData),
+                    });
             
+                    const result = await response.json();
+            
+                    if (result.success) {
+                        // Almacena el ID en localStorage
+                        localStorage.setItem('lastInsertedId', result.insertId);
+                        localStorage.setItem('lastStatus', "Start");
+                        // Llama a la función para cargar los registros después de la inserción
+                        const reports = await fetchDailyReports(); // Llama a tu función para obtener los datos
+                        setDataRows(reports); // Actualiza el estado con los nuevos registros
+                        
+                        // Limpia el formulario
+                        setFormData({
+                            task: formData.task,
+                            type: formData.type,
+                            alias: formData.alias,
+                            comments: formData.comments,
+                            status: 'Finish',
+                        });
+                    } else {
+                        alert(result.message || "Error al añadir el registro.");
+                    }
+                } catch (error) {
+                    console.error(error);
+                    alert("Error en la conexión.");
+                }
+            };
+
+            const updateRow = async (rowId) => {
+                try {
+                    alert("row id: " + rowId);
+                    const currentTime = getCurrentDateTime(); // Obtener la hora actual
+                    const endTime = new Date(); // Obtiene el tiempo actual
+                    const startTime = new Date(currentTime); // Asegúrate de que currentTime sea el valor correcto de la fila a modificar
+                    const timeDifference = endTime - startTime;
+                    const elapsedMinutes = Math.floor(timeDifference / 60000); // Convertir a minutos
+            
+                    const updatedRowData = {
+                        comments: formData.comments,
+                        status: formData.status,
+                        end_time: endTime.toISOString().slice(0, 19).replace('T', ' '), // Formato 'YYYY-MM-DD HH:MM:SS'
+                        total_time: elapsedMinutes, 
+                        roll: userRole,
+                    };
+            
+                    // Envía la solicitud POST a la API para actualizar la fila
+                    const response = await fetch('/api/update_rows', { // No necesitas incluir rowId en la URL
+                        method: 'PUT',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({ rowId, ...updatedRowData }), // Incluye rowId dentro del body
+                    });                    
+            
+                    const result = await response.json();
+            
+                    if (result.success) {
+                        localStorage.setItem('lastStatus',formData.status);
+
+                        showAlert('success', 'Task', 'Your task was updated successfully.');
+                        resetForm(); // Limpiar el formulario después de actualizar
+                    } else {
+                        alert(result.message || "Error al actualizar el registro.");
+                    }
+                } catch (error) {
+                    console.error(error);
+                    alert("Error en la conexión.");
+                }
+            };
+            
+                       
     //#endregion
 
     //#region for Password changes
@@ -336,7 +434,7 @@ export default function Dashboard() {
             row.task === 'Production' && 
             row.type === 'New case' && 
             row.alias.trim() !== '' &&
-            row.status === "Finished"
+            row.status === "Finish"
         ).length;   
         const chartData = {
             labels: ['Cases Completed'],
@@ -524,7 +622,7 @@ export default function Dashboard() {
                                     <label>Task:</label>
                                     <select name="task" value={formData.task} onChange={handleTaskChange}>
                                         {taskOptionsByRole.map(task => (
-                                            <option key={task.id} value={task.id}>
+                                            <option key={task.id} value={String(task.id)}>
                                                 {task.task_name}
                                             </option>
                                         ))}
@@ -532,20 +630,20 @@ export default function Dashboard() {
                                 </div>
                                 <div>
                                     <label>Type:</label>
-                                    <select name="type" value={formData.type} onChange={handleFormChange} disabled={!formData.task}>
+                                    <select name="type" value={formData.type} onChange={handleFormChange}>
                                         {AvailableTypeOptions.map(type => (
-                                            <option key={type.id} value={type.id}>
+                                            <option key={type.id} value={String(type.id)}>
                                                 {type.type_value}
                                             </option>
                                         ))}
                                     </select>
                                 </div>
                                 <div>
-                                    {/* Mostrar alias solo si task es "Production" */}
-                                    {formData.task === 'Production' && (
+                                    {String(formData.task) === "1" && (
                                         <>
                                             <label htmlFor="alias" className={styles.label}>Alias:</label>
-                                            <input type="text" name="alias" id="alias" value={formData.alias} onChange={handleFormChange} className={styles.input} />
+                                            <input type="text" name="alias" id="alias" value={formData.alias} onChange={handleFormChange} className={styles.input} 
+                                            />
                                         </>
                                     )}
                                 </div>
@@ -664,15 +762,15 @@ export default function Dashboard() {
                             <tbody>
                                 {dataRows.map((row, index) => (
                                     <tr key={index}>
-                                        <td>{row.task}</td>
-                                        <td>{row.type}</td>
+                                        <td>{row.task_id}</td>
+                                        <td>{row.type_id}</td>
                                         <td>{row.alias}</td>
                                         <td>{row.comments}</td>
-                                        <td>{row.status}</td>
+                                        <td>{row.row_status}</td>
                                         <td>{row.start_time}</td> 
                                         <td>{row.end_time}</td> 
                                         <td>{row.total_time}</td> 
-                                        <td>{row.roll}</td>
+                                        <td>{row.role_id}</td>
                                     </tr>
                                 ))}
                             </tbody>

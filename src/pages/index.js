@@ -37,7 +37,7 @@ export default function Home() {
                 localStorage.setItem('roleId', data.role);
                 localStorage.setItem('user_name', data.user_name);
                 localStorage.setItem('schedule_id', data.schedule_id); 
-                // Redirigir al usuario según su rol
+                localStorage.setItem('user_id', data.user_id);
                 if (data.role === 'admin') {
                     router.push('/dashboard');
                 } else if (data.role === 'team_lead') {
