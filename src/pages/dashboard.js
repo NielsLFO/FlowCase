@@ -31,7 +31,7 @@ export default function Dashboard() {
                 comments: '',
                 status: 'Start',
             });
-            const [dataRows, setDataRows] = useState([]);
+            const [dataRows, setDataRows] = useState();
             const [showPasswordChangeForm, setShowPasswordChangeForm] = useState(false);
             const [passwordChangeData, setPasswordChangeData] = useState({
                 oldPassword: '',
@@ -45,6 +45,13 @@ export default function Dashboard() {
                 title: 'Error',
                 message: '',
             });
+            const [lastStatus, setlastStatus] = useState(null);
+            const [lastAlias, setlastAlias] = useState(null);
+            const [lastTask, setlastTask] = useState(null);
+            const [lastType, setlastType] = useState(null);
+            const [lastID, setlastID] = useState(null);
+            const [lastStarTime, setlastStarTime] = useState(null);
+            
             
     //#endregion
 
@@ -122,7 +129,7 @@ export default function Dashboard() {
                 if (userEmail) {
                     try {
                         // Hacer una sola solicitud para obtener el rol y las tareas asociadas
-                        const res = await fetch('/api/role', {
+                        const res = await fetch('/api/Production/role', {
                             method: 'POST',
                             headers: {
                                 'Content-Type': 'application/json',
@@ -135,15 +142,11 @@ export default function Dashboard() {
                             setTaskOptionsByRole(data.tasks);
                             setAvailableTypeOptions(data.types);
                             // Verificar si el rol cambió
-                            const lastRowIndex = dataRows.length - 1;
-                            const lastRow = dataRows[lastRowIndex];
-                            if (dataRows.length > 0) {
-                                if (userRole !== role && (lastRow.status === 'Stop' || lastRow.status === 'Finish')) {
-                                    setUserRole(role);
-                                    updatetypevalue();
-                                    showAlert('warning', 'Role Changed', "Please be advised that your Team Lead has changed your user role. You will now be working in the following role: " + role);
-                                }
-                            } else {
+                            if (userRole !== role && (lastStatus === 'Stop' || lastStatus === 'Finish')) {
+                                setUserRole(role);
+                                updatetypevalue();
+                                showAlert('warning', 'Role Changed', "Please be advised that your Team Lead has changed your user role. You will now be working in the following role: " + role);
+                            }else {
                                 setUserRole(role);
                                 updatetypevalue();
                             }
@@ -157,14 +160,14 @@ export default function Dashboard() {
             };
         
             fetchAndUpdateRole();
-        }, [dataRows, userRole]);
+        }, [userRole]);
 
     //#endregion
     
     //#region FormSubmit code 
 
         /*********************************************************************************************/
-        /***               All The Validations needed for FormSubmit Baase on Rolls                ***/
+        /***               All The Validations needed for FormSubmit Base on Rolls                 ***/
         /*********************************************************************************************/
         const handleFormSubmit = async (e) => { 
             e.preventDefault();
@@ -184,28 +187,20 @@ export default function Dashboard() {
                 return;
             }  
     
-            if (dataRows.length > 0) {
-                const lastRowIndex = dataRows.length - 1; 
-                const lastRow = dataRows[lastRowIndex]; 
-                const lastStatus = localStorage.getItem('lastStatus');
-                if (lastStatus === 'Start') {
-                    alert(lastRow.alias + " / " + formData.alias);
-                    if (lastRow.alias !== formData.alias) {
-                        showAlert('error', 'Error', 'You must complete the previous task before adding a new one.');
-                        await updateRow(localStorage.getItem('lastInsertedId')); 
-                        return;
-                    } else if (lastRow.task === formData.task && lastRow.type === formData.type && lastRow.alias === formData.alias && (formData.status === 'Stop' || formData.status === 'Finish')) {
-                        // Llama a la función para actualizar la fila
-                        await updateRow(localStorage.getItem('lastInsertedId')); 
-                    } else {
-                        showAlert('error', 'Error', 'You must complete the previous task before adding a new one.'); 
-                        await updateRow(localStorage.getItem('lastInsertedId')); 
-                    }
+
+            if (lastStatus === 'Start') {
+                alert(lastAlias + " / " + formData.alias);
+                if (lastAlias !== formData.alias) {
+                    showAlert('error', 'Error', 'You must complete the previous task before adding a new one.');
+                    return;
+                } else if (lastTask == formData.task && lastType == formData.type && lastAlias == formData.alias) {
+                    // Llama a la función para actualizar la fila
+                   await updateRow(lastID); 
                 } else {
-                    addNewRow();         
+                    showAlert('error', 'Error', 'You must complete the previous task before adding a new one.'); 
                 }
             } else {
-                addNewRow();
+                addNewRow();         
             }
         };
         
@@ -220,14 +215,10 @@ export default function Dashboard() {
                 return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
             }
             const getStatusOptions = () => {// Función para obtener las opciones dinámicas de estado
-                if (dataRows.length > 0) {
-                    const lastStatus = localStorage.getItem('lastStatus');
-                    alert("ultima fila: " + lastStatus);
-                    if (lastStatus === 'Start') {
-                        return ['Finish', 'Stop'];
-                    } else if (lastStatus === 'Stop' || lastStatus === 'Finish') {
-                        return ['Start'];
-                    }
+                if (lastStatus === 'Start') {
+                    return ['Finish', 'Stop'];
+                } else if (lastStatus === 'Stop' || lastStatus === 'Finish') {
+                    return ['Start'];
                 }
                 return ['Start'];
             };
@@ -237,7 +228,7 @@ export default function Dashboard() {
                 if (!formData.status && availableStatusOptions.length > 0) {
                     setFormData(prevData => ({ ...prevData, status: availableStatusOptions[0] }));
                 }
-            }, [availableStatusOptions]);
+            }, [availableStatusOptions,formData]);
 
             const resetForm = () => {
                 setFormData({
@@ -262,128 +253,146 @@ export default function Dashboard() {
                     setFormData(prevData => ({ ...prevData, type: AvailableTypeOptions[0].id }));
                 }
             }, [AvailableTypeOptions]);
+                
+    //#endregion
 
+    //#region FormSubmit Functions
 
+        /*********************************************************************************************/
+        /***           Functions for new insert row, update row, consult row and report            ***/
+        /*********************************************************************************************/
 
-            const fetchDailyReports = async () => {
-                const today = new Date().toISOString().slice(0, 10); // Obtiene la fecha actual en formato YYYY-MM-DD
-                try {
-                    const res = await fetch('/api/production_daily_report', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
-                        body: JSON.stringify({ user_id: userId, row_date: today }),
-                    });  
-                    const result = await res.json();    
-                    if (result.success) {
-
-                        return result.reports; 
-                    } else {
-                        throw new Error(result.message || "Error al obtener los registros.");
-                    }
-                } catch (error) {
-                    console.error("Error fetching daily reports:", error);
-                    alert("Error al obtener los registros.");
-                    return []; // Devuelve un arreglo vacío en caso de error
-                }
-            };
-
-            const addNewRow = async () => {
-                const currentTime = getCurrentDateTime(); // Obtener la hora actual
-                try {
-                    const newRowData = {
-                        user_id: userId,
-                        row_date: new Date().toISOString().slice(0, 19).replace('T', ' '), // Formato YYYY-MM-DD HH:mm:ss
-                        task_id: formData.task,
-                        type_id: formData.type,
+        const addNewRow = async () => {
+            const currentTime = getCurrentDateTime(); // Obtener la hora actual
+            const date_row = new Date().toISOString().slice(0, 10).replace('T', ' '); // Formato YYYY-MM-DD
+            try {
+                const newRowData = {
+                    user_id: userId,
+                    row_date: date_row, 
+                    task_id: formData.task,
+                    type_id: formData.type,
+                    alias: formData.alias,
+                    commment: formData.comments,
+                    row_status: formData.status,
+                    start_time: currentTime,
+                    total_time: 0, 
+                    role_id: userRole,
+                };
+                
+                // Envía la solicitud POST a la API
+                const response = await fetch('/api/Production/register_rows', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(newRowData),
+                });
+        
+                const result = await response.json();
+        
+                if (result.success) {
+                    // Almacena el ID en localStorage
+                    localStorage.setItem('lastStatus', "Start");
+                    fetchDailyReports(); //Refresh the table
+                    // Mantiene el formulario
+                    setFormData({
+                        task: formData.task,
+                        type: formData.type,
                         alias: formData.alias,
-                        commment: formData.comments,
-                        row_status: formData.status,
-                        start_time: currentTime,
-                        total_time: 0, 
-                        role_id: userRole,
-                    };
-                    
-                    // Envía la solicitud POST a la API
-                    const response = await fetch('/api/register_rows', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
-                        body: JSON.stringify(newRowData),
-                    });
-            
-                    const result = await response.json();
-            
-                    if (result.success) {
-                        // Almacena el ID en localStorage
-                        localStorage.setItem('lastInsertedId', result.insertId);
-                        localStorage.setItem('lastStatus', "Start");
-                        // Llama a la función para cargar los registros después de la inserción
-                        const reports = await fetchDailyReports(); // Llama a tu función para obtener los datos
-                        setDataRows(reports); // Actualiza el estado con los nuevos registros
-                        
-                        // Limpia el formulario
-                        setFormData({
-                            task: formData.task,
-                            type: formData.type,
-                            alias: formData.alias,
-                            comments: formData.comments,
-                            status: 'Finish',
-                        });
-                    } else {
-                        alert(result.message || "Error al añadir el registro.");
-                    }
-                } catch (error) {
-                    console.error(error);
-                    alert("Error en la conexión.");
-                }
-            };
-
-            const updateRow = async (rowId) => {
-                try {
-                    alert("row id: " + rowId);
-                    const currentTime = getCurrentDateTime(); // Obtener la hora actual
-                    const endTime = new Date(); // Obtiene el tiempo actual
-                    const startTime = new Date(currentTime); // Asegúrate de que currentTime sea el valor correcto de la fila a modificar
-                    const timeDifference = endTime - startTime;
-                    const elapsedMinutes = Math.floor(timeDifference / 60000); // Convertir a minutos
-            
-                    const updatedRowData = {
                         comments: formData.comments,
-                        status: formData.status,
-                        end_time: endTime.toISOString().slice(0, 19).replace('T', ' '), // Formato 'YYYY-MM-DD HH:MM:SS'
-                        total_time: elapsedMinutes, 
-                        roll: userRole,
-                    };
-            
-                    // Envía la solicitud POST a la API para actualizar la fila
-                    const response = await fetch('/api/update_rows', { // No necesitas incluir rowId en la URL
-                        method: 'PUT',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
-                        body: JSON.stringify({ rowId, ...updatedRowData }), // Incluye rowId dentro del body
-                    });                    
-            
-                    const result = await response.json();
-            
-                    if (result.success) {
-                        localStorage.setItem('lastStatus',formData.status);
-
-                        showAlert('success', 'Task', 'Your task was updated successfully.');
-                        resetForm(); // Limpiar el formulario después de actualizar
-                    } else {
-                        alert(result.message || "Error al actualizar el registro.");
-                    }
-                } catch (error) {
-                    console.error(error);
-                    alert("Error en la conexión.");
+                        status: 'Finish',
+                    });
+                } else {
+                    alert(result.message || "Error al añadir el registro.");
                 }
-            };
-            
-                       
+            } catch (error) {
+                console.error(error);
+                alert("Error en la conexión aaaa");
+            }
+        };
+
+        const updateRow = async (rowId) => {
+            try {
+                const currentTime = getCurrentDateTime(); // Obtener la hora actual
+                const startTime = new Date(lastStarTime); // Asegúrate de que lastStarTime sea una cadena válida
+                const endTime = new Date(); 
+                const timeDifference = endTime - startTime; // Esto te dará la diferencia en milisegundos
+                const elapsedMinutes = Math.floor(timeDifference / (1000 * 60)); // Convertir milisegundos a minutos
+                alert(`Start Time: ${startTime} / End Time: ${endTime} / Time Difference (ms): ${timeDifference} / Elapsed Minutes: ${elapsedMinutes}`);
+
+                // Crear el objeto de datos actualizado
+                const updatedRowData = {
+                    comments: formData.comments,
+                    status: formData.status,
+                    end_time: currentTime, // Convierte a ISO 8601 para almacenamiento
+                    total_time: elapsedMinutes, 
+                    role: userRole,
+                };
+
+                // Envía la solicitud POST a la API para actualizar la fila
+                const response = await fetch('/api/Production/update_rows', { // No necesitas incluir rowId en la URL
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ rowId, ...updatedRowData }), // Incluye rowId dentro del body
+                });                    
+        
+                const result = await response.json();
+        
+                if (result.success) {
+                    alert(formData.status);
+                    setlastStatus(formData.status);
+                    showAlert('success', 'Task', 'Your task was updated successfully.');
+                    fetchDailyReports();
+                    resetForm(); // Limpiar el formulario después de actualizar
+                } else {
+                    alert(result.message || "Error al actualizar el registro.");
+                }
+            } catch (error) {
+                console.error(error);
+                alert("Error en la conexión.");
+            }
+        };
+
+        const fetchDailyReports = async () => {
+            const currentDate = new Date().toISOString().slice(0, 10).replace('T', ' '); // Formato YYYY-MM-DD HH:mm:ss
+            const user_id = localStorage.getItem('user_id');
+            alert(currentDate + " / " + user_id);
+            try {
+                const response = await fetch('/api/Production/production_daily_report', { 
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ user_id, currentDate }),
+                });                    
+        
+                const result = await response.json();
+        
+                if (result.success) {
+                    const data = result.reports;
+                    setDataRows(data); 
+                    if(data.length > 0){
+                        setlastStatus(data[data.length - 1].row_status);
+                        setlastAlias(data[data.length - 1].alias);
+                        setlastTask(data[data.length - 1].task_id);
+                        setlastType(data[data.length - 1].type_id);
+                        setlastID(data[data.length - 1].id);
+                        setlastStarTime(data[data.length - 1].start_time);
+                    }
+                } else {
+                    alert(result.message || "Error al actualizar la tabla.");
+                }
+            } catch (error) {
+                console.error(error);
+                alert("Error en la conexión.");
+            }
+        };
+        useEffect(() => {
+            fetchDailyReports(); 
+        }, []);
+
     //#endregion
 
     //#region for Password changes
@@ -430,12 +439,12 @@ export default function Dashboard() {
         /***                                    Grafic Code                                        ***/
         /*********************************************************************************************/
         const targetCases = 6;
-        const completedCases = dataRows.filter(row => 
+        const completedCases = Array.isArray(dataRows) ? dataRows.filter(row => 
             row.task === 'Production' && 
             row.type === 'New case' && 
             row.alias.trim() !== '' &&
             row.status === "Finish"
-        ).length;   
+        ).length : 0;   
         const chartData = {
             labels: ['Cases Completed'],
             datasets: [
@@ -760,19 +769,25 @@ export default function Dashboard() {
                                 </tr>
                             </thead>
                             <tbody>
-                                {dataRows.map((row, index) => (
-                                    <tr key={index}>
-                                        <td>{row.task_id}</td>
-                                        <td>{row.type_id}</td>
-                                        <td>{row.alias}</td>
-                                        <td>{row.comments}</td>
-                                        <td>{row.row_status}</td>
-                                        <td>{row.start_time}</td> 
-                                        <td>{row.end_time}</td> 
-                                        <td>{row.total_time}</td> 
-                                        <td>{row.role_id}</td>
+                                {Array.isArray(dataRows) && dataRows.length > 0 ? (
+                                    dataRows.map((row, index) => (
+                                        <tr key={index}>
+                                            <td>{row.task_id}</td>
+                                            <td>{row.type_id}</td>
+                                            <td>{row.alias}</td>
+                                            <td>{row.comments}</td>
+                                            <td>{row.row_status}</td>
+                                            <td>{row.start_time}</td> 
+                                            <td>{row.end_time}</td> 
+                                            <td>{row.total_time}</td> 
+                                            <td>{row.role_id}</td>
+                                        </tr>
+                                    ))
+                                ) : (
+                                    <tr>
+                                        <td colSpan="9">No data available</td>
                                     </tr>
-                                ))}
+                                )}
                             </tbody>
                         </table>
                     </div>

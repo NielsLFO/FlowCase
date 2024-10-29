@@ -1,4 +1,4 @@
-import db from '../../lib/db';
+import db from '../../../lib/db';
 
 export default async function handler(req, res) {
     if (req.method !== 'POST') {
@@ -18,9 +18,12 @@ export default async function handler(req, res) {
         role_id,
     } = req.body;
 
+    let connection; // Declaramos la conexión
     try {
+        connection = await db.getConnection(); // Obtiene una conexión del pool
+
         // Inserta el nuevo registro en la tabla
-        const [result] = await db.query(`
+        const [result] = await connection.query(`
             INSERT INTO daily_reports (user_id, row_date, task_id, type_id, alias, commment, row_status, start_time, total_time, role_id)
             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         `, [user_id, row_date, task_id, type_id, alias, commment, row_status, start_time, total_time, role_id]);
@@ -30,6 +33,7 @@ export default async function handler(req, res) {
     } catch (error) {
         console.error(error);
         res.status(500).json({ success: false, message: 'Server error' });
+    } finally {
+        if (connection) connection.release(); // Libera la conexión si se obtuvo
     }
 }
-
