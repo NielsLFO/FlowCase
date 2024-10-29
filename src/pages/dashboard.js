@@ -72,12 +72,12 @@ export default function Dashboard() {
                 const selectedTaskId = e.target.value; // Obtener el ID de la tarea seleccionada
                 setFormData(prevData => ({ ...prevData, task: selectedTaskId }));    
                 try {
-                    const res = await fetch('/api/task_type', {
+                    const res = await fetch('/api/Production/task_type', {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
                         },
-                        body: JSON.stringify({ task_id: selectedTaskId, role_id: userRole }), // Enviamos task_id y role_id
+                        body: JSON.stringify({ task_id: selectedTaskId, role_id: userRole }), // Enviamos task_id y role_id   cambiar esto a funcion 
                     });
                     const data = await res.json();        
                     if (data.success) {
@@ -187,9 +187,7 @@ export default function Dashboard() {
                 return;
             }  
     
-
             if (lastStatus === 'Start') {
-                alert(lastAlias + " / " + formData.alias);
                 if (lastAlias !== formData.alias) {
                     showAlert('error', 'Error', 'You must complete the previous task before adding a new one.');
                     return;
@@ -278,7 +276,6 @@ export default function Dashboard() {
                     total_time: 0, 
                     role_id: userRole,
                 };
-                
                 // Envía la solicitud POST a la API
                 const response = await fetch('/api/Production/register_rows', {
                     method: 'POST',
@@ -313,39 +310,36 @@ export default function Dashboard() {
 
         const updateRow = async (rowId) => {
             try {
-                const currentTime = getCurrentDateTime(); // Obtener la hora actual
-                const startTime = new Date(lastStarTime); // Asegúrate de que lastStarTime sea una cadena válida
+                const currentTime = getCurrentDateTime(); 
+                const startTime = new Date(lastStarTime); 
                 const endTime = new Date(); 
-                const timeDifference = endTime - startTime; // Esto te dará la diferencia en milisegundos
-                const elapsedMinutes = Math.floor(timeDifference / (1000 * 60)); // Convertir milisegundos a minutos
-                alert(`Start Time: ${startTime} / End Time: ${endTime} / Time Difference (ms): ${timeDifference} / Elapsed Minutes: ${elapsedMinutes}`);
+                const timeDifference = endTime - startTime; 
+                const elapsedMinutes = Math.floor(timeDifference / (1000 * 60));
 
                 // Crear el objeto de datos actualizado
                 const updatedRowData = {
                     comments: formData.comments,
                     status: formData.status,
-                    end_time: currentTime, // Convierte a ISO 8601 para almacenamiento
+                    end_time: currentTime, 
                     total_time: elapsedMinutes, 
                     role: userRole,
                 };
-
-                // Envía la solicitud POST a la API para actualizar la fila
-                const response = await fetch('/api/Production/update_rows', { // No necesitas incluir rowId en la URL
+                // Envía la solicitud PUT a la API para actualizar la fila
+                const response = await fetch('/api/Production/update_rows', { 
                     method: 'PUT',
                     headers: {
                         'Content-Type': 'application/json',
                     },
-                    body: JSON.stringify({ rowId, ...updatedRowData }), // Incluye rowId dentro del body
+                    body: JSON.stringify({ rowId, ...updatedRowData }), 
                 });                    
         
                 const result = await response.json();
-        
+
                 if (result.success) {
-                    alert(formData.status);
                     setlastStatus(formData.status);
                     showAlert('success', 'Task', 'Your task was updated successfully.');
                     fetchDailyReports();
-                    resetForm(); // Limpiar el formulario después de actualizar
+                    resetForm(); 
                 } else {
                     alert(result.message || "Error al actualizar el registro.");
                 }
@@ -358,7 +352,6 @@ export default function Dashboard() {
         const fetchDailyReports = async () => {
             const currentDate = new Date().toISOString().slice(0, 10).replace('T', ' '); // Formato YYYY-MM-DD HH:mm:ss
             const user_id = localStorage.getItem('user_id');
-            alert(currentDate + " / " + user_id);
             try {
                 const response = await fetch('/api/Production/production_daily_report', { 
                     method: 'POST',
@@ -775,11 +768,11 @@ export default function Dashboard() {
                                             <td>{row.task_id}</td>
                                             <td>{row.type_id}</td>
                                             <td>{row.alias}</td>
-                                            <td>{row.comments}</td>
+                                            <td>{row.commment}</td>
                                             <td>{row.row_status}</td>
                                             <td>{row.start_time}</td> 
                                             <td>{row.end_time}</td> 
-                                            <td>{row.total_time}</td> 
+                                            <td>{row.total_time + ' min'}</td> 
                                             <td>{row.role_id}</td>
                                         </tr>
                                     ))
