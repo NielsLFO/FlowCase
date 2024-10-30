@@ -4,7 +4,7 @@ export default async function handler(req, res) {
     if (req.method !== 'POST') {
         return res.status(405).json({ message: 'Method not allowed' });
     }
-    
+
     const {
         user_id,
         row_date,
@@ -18,9 +18,10 @@ export default async function handler(req, res) {
         role_id,
     } = req.body;
 
-    let connection; // Declaramos la conexión
+    let connection;
     try {
-        connection = await db.getConnection(); // Obtiene una conexión del pool
+        // Adquiere una conexión del pool usando `generic-pool`
+        connection = await db.acquire();
 
         // Inserta el nuevo registro en la tabla
         const [result] = await connection.query(`
@@ -29,11 +30,12 @@ export default async function handler(req, res) {
         `, [user_id, row_date, task_id, type_id, alias, commment, row_status, start_time, total_time, role_id]);
 
         // Devuelve el ID del registro insertado
+        await db.release(connection);
         res.status(201).json({ success: true, insertId: result.insertId });
     } catch (error) {
-        console.error(error);
+        console.error('Error al insertar el registro:', error);
+        await db.release(connection);
         res.status(500).json({ success: false, message: 'Server error' });
-    } finally {
-        if (connection) connection.release(); // Libera la conexión si se obtuvo
-    }
+    } 
 }
+

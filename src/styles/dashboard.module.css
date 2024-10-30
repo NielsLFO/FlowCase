@@ -269,6 +269,7 @@
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Sombra sutil */
     background-color: #ffffff; /* Fondo blanco */
     align-items: center; /* Alinear verticalmente al centro */
+    margin-bottom: 20px;
 }
 
 /* Estilos para las etiquetas */

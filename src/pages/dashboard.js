@@ -71,32 +71,14 @@ export default function Dashboard() {
             const handleTaskChange = async (e) => {
                 const selectedTaskId = e.target.value; // Obtener el ID de la tarea seleccionada
                 setFormData(prevData => ({ ...prevData, task: selectedTaskId }));    
-                try {
-                    const res = await fetch('/api/Production/task_type', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
-                        body: JSON.stringify({ task_id: selectedTaskId, role_id: userRole }), // Enviamos task_id y role_id   cambiar esto a funcion 
-                    });
-                    const data = await res.json();        
-                    if (data.success) {
-                        setAvailableTypeOptions(data.types); // Actualizar los tipos disponibles
-                    } else {
-                        console.error('Error fetching types:', data.message);
-                    }
-                } catch (error) {
-                    console.error('Error fetching types:', error);
-                }
-            };
-            
-            
+                fetchTaskType(selectedTaskId);
+            };       
     //#endregion
 
-    //#region Roll code
+    //#region Role code
 
         /*********************************************************************************************/
-        /***                                        Roll                                           ***/
+        /***                                        Role                                           ***/
         /*********************************************************************************************/
         const [userEmail, setUserEmail] = useState(null);
         const [userRole, setUserRole] = useState(null);
@@ -113,54 +95,6 @@ export default function Dashboard() {
                 setUserId(user_id_FromStorage);
             }
         }, []);
-        // Función para actualizar los valores del tipo
-        const updatetypevalue = () => {
-            setFormData({
-                task: '',
-                type:  '', // Asegúrate de manejar el caso donde no hay opciones
-                alias: '',
-                comments: '',
-                status: 'Start',
-            });
-        };
-
-        useEffect(() => {
-            const fetchAndUpdateRole = async () => {
-                if (userEmail) {
-                    try {
-                        // Hacer una sola solicitud para obtener el rol y las tareas asociadas
-                        const res = await fetch('/api/Production/role', {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json',
-                            },
-                            body: JSON.stringify({ email: userEmail }),
-                        });
-                        const data = await res.json();
-                        if (data.success) {
-                            const role = data.role;
-                            setTaskOptionsByRole(data.tasks);
-                            setAvailableTypeOptions(data.types);
-                            // Verificar si el rol cambió
-                            if (userRole !== role && (lastStatus === 'Stop' || lastStatus === 'Finish')) {
-                                setUserRole(role);
-                                updatetypevalue();
-                                showAlert('warning', 'Role Changed', "Please be advised that your Team Lead has changed your user role. You will now be working in the following role: " + role);
-                            }else {
-                                setUserRole(role);
-                                updatetypevalue();
-                            }
-                        } else {
-                            console.error('Failed to fetch role and tasks:', data.message);
-                        }
-                    } catch (error) {
-                        console.error('Error fetching role and tasks:', error);
-                    }
-                }
-            };
-        
-            fetchAndUpdateRole();
-        }, [userRole]);
 
     //#endregion
     
@@ -188,6 +122,7 @@ export default function Dashboard() {
             }  
     
             if (lastStatus === 'Start') {
+                alert(lastTask+ " / " + lastType +" / "+ lastAlias +" / " +lastStatus +" / " +lastID);
                 if (lastAlias !== formData.alias) {
                     showAlert('error', 'Error', 'You must complete the previous task before adding a new one.');
                     return;
@@ -226,7 +161,7 @@ export default function Dashboard() {
                 if (!formData.status && availableStatusOptions.length > 0) {
                     setFormData(prevData => ({ ...prevData, status: availableStatusOptions[0] }));
                 }
-            }, [availableStatusOptions,formData]);
+            }, [availableStatusOptions,formData.status]);
 
             const resetForm = () => {
                 setFormData({
@@ -261,7 +196,7 @@ export default function Dashboard() {
         /*********************************************************************************************/
 
         const addNewRow = async () => {
-            const currentTime = getCurrentDateTime(); // Obtener la hora actual
+            const currentTime = getCurrentDateTime(); 
             const date_row = new Date().toISOString().slice(0, 10).replace('T', ' '); // Formato YYYY-MM-DD
             try {
                 const newRowData = {
@@ -324,6 +259,7 @@ export default function Dashboard() {
                     total_time: elapsedMinutes, 
                     role: userRole,
                 };
+                alert(formData.status);
                 // Envía la solicitud PUT a la API para actualizar la fila
                 const response = await fetch('/api/Production/update_rows', { 
                     method: 'PUT',
@@ -340,6 +276,7 @@ export default function Dashboard() {
                     showAlert('success', 'Task', 'Your task was updated successfully.');
                     fetchDailyReports();
                     resetForm(); 
+                    fetchAndUpdateRole();
                 } else {
                     alert(result.message || "Error al actualizar el registro.");
                 }
@@ -382,10 +319,64 @@ export default function Dashboard() {
                 alert("Error en la conexión.");
             }
         };
+
+        const fetchTaskType = async (selectedTaskId) => {
+            try {
+                const res = await fetch('/api/Production/task_type', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ task_id: selectedTaskId, role_id: userRole }), 
+                });
+                const data = await res.json();        
+                if (data.success) {
+                    setAvailableTypeOptions(data.types);
+                } else {
+                    console.error('Error fetching types:', data.message);
+                }
+            } catch (error) {
+                console.error('Error fetching types:', error);
+            }
+        };
+
+        const fetchAndUpdateRole = async () => {
+            if (localStorage.getItem('userEmail')) {
+                try {
+                    // Hacer una sola solicitud para obtener el rol y las tareas asociadas
+                    const res = await fetch('/api/Production/role', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({ email: localStorage.getItem('userEmail') }),
+                    });
+                    const data = await res.json();
+                    if (data.success) {
+                        const role = data.role;
+                        setTaskOptionsByRole(data.tasks);
+                        setAvailableTypeOptions(data.types);
+                        // Verificar si el rol cambió
+                        if (userRole !== role && (lastStatus === 'Stop' || lastStatus === 'Finish')) {
+                            setUserRole(role);
+                            showAlert('warning', 'Role Changed', "Please be advised that your Team Lead has changed your user role. You will now be working in the following role: " + role);
+                        }else {
+                            setUserRole(role);
+                        }
+                    } else {
+                        console.error('Failed to fetch role and tasks:', data.message);
+                    }
+                } catch (error) {
+                    console.error('Error fetching role and tasks:', error);
+                }
+            }
+        };
+
         useEffect(() => {
             fetchDailyReports(); 
+            fetchAndUpdateRole();
         }, []);
-
+    
     //#endregion
 
     //#region for Password changes
@@ -433,11 +424,11 @@ export default function Dashboard() {
         /*********************************************************************************************/
         const targetCases = 6;
         const completedCases = Array.isArray(dataRows) ? dataRows.filter(row => 
-            row.task === 'Production' && 
-            row.type === 'New case' && 
+            row.task_name === 'Production' && 
+            row.type_value === 'New case' && 
             row.alias.trim() !== '' &&
-            row.status === "Finish"
-        ).length : 0;   
+            row.row_status === "Finish"
+        ).length : 0;  
         const chartData = {
             labels: ['Cases Completed'],
             datasets: [
@@ -745,7 +736,7 @@ export default function Dashboard() {
                         </form>
                     </div>
                 )}
-                {!showPasswordChangeForm && (
+                {selectedOption === 'Today Work' && !showPasswordChangeForm && (
                     <div className={styles.tableSection}>
                         <table className={styles.table}>
                             <thead>
@@ -765,15 +756,55 @@ export default function Dashboard() {
                                 {Array.isArray(dataRows) && dataRows.length > 0 ? (
                                     dataRows.map((row, index) => (
                                         <tr key={index}>
-                                            <td>{row.task_id}</td>
-                                            <td>{row.type_id}</td>
+                                            <td>{row.task_name}</td>
+                                            <td>{row.type_value}</td>
                                             <td>{row.alias}</td>
                                             <td>{row.commment}</td>
                                             <td>{row.row_status}</td>
                                             <td>{row.start_time}</td> 
                                             <td>{row.end_time}</td> 
                                             <td>{row.total_time + ' min'}</td> 
-                                            <td>{row.role_id}</td>
+                                            <td>{row.role_name}</td>
+                                        </tr>
+                                    ))
+                                ) : (
+                                    <tr>
+                                        <td colSpan="9">No data available</td>
+                                    </tr>
+                                )}
+                            </tbody>
+                        </table>
+                    </div>
+                )}
+                {selectedOption === 'History' && !showPasswordChangeForm && (
+                    <div className={styles.tableSection}>
+                        <table className={styles.table}>
+                            <thead>
+                                <tr>
+                                    <th>Task</th>
+                                    <th>Type</th>
+                                    <th>Alias</th>
+                                    <th>Comments</th>
+                                    <th>Status</th>
+                                    <th>Start Time</th> 
+                                    <th>End Time</th> 
+                                    <th>Total Time</th> 
+                                    <th>Role</th> 
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {Array.isArray(dataRows) && dataRows.length > 0 ? (
+                                    dataRows.map((row, index) => (
+                                        <tr key={index}>
+                                            <td>{row.task_name}</td>
+                                            <td>{row.type_value}</td>
+                                            <td>{row.alias}</td>
+                                            <td>{row.commment}</td>
+                                            <td>{row.row_status}</td>
+                                            <td>{row.start_time}</td> 
+                                            <td>{row.end_time}</td> 
+                                            <td>{row.total_time + ' minddd'}</td> 
+                                            <td>{row.role_name}</td>
                                         </tr>
                                     ))
                                 ) : (

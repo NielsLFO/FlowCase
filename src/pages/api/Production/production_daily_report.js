@@ -9,25 +9,28 @@ export default async function handler(req, res) {
     let connection;
 
     try {
-        connection = await db.getConnection(); // Obtiene una conexión del pool
+        // Adquiere una conexión del pool
+        connection = await db.acquire();
 
         const [rows] = await connection.query(`
-            SELECT id, user_id, task_id, type_id, alias, commment, row_status, 
-                   DATE_FORMAT(start_time, '%Y-%m-%d %H:%i:%s') as start_time,
-                   DATE_FORMAT(end_time, '%Y-%m-%d %H:%i:%s') as end_time,
-                   total_time, role_id
-            FROM daily_reports 
-            WHERE user_id = ? AND row_date = ? 
-            ORDER BY start_time ASC
+            SELECT dr.id, dr.user_id, dr.row_date, dr.task_id, t.task_name, dr.type_id, tp.type_value, dr.alias, dr.commment, dr.row_status, 
+            DATE_FORMAT(dr.start_time, '%Y-%m-%d %H:%i:%s') as start_time, DATE_FORMAT(dr.end_time, '%Y-%m-%d %H:%i:%s') as end_time, dr.total_time, dr.role_id, r.role_name
+            FROM daily_reports dr
+            INNER JOIN tasks t ON dr.task_id = t.id
+            INNER JOIN type_options tp ON dr.type_id = tp.id
+            INNER JOIN roles r ON dr.role_id = r.id
+            WHERE dr.user_id = ?
+            AND dr.row_date = ?
+            ORDER BY dr.start_time ASC
         `, [user_id, currentDate]);
-
+        await db.release(connection);
         res.status(200).json({ success: true, reports: rows });
     } catch (error) {
         console.error('Error al obtener los informes:', error);
+        await db.release(connection);
         res.status(500).json({ success: false, message: 'Error en el servidor' });
-    } finally {
-        if (connection) connection.release(); // Libera la conexión
     }
 }
+
 
 

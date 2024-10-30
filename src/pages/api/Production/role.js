@@ -9,7 +9,8 @@ export default async function handler(req, res) {
     let connection;
 
     try {
-        connection = await db.getConnection(); // Obtiene una conexión del pool
+        // Adquiere una conexión del pool usando `generic-pool`
+        connection = await db.acquire();
 
         // Consultar el rol del usuario
         const [roleRows] = await connection.query('SELECT role_id FROM users WHERE email = ?', [email]);
@@ -29,7 +30,7 @@ export default async function handler(req, res) {
                 task_name: row.task_name
             }));
 
-            let types = []; // Inicializa types como un array vacío
+            let types = [];
             if (tasks.length > 0) {
                 // Consultar los tipos de opciones para la primera tarea
                 const [typeRows] = await connection.query(`
@@ -44,14 +45,15 @@ export default async function handler(req, res) {
                 }));
             }
 
+            await db.release(connection);
             return res.status(200).json({ success: true, role, tasks, types });
         } else {
+            await db.release(connection);
             return res.status(404).json({ success: false, message: 'Rol no encontrado' });
         }
     } catch (error) {
         console.error('Error en la consulta:', error);
+        if (connection) await db.release(connection);
         return res.status(500).json({ success: false, message: 'Error en el servidor' });
-    } finally {
-        if (connection) connection.release(); // Libera la conexión
-    }
+    } 
 }
