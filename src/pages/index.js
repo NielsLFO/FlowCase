@@ -40,7 +40,7 @@ export default function Home() {
                 localStorage.setItem('user_id', data.user_id);
                 if (data.role === 'admin') {
                     router.push('/dashboard');
-                } else if (data.role === 'team_lead') {
+                } else if (data.role === 10) {
                     router.push('/dashboard_team_lead');
                 } else if (data.role === 1){
                     router.push('/dashboard');

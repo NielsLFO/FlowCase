@@ -26,6 +26,7 @@ export default function Dashboard() {
     /*********************************************************************************************/
     const [selectedOption, setSelectedOption] = useState('Today Team Work');
     const [showPasswordChangeForm, setShowPasswordChangeForm] = useState(false);
+    const [dataRows, setDataRows] = useState();
     const [passwordChangeData, setPasswordChangeData] = useState({
         oldPassword: '',
         newPassword: '',
@@ -944,6 +945,43 @@ export default function Dashboard() {
 
     //#endregion
 
+    //#region Code for report
+
+        /*********************************************************************************************/
+        /***                             Report and data for grafics                               ***/
+        /*********************************************************************************************/
+
+        const fetchDailyReportsTl = async () => {
+            const currentDate = new Date().toISOString().slice(0, 10).replace('T', ' '); // Formato YYYY-MM-DD HH:mm:ss
+            const tl_name = localStorage.getItem('user_name');
+            try {
+                const response = await fetch('/api/TL/report_tl', { 
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ tl_name, currentDate }),
+                });                    
+        
+                const result = await response.json();
+        
+                if (result.success) {
+                    const data = result.reports;
+                    setDataRows(data); 
+                } else {
+                    alert(result.message || "Error al actualizar la tabla.");
+                }
+            } catch (error) {
+                console.error(error);
+                alert("Error en la conexión.");
+            }
+        };
+        useEffect(() => {
+            fetchDailyReportsTl(); 
+        }, []);
+
+    //#endregion
+
     //#region Code for alert messagess
 
     /*********************************************************************************************/
@@ -1071,222 +1109,26 @@ export default function Dashboard() {
                                 </tr>
                             </thead>
                             <tbody>
-                                <tr>
-                                    <td>Tech #1</td>
-                                    <td>Install Brackets</td>
-                                    <td>New Case</td>
-                                    <td>Patient_A1</td>
-                                    <td>N/A</td>
-                                    <td>Completed</td>
-                                    <td>08:00</td>
-                                    <td>09:30</td>
-                                    <td>1h 30m</td>
-                                    <td>Technician</td>
-                                </tr>
-                                <tr>
-                                    <td>Tech #2</td>
-                                    <td>Adjustment</td>
-                                    <td>Rework</td>
-                                    <td>Patient_B2</td>
-                                    <td>Replaced bands</td>
-                                    <td>In Progress</td>
-                                    <td>10:00</td>
-                                    <td>-</td>
-                                    <td>-</td>
-                                    <td>Technician</td>
-                                </tr>
-                                <tr>
-                                    <td>Tech #3</td>
-                                    <td>Initial Consultation</td>
-                                    <td>Team Lead Consult</td>
-                                    <td>Patient_C3</td>
-                                    <td>Discussed treatment options</td>
-                                    <td>Completed</td>
-                                    <td>11:00</td>
-                                    <td>11:45</td>
-                                    <td>45m</td>
-                                    <td>Team Lead</td>
-                                </tr>
-                                <tr>
-                                    <td>Tech #4</td>
-                                    <td>Retainer Check</td>
-                                    <td>Rework</td>
-                                    <td>Patient_D4</td>
-                                    <td>Adjusted fit</td>
-                                    <td>Pending</td>
-                                    <td>12:00</td>
-                                    <td>-</td>
-                                    <td>-</td>
-                                    <td>Technician</td>
-                                </tr>
-                                <tr>
-                                    <td>Tech #5</td>
-                                    <td>Bracket Removal</td>
-                                    <td>New Case</td>
-                                    <td>Patient_E5</td>
-                                    <td>Final phase</td>
-                                    <td>Completed</td>
-                                    <td>13:30</td>
-                                    <td>14:15</td>
-                                    <td>45m</td>
-                                    <td>Technician</td>
-                                </tr>
-                                <tr>
-                                    <td>Tech #6</td>
-                                    <td>Follow-up</td>
-                                    <td>Rework</td>
-                                    <td>Patient_F6</td>
-                                    <td>Minor adjustments needed</td>
-                                    <td>In Progress</td>
-                                    <td>15:00</td>
-                                    <td>-</td>
-                                    <td>-</td>
-                                    <td>Technician</td>
-                                </tr>
-                                <tr>
-                                    <td>Tech #1</td>
-                                    <td>Install Brackets</td>
-                                    <td>New Case</td>
-                                    <td>Patient_A1</td>
-                                    <td>N/A</td>
-                                    <td>Completed</td>
-                                    <td>08:00</td>
-                                    <td>09:30</td>
-                                    <td>1h 30m</td>
-                                    <td>Technician</td>
-                                </tr>
-                                <tr>
-                                    <td>Tech #2</td>
-                                    <td>Adjustment</td>
-                                    <td>Rework</td>
-                                    <td>Patient_B2</td>
-                                    <td>Replaced bands</td>
-                                    <td>In Progress</td>
-                                    <td>10:00</td>
-                                    <td>-</td>
-                                    <td>-</td>
-                                    <td>Technician</td>
-                                </tr>
-                                <tr>
-                                    <td>Tech #3</td>
-                                    <td>Initial Consultation</td>
-                                    <td>Team Lead Consult</td>
-                                    <td>Patient_C3</td>
-                                    <td>Discussed treatment options</td>
-                                    <td>Completed</td>
-                                    <td>11:00</td>
-                                    <td>11:45</td>
-                                    <td>45m</td>
-                                    <td>Team Lead</td>
-                                </tr>
-                                <tr>
-                                    <td>Tech #4</td>
-                                    <td>Retainer Check</td>
-                                    <td>Rework</td>
-                                    <td>Patient_D4</td>
-                                    <td>Adjusted fit</td>
-                                    <td>Pending</td>
-                                    <td>12:00</td>
-                                    <td>-</td>
-                                    <td>-</td>
-                                    <td>Technician</td>
-                                </tr>
-                                <tr>
-                                    <td>Tech #5</td>
-                                    <td>Bracket Removal</td>
-                                    <td>New Case</td>
-                                    <td>Patient_E5</td>
-                                    <td>Final phase</td>
-                                    <td>Completed</td>
-                                    <td>13:30</td>
-                                    <td>14:15</td>
-                                    <td>45m</td>
-                                    <td>Technician</td>
-                                </tr>
-                                <tr>
-                                    <td>Tech #6</td>
-                                    <td>Follow-up</td>
-                                    <td>Rework</td>
-                                    <td>Patient_F6</td>
-                                    <td>Minor adjustments needed</td>
-                                    <td>In Progress</td>
-                                    <td>15:00</td>
-                                    <td>-</td>
-                                    <td>-</td>
-                                    <td>Technician</td>
-                                </tr>
-                                <tr>
-                                    <td>Tech #1</td>
-                                    <td>Install Brackets</td>
-                                    <td>New Case</td>
-                                    <td>Patient_A1</td>
-                                    <td>N/A</td>
-                                    <td>Completed</td>
-                                    <td>08:00</td>
-                                    <td>09:30</td>
-                                    <td>1h 30m</td>
-                                    <td>Technician</td>
-                                </tr>
-                                <tr>
-                                    <td>Tech #2</td>
-                                    <td>Adjustment</td>
-                                    <td>Rework</td>
-                                    <td>Patient_B2</td>
-                                    <td>Replaced bands</td>
-                                    <td>In Progress</td>
-                                    <td>10:00</td>
-                                    <td>-</td>
-                                    <td>-</td>
-                                    <td>Technician</td>
-                                </tr>
-                                <tr>
-                                    <td>Tech #3</td>
-                                    <td>Initial Consultation</td>
-                                    <td>Team Lead Consult</td>
-                                    <td>Patient_C3</td>
-                                    <td>Discussed treatment options</td>
-                                    <td>Completed</td>
-                                    <td>11:00</td>
-                                    <td>11:45</td>
-                                    <td>45m</td>
-                                    <td>Team Lead</td>
-                                </tr>
-                                <tr>
-                                    <td>Tech #4</td>
-                                    <td>Retainer Check</td>
-                                    <td>Rework</td>
-                                    <td>Patient_D4</td>
-                                    <td>Adjusted fit</td>
-                                    <td>Pending</td>
-                                    <td>12:00</td>
-                                    <td>-</td>
-                                    <td>-</td>
-                                    <td>Technician</td>
-                                </tr>
-                                <tr>
-                                    <td>Tech #5</td>
-                                    <td>Bracket Removal</td>
-                                    <td>New Case</td>
-                                    <td>Patient_E5</td>
-                                    <td>Final phase</td>
-                                    <td>Completed</td>
-                                    <td>13:30</td>
-                                    <td>14:15</td>
-                                    <td>45m</td>
-                                    <td>Technician</td>
-                                </tr>
-                                <tr>
-                                    <td>Tech #6</td>
-                                    <td>Follow-up</td>
-                                    <td>Rework</td>
-                                    <td>Patient_F6</td>
-                                    <td>Minor adjustments needed</td>
-                                    <td>In Progress</td>
-                                    <td>15:00</td>
-                                    <td>-</td>
-                                    <td>-</td>
-                                    <td>Technician</td>
-                                </tr>
+                                {Array.isArray(dataRows) && dataRows.length > 0 ? (
+                                    dataRows.map((row, index) => (
+                                        <tr key={index}>
+                                            <td>{row.user_name}</td>
+                                            <td>{row.task_name}</td>
+                                            <td>{row.type_value}</td>
+                                            <td>{row.alias}</td>
+                                            <td>{row.commment}</td>
+                                            <td>{row.row_status}</td>
+                                            <td>{row.start_time}</td> 
+                                            <td>{row.end_time}</td> 
+                                            <td>{row.total_time + ' min'}</td> 
+                                            <td>{row.role_name}</td>
+                                        </tr>
+                                    ))
+                                ) : (
+                                    <tr>
+                                        <td colSpan="9">No data available</td>
+                                    </tr>
+                                )}
                             </tbody>
 
                         </table>
