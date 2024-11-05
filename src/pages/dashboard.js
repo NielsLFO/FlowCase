@@ -32,6 +32,7 @@ export default function Dashboard() {
                 status: 'Start',
             });
             const [dataRows, setDataRows] = useState();
+            const [dataRows_report, setDataRows_report] = useState();
             const [showPasswordChangeForm, setShowPasswordChangeForm] = useState(false);
             const [passwordChangeData, setPasswordChangeData] = useState({
                 oldPassword: '',
@@ -122,7 +123,6 @@ export default function Dashboard() {
             }  
     
             if (lastStatus === 'Start') {
-                alert(lastTask+ " / " + lastType +" / "+ lastAlias +" / " +lastStatus +" / " +lastID);
                 if (lastAlias !== formData.alias) {
                     showAlert('error', 'Error', 'You must complete the previous task before adding a new one.');
                     return;
@@ -158,7 +158,7 @@ export default function Dashboard() {
             const availableStatusOptions = getStatusOptions();
             useEffect(() => {
                 // Si `status` está vacío y hay opciones de estado disponibles, selecciona la primera
-                if (!formData.status && availableStatusOptions.length > 0) {
+                if (availableStatusOptions.length > 0) {
                     setFormData(prevData => ({ ...prevData, status: availableStatusOptions[0] }));
                 }
             }, [availableStatusOptions,formData.status]);
@@ -277,6 +277,7 @@ export default function Dashboard() {
                     fetchDailyReports();
                     resetForm(); 
                     fetchAndUpdateRole();
+                    fetchWeeklyReports();
                 } else {
                     alert(result.message || "Error al actualizar el registro.");
                 }
@@ -470,22 +471,25 @@ export default function Dashboard() {
                         }
                     }
                 }
+            },
+            animation: {
+                duration: 150, 
             }
         };
 
         // Datos para el gráfico de producción semanal
-        const weeklyData = {
+        const [weeklyData, setWeeklyData] = useState({
             labels: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'],
             datasets: [
                 {
                     label: 'Cases per Day',
-                    data: [2, 4, 3, 4, 6], 
+                    data: [0, 0, 0, 0, 0], // Inicializado en cero
                     backgroundColor: 'rgba(75, 192, 192, 0.6)',
                     borderColor: 'rgba(75, 192, 192, 1)',
                     borderWidth: 1,
                 },
             ],
-        };
+        });
         // Opciones para el gráfico
         const weeklyChartOptions = {
             responsive: true,
@@ -499,7 +503,56 @@ export default function Dashboard() {
                     text: 'Weekly Production Report',
                 },
             },
+            animation: {
+                duration: 50, 
+            },
         };
+
+        const fetchWeeklyReports = async () => {
+            const user_id = localStorage.getItem('user_id');
+            try {
+                const response = await fetch('/api/Production/grafic', { 
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ user_id }),
+                });                    
+        
+                const result = await response.json();
+        
+                if (result.success) {
+                    // Mapear los datos recibidos a los días de la semana
+                    const weeklyCases = [0, 0, 0, 0, 0]; // Lunes a viernes
+
+                    // Procesar cada resultado y asignarlo al índice correspondiente
+                    result.reports.forEach(report => {
+                        const dayIndex = report.day_of_week - 2; // Mapea 2=Lunes, 3=Martes, ..., 6=Viernes a índice 0-4
+                        if (dayIndex >= 0 && dayIndex < 5) {
+                            weeklyCases[dayIndex] = report.cases_per_day;
+                        }
+                    });
+                    // Actualizar el estado de los datos del gráfico
+                    setWeeklyData(prevData => ({
+                        ...prevData,
+                        datasets: [
+                            {
+                                ...prevData.datasets[0],
+                                data: weeklyCases,
+                            },
+                        ],
+                    }));
+                } else {
+                    alert(result.message || "Error al actualizar la tabla.");
+                }
+            } catch (error) {
+                console.error(error);
+                alert("Error en la conexión.");
+            }
+        };
+        useEffect(() => {
+            fetchWeeklyReports();
+        }, []);
     //#endregion
 
     //#region Code for history section
@@ -522,9 +575,47 @@ export default function Dashboard() {
             // Función para manejar la búsqueda (aún sin funcionalidad)
             const handleSearchSubmit = (e) => {
                 e.preventDefault();
-                // Aquí puedes agregar la lógica para realizar la búsqueda
-                console.log('Searching from', searchData.startDate, 'to', searchData.endDate);
+                if (searchData.startDate == "") { 
+                    showAlert('error', 'Error', 'Please select both Task and Type.');
+                    return;
+                }
+                if (searchData.endDate == "") { 
+                    showAlert('error', 'Error', 'Please select both Task and Type.');
+                    return;
+                }
+                
+                fetchReports();
             };
+
+            const fetchReports = async () => {
+                const user_id = localStorage.getItem('user_id');
+                const startDate = searchData.startDate;
+                const endDate = searchData.endDate;
+                alert(user_id +" " + startDate+" " + endDate);
+                try {
+                    const response = await fetch('/api/Production/production_report', { 
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({ user_id, startDate, endDate}),
+                    });                    
+            
+                    const result = await response.json();
+            
+                    if (result.success) {
+                        const data = result.reports;
+                        setDataRows_report(data); 
+                        alert(data.length);
+                    } else {
+                        alert(result.message || "Error al actualizar la tabla.");
+                    }
+                } catch (error) {
+                    console.error(error);
+                    alert("Error en la conexión.");
+                }
+            };
+
     //#endregion
 
     //#region Code for alert messagess
@@ -594,21 +685,21 @@ export default function Dashboard() {
                 </nav>
             </header>
             <main className={styles.content}>
+                {/* Snackbar para mostrar el mensaje de alerta */}
+                <Snackbar
+                    open={alertConfig.open}
+                    autoHideDuration={6000}
+                    onClose={handleClose}
+                    anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+                >
+                <Alert onClose={handleClose} severity={alertConfig.severity} variant="filled">
+                <AlertTitle>{alertConfig.title}</AlertTitle>
+                    {alertConfig.message}
+                </Alert>
+                </Snackbar>
                 {selectedOption === 'Today Work' && !showPasswordChangeForm && (
                     <div className={styles.mainContent}>
                         <div className={styles.formSection}>
-                             {/* Snackbar para mostrar el mensaje de alerta */}
-                            <Snackbar
-                                open={alertConfig.open}
-                                autoHideDuration={6000}
-                                onClose={handleClose}
-                                anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
-                            >
-                                <Alert onClose={handleClose} severity={alertConfig.severity} variant="filled">
-                                    <AlertTitle>{alertConfig.title}</AlertTitle>
-                                    {alertConfig.message}
-                                </Alert>
-                            </Snackbar>
                             <form onSubmit={handleFormSubmit}>
                                 <div>
                                     <h2>Case Flow</h2>
@@ -680,7 +771,7 @@ export default function Dashboard() {
                                 name="startDate"
                                 value={searchData.startDate}
                                 onChange={handleSearchFormChange}
-                                className={styles.searchInput} // Aplica el estilo del input
+                                className={styles.searchInput} 
                             />
                         </div>
                         <div>
@@ -691,7 +782,7 @@ export default function Dashboard() {
                                 name="endDate"
                                 value={searchData.endDate}
                                 onChange={handleSearchFormChange}
-                                className={styles.searchInput} // Aplica el estilo del input
+                                className={styles.searchInput} 
                             />
                         </div>
                         <button type="submit" className={styles.searchButton}>Search</button>
@@ -793,8 +884,8 @@ export default function Dashboard() {
                                 </tr>
                             </thead>
                             <tbody>
-                                {Array.isArray(dataRows) && dataRows.length > 0 ? (
-                                    dataRows.map((row, index) => (
+                                {Array.isArray(dataRows_report) && dataRows_report.length > 0 ? (
+                                    dataRows_report.map((row, index) => (
                                         <tr key={index}>
                                             <td>{row.task_name}</td>
                                             <td>{row.type_value}</td>
@@ -803,7 +894,7 @@ export default function Dashboard() {
                                             <td>{row.row_status}</td>
                                             <td>{row.start_time}</td> 
                                             <td>{row.end_time}</td> 
-                                            <td>{row.total_time + ' minddd'}</td> 
+                                            <td>{row.total_time + ' min'}</td> 
                                             <td>{row.role_name}</td>
                                         </tr>
                                     ))
