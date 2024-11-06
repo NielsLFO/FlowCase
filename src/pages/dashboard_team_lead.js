@@ -27,6 +27,8 @@ export default function Dashboard() {
     const [selectedOption, setSelectedOption] = useState('Today Team Work');
     const [showPasswordChangeForm, setShowPasswordChangeForm] = useState(false);
     const [dataRows, setDataRows] = useState();
+    const [dataRows_Report, setDataRows_Report] = useState();
+    const [TL_Technitians, setTL_Technitians] = useState([]);
     const [passwordChangeData, setPasswordChangeData] = useState({
         oldPassword: '',
         newPassword: '',
@@ -105,27 +107,55 @@ export default function Dashboard() {
             'rgba(105, 195, 140, 0.6)', // Color para Tech #6
         ];
 
-        // Datos para el gráfico de tipo de casos completados
-        const groupData = {
-            labels: ['New Cases', 'Reworks', 'Team Lead Consult'],
+        // Datos para el gráfico de producción individual
+    const [individualData, setIndividualData] = useState({
+        labels: [],
+        datasets: [
+            {
+                label: 'Cases per Technician',
+                data: [],
+                backgroundColor: [],
+                borderColor: [],
+                borderWidth: 1,
+            },
+        ],
+    });
+
+        // Opciones para el gráfico
+        const current_production_ChartOptions = {
+            responsive: true,
+            plugins: {
+                legend: {
+                    display: false,
+                    position: 'top',
+                },
+                title: {
+                    display: false,
+                    text: 'Current Production Report',
+                },
+            },
+        };
+
+
+        const taskColors = [
+            'rgba(66, 135, 245, 0.6)',  // Color para 'New Cases'
+            'rgba(255, 166, 0, 0.6)',   // Color para 'Reworks'
+            'rgba(231, 76, 60, 0.6)',   // Color para 'Team Lead Consult'
+        ];
+    
+        // Estado para los datos del gráfico de tareas
+        const [groupData, setGroupData] = useState({
+            labels: [],
             datasets: [
                 {
-                    label: '',
-                    data: [2, 4, 3],
-                    backgroundColor: [
-                        'rgba(66, 135, 245, 0.6)',  // Color nuevo para 'New Cases'
-                        'rgba(255, 166, 0, 0.6)',   // Color nuevo para 'Reworks'
-                        'rgba(231, 76, 60, 0.6)',   // Color nuevo para 'Team Lead Consult'
-                    ],
-                    borderColor: [
-                        'rgba(66, 135, 245, 1)',
-                        'rgba(255, 166, 0, 1)',
-                        'rgba(231, 76, 60, 1)',
-                    ],
+                    label: 'Tasks per Type',
+                    data: [],
+                    backgroundColor: taskColors,
+                    borderColor: taskColors.map(color => color.replace('0.6', '1')),
                     borderWidth: 1,
                 },
             ],
-        };
+        });
 
         // Opciones para el gráfico
         const group_ChartOptions = {
@@ -142,98 +172,47 @@ export default function Dashboard() {
             },
         };
 
-        // Datos para el gráfico de producción semanal
-        const weeklyData = {
-            labels: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'],
-            datasets: [
-                {
-                    label: 'Tech #1',
-                    data: [1, 2, 3, 2, 1],
-                    backgroundColor: techColors[0],
-                    borderColor: techColors[0].replace('0.6', '1'),
-                    borderWidth: 1,
-                },
-                {
-                    label: 'Tech #2',
-                    data: [2, 3, 1, 4, 2],
-                    backgroundColor: techColors[1],
-                    borderColor: techColors[1].replace('0.6', '1'),
-                    borderWidth: 1,
-                },
-                {
-                    label: 'Tech #3',
-                    data: [3, 2, 4, 3, 5],
-                    backgroundColor: techColors[2],
-                    borderColor: techColors[2].replace('0.6', '1'),
-                    borderWidth: 1,
-                },
-                {
-                    label: 'Tech #4',
-                    data: [1, 4, 2, 1, 3],
-                    backgroundColor: techColors[3],
-                    borderColor: techColors[3].replace('0.6', '1'),
-                    borderWidth: 1,
-                },
-                {
-                    label: 'Tech #5',
-                    data: [2, 1, 3, 5, 2],
-                    backgroundColor: techColors[4],
-                    borderColor: techColors[4].replace('0.6', '1'),
-                    borderWidth: 1,
-                },
-                {
-                    label: 'Tech #6',
-                    data: [4, 3, 2, 1, 4],
-                    backgroundColor: techColors[5],
-                    borderColor: techColors[5].replace('0.6', '1'),
-                    borderWidth: 1,
-                },
-            ],
-        };
 
-        // Opciones para el gráfico
-        const weeklyChartOptions = {
-            responsive: true,
-            plugins: {
-                legend: {
-                    display: true,
-                    position: 'top',
-                },
-                title: {
-                    display: false,
-                    text: 'Weekly Production Report',
-                },
-            },
-        };
+       // Paleta de colores para los técnicos (elegantes y consistentes)
+       const techColors_Idle_Time = [
+        'rgba(75, 123, 139, 0.6)',  // Color para Tech #1
+        'rgba(153, 102, 255, 0.6)', // Color para Tech #2
+        'rgba(255, 159, 64, 0.6)',  // Color para Tech #3
+        'rgba(54, 162, 235, 0.6)',  // Color para Tech #4
+        'rgba(255, 206, 86, 0.6)',  // Color para Tech #5
+        'rgba(105, 195, 140, 0.6)', // Color para Tech #6
+        ];
 
         // Datos para el gráfico de producción individual
-        const individualData = {
-            labels: ['Tech #1', 'Tech #2', 'Tech #3', 'Tech #4', 'Tech #5', 'Tech #6'],
+        const [individualData_Idle_Time, setIndividualData_Idle_Time] = useState({
+            labels: [],
             datasets: [
                 {
                     label: 'Cases per Technician',
-                    data: [2, 4, 3, 4, 6, 4],
-                    backgroundColor: techColors,
-                    borderColor: techColors.map(color => color.replace('0.6', '1')),
+                    data: [],
+                    backgroundColor: [],
+                    borderColor: [],
                     borderWidth: 1,
                 },
             ],
-        };
+        });
 
-        // Opciones para el gráfico
-        const current_production_ChartOptions = {
-            responsive: true,
-            plugins: {
-                legend: {
-                    display: false,
-                    position: 'top',
+            // Opciones para el gráfico
+            const current_Idle_Time_ChartOptions = {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        display: false,
+                        position: 'top',
+                    },
+                    title: {
+                        display: false,
+                        text: 'Current Production Report',
+                    },
                 },
-                title: {
-                    display: false,
-                    text: 'Current Production Report',
-                },
-            },
-        };
+            };
+
+
 
     //#endregion
 
@@ -741,38 +720,29 @@ export default function Dashboard() {
 
         const handleSearchFormChange = (e) => {
             const { name, value } = e.target;
-            setSearchData((prevState) => ({
-                ...prevState,
-                [name]: value,
-            }));
+            setSearchData(prev => ({ ...prev, [name]: value }));
         };
 
         const handleSearchSubmit = (e) => {
             e.preventDefault();
-            const newEntry = {
-                technician: "Niels Morales",
-                task: 'Production', // Cambia a un valor real más tarde
-                type: 'Second review',
-                alias: '12345',
-                comments: 'Comments Example',
-                status: 'Finished',
-                startTime: '2024-10-11 10:12:05',
-                endTime: '2024-10-11 10:12:15',
-                totalTime: '0 min',
-                role: 'Clinical_Ops', // Cambia a un valor real más tarde
-            };
-            setTableData((prevData) => [...prevData, newEntry]);
-            setSearchData({
-                startDate: '',
-                endDate: '',
-                technician: '',
-            });
+            alert(searchData.startDate +" / " + searchData.endDate + " / " + searchData.technician);
+
+            if (searchData.startDate == "") { 
+                showAlert('error', 'Error', 'Please select both Task and Type.');
+                return;
+            }
+            if (searchData.endDate == "") { 
+                showAlert('error', 'Error', 'Please select both Task and Type.');
+                return;
+            }
+            
+            fetchReports();
         };
 
         const handleModifyClick = (index) => {
             setIsEditing(true);
             setEditingIndex(index);
-            setEditData(tableData[index]);
+            setEditData(dataRows_Report[index]);
             setHighlightedRow(index); // Establece el índice de la fila seleccionada
         };
 
@@ -858,7 +828,32 @@ export default function Dashboard() {
             return ['Finished', 'Stop'] || [];
         };
 
-        // Este efecto se ejecuta cada vez que cambie `editData.task`
+        const fetchTechList = async () => {
+        
+            const tl = localStorage.getItem('user_name');
+            try {
+                const res = await fetch('/api/TL/manage_times', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ tl_user_name: tl }), 
+                });
+                const data = await res.json();        
+                if (data.success) {
+                    setTL_Technitians(data.users);
+                } else {
+                    console.error('Error fetching types:', data.message);
+                }
+            } catch (error) {
+                console.error('Error fetching types:', error);
+            }
+        };
+
+        useEffect(() => {
+            fetchTechList();
+        },[]);
+        /*
         useEffect(() => {
             // Obtener las opciones disponibles para `type` basado en el `role` y `task`
             const typeOptions = roll_available_Type_Options(editData.role, editData.task);
@@ -870,7 +865,44 @@ export default function Dashboard() {
                     type: typeOptions[0].value,
                 }));
             }
-        }, [editData.task]); // Ejecutar cada vez que cambie `editData.task`
+        }, [editData.task]);
+*/
+
+
+        const fetchReports = async () => {
+            const user_id = searchData.technician;
+            const startDate = searchData.startDate;
+            const endDate = searchData.endDate;
+
+            try {
+                const response = await fetch('/api/TL/search_report', { 
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ user_id, startDate, endDate}),
+                });                    
+        
+                const result = await response.json();
+        
+                if (result.success) {
+                    const data = result.reports;
+                    setDataRows_Report(data); 
+
+                } else {
+                    alert(result.message || "Error al actualizar la tabla.");
+                }
+            } catch (error) {
+                console.error(error);
+                alert("Error en la conexión.");
+            }
+        };
+
+        useEffect(() => {
+            if (TL_Technitians.length > 0) {
+                setSearchData(prevData => ({ ...prevData, technician: TL_Technitians[0].id }));
+            }
+        }, [searchData.startDate, searchData.endDate]);
 
 
     //#endregion
@@ -952,30 +984,109 @@ export default function Dashboard() {
         /*********************************************************************************************/
 
         const fetchDailyReportsTl = async () => {
-            const currentDate = new Date().toISOString().slice(0, 10).replace('T', ' '); // Formato YYYY-MM-DD HH:mm:ss
-            const tl_name = localStorage.getItem('user_name');
-            try {
-                const response = await fetch('/api/TL/report_tl', { 
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({ tl_name, currentDate }),
-                });                    
-        
-                const result = await response.json();
-        
-                if (result.success) {
-                    const data = result.reports;
-                    setDataRows(data); 
-                } else {
-                    alert(result.message || "Error al actualizar la tabla.");
-                }
-            } catch (error) {
-                console.error(error);
-                alert("Error en la conexión.");
+        const currentDate = new Date().toISOString().slice(0, 10).replace('T', ' '); // Formato YYYY-MM-DD
+        const tl_name = localStorage.getItem('user_name');
+        try {
+            const response = await fetch('/api/TL/report_tl', { 
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ tl_name, currentDate }),
+            });
+
+            const result = await response.json();
+
+            if (result.success) {
+                const data = result.reports;
+                setDataRows(data);
+
+                // Obtener nombres únicos y contar casos por cada técnico
+                const uniqueUsers = Array.from(new Set(data.map(item => item.user_name)));
+                const caseCounts = uniqueUsers.map(user => 
+                    data.filter(item => item.user_name === user).length
+                );
+
+                // Crear datos dinámicos para el gráfico
+                const dynamicIndividualData = {
+                    labels: uniqueUsers,
+                    datasets: [
+                        {
+                            label: 'Cases per Technician',
+                            data: caseCounts,
+                            backgroundColor: techColors.slice(0, uniqueUsers.length),
+                            borderColor: techColors.slice(0, uniqueUsers.length).map(color => color.replace('0.6', '1')),
+                            borderWidth: 1,
+                        },
+                    ],
+                };
+                setIndividualData(dynamicIndividualData);
+
+                const uniqueType = Array.from(new Set(data.map(item => item.type_value)));
+                const taskCounts = uniqueType.map(task =>
+                    data.filter(item => item.type_value === task).length
+                );
+
+                // Crear datos dinámicos para el gráfico
+                const dynamicGroupData = {
+                    labels: uniqueType,
+                    datasets: [
+                        {
+                            label: 'Tasks per Type',
+                            data: taskCounts,
+                            backgroundColor: taskColors.slice(0, uniqueType.length),
+                            borderColor: taskColors.slice(0, uniqueType.length).map(color => color.replace('0.6', '1')),
+                            borderWidth: 1,
+                        },
+                    ],
+                };
+
+                // Actualizar el estado del gráfico
+                setGroupData(dynamicGroupData);
+
+
+                // Sumar el tiempo total de "Idle_Time" para cada usuario
+                const idleTimeCounts = uniqueUsers.map(user => {
+                    // Filtrar registros que corresponden a "Idle_Time" y al usuario actual
+                    const idleTimeRecords = data.filter(
+                        item => item.user_name === user && item.task_name === "Idle_Time"
+                    );
+
+                    // Sumar el tiempo total para este usuario en "Idle_Time"
+                    const totalIdleTime = idleTimeRecords.reduce((sum, record) => {
+                        // Convertir total_time a número entero y sumar
+                        return sum + parseInt(record.total_time, 10);
+                    }, 0);
+
+                    return totalIdleTime;
+                });
+
+                // Crear datos dinámicos para el gráfico
+                const dynamicIndividualData_Idle_Time = {
+                    labels: uniqueUsers,
+                    datasets: [
+                        {
+                            label: 'Total Idle Time per Technician',
+                            data: idleTimeCounts,
+                            backgroundColor: techColors.slice(0, uniqueUsers.length),
+                            borderColor: techColors.slice(0, uniqueUsers.length).map(color => color.replace('0.6', '1')),
+                            borderWidth: 1,
+                        },
+                    ],
+                };
+
+                // Actualizar el estado del gráfico
+                setIndividualData_Idle_Time(dynamicIndividualData_Idle_Time);
+
+            } else {
+                alert(result.message || "Error al actualizar la tabla.");
             }
-        };
+        } catch (error) {
+            console.error(error);
+            alert("Error en la conexión.");
+        }
+    };
+        
         useEffect(() => {
             fetchDailyReportsTl(); 
         }, []);
@@ -1084,11 +1195,10 @@ export default function Dashboard() {
                         <div className={styles.timerSection}>
                             {/* Weekly Production Section */}
                             <div className={styles.timerSection}>
-                                <h2>Weekly Production Report</h2>
-                                <Bar data={weeklyData} options={weeklyChartOptions} />
+                                <h2>Idle Time Report</h2>
+                                <Bar data={individualData_Idle_Time} options={current_Idle_Time_ChartOptions} />
                             </div>
-                        </div>
-                        
+                        </div>       
                     </div>
                 )}
                 {selectedOption === 'Today Team Work' && !showPasswordChangeForm && (
@@ -1141,21 +1251,35 @@ export default function Dashboard() {
                                 <label htmlFor="startDate" className={styles.searchLabel}> {/* Cambiado a htmlFor */}
                                     Start Date
                                 </label>
-                                <input type="date" id="startDate" className={styles.searchInput} />
-
+                                <input
+                                    type="date"
+                                    id="startDate"
+                                    name="startDate"
+                                    value={searchData.startDate}
+                                    onChange={handleSearchFormChange}
+                                    className={styles.searchInput} 
+                                />
                                 <label htmlFor="endDate" className={styles.searchLabel}> {/* Cambiado a htmlFor */}
                                     End Date
                                 </label>
-                                <input type="date" id="endDate" className={styles.searchInput} />
-
+                                <input
+                                    type="date"
+                                    id="endDate"
+                                    name="endDate"
+                                    value={searchData.endDate}
+                                    onChange={handleSearchFormChange}
+                                    className={styles.searchInput} 
+                                />
                                 <label htmlFor="technician" className={styles.searchLabel}> {/* Cambiado a htmlFor */}
                                     Select Technician
                                 </label>
-                                <select id="technician" className={styles.searchInput}>
-                                    <option value="">Select Technician</option>
-                                    <option value="technician1">Technician 1</option>
-                                    <option value="technician2">Technician 2</option>
-                                    <option value="technician3">Technician 3</option>
+
+                                <select id="technician" name="type" value={searchData.technician} onChange={handleSearchFormChange} className={styles.searchInput}>
+                                    {TL_Technitians.map(user => (
+                                        <option key={user.id} value={String(user.id)}>
+                                            {user.user_name}
+                                        </option>
+                                    ))}
                                 </select>
                                 <button type="submit" className={styles.searchButton}>Search</button>
                             </div>
@@ -1183,26 +1307,32 @@ export default function Dashboard() {
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    {tableData.map((entry, index) => (
+                                {Array.isArray(dataRows_Report) && dataRows_Report.length > 0 ? (
+                                    dataRows_Report.map((row, index) => (
                                         <tr
                                             key={index}
-                                            style={{ backgroundColor: index === highlightedRow ? '#f0f8ff' : 'transparent' }} // Cambia el color según la fila seleccionada
+                                            style={{ backgroundColor: index === highlightedRow ? '#f0f8ff' : 'transparent' }} 
                                         >
-                                            <td>{entry.technician}</td>
-                                            <td>{entry.task}</td>
-                                            <td>{entry.type}</td>
-                                            <td>{entry.alias}</td>
-                                            <td>{entry.comments}</td>
-                                            <td>{entry.status}</td>
-                                            <td>{entry.startTime}</td>
-                                            <td>{entry.endTime}</td>
-                                            <td>{entry.totalTime}</td>
-                                            <td>{entry.role}</td>
+                                            <td>{row.user_name}</td>
+                                            <td>{row.task_name}</td>
+                                            <td>{row.type_value}</td>
+                                            <td>{row.alias}</td>
+                                            <td>{row.commment}</td>
+                                            <td>{row.row_status}</td>
+                                            <td>{row.start_time}</td> 
+                                            <td>{row.end_time}</td> 
+                                            <td>{row.total_time + ' min'}</td> 
+                                            <td>{row.role_name}</td>
                                             <td>
                                                 <button onClick={() => handleModifyClick(index)}>Modify</button>
                                             </td>
                                         </tr>
-                                    ))}
+                                    ))
+                                ) : (
+                                    <tr>
+                                        <td colSpan="9">No data available</td>
+                                    </tr>
+                                )}
                                 </tbody>
                             </table>
                         </div>
@@ -1214,7 +1344,7 @@ export default function Dashboard() {
                                     <input 
                                         type="text"
                                         name="technician"
-                                        value={editData.technician}
+                                        value={editData.user_name}
                                         onChange={handleEditFormChange}
                                         placeholder="Technician"
                                         disabled
@@ -1222,7 +1352,7 @@ export default function Dashboard() {
                                     />
                                     <select 
                                         name="task"
-                                        value={editData.task}
+                                        value={editData.task_name}
                                         onChange={handleEditFormChange}
                                         className={styles.editList} // Clase para los estilos
                                     >
@@ -1234,7 +1364,7 @@ export default function Dashboard() {
                                     </select>
                                     <select 
                                         name="type"
-                                        value={editData.type}
+                                        value={editData.type_value}
                                         onChange={handleEditFormChange}
                                         className={styles.editList} // Clase para los estilos
                                     >
@@ -1245,7 +1375,7 @@ export default function Dashboard() {
                                         ))}
                                     </select>
                                     {/* Mostrar alias solo si task es "Production" */}
-                                    {editData.task === 'Production' && (
+                                    {editData.task_name === 'Production' && (
                                         <input 
                                             type="text"
                                             name="alias"
@@ -1265,7 +1395,7 @@ export default function Dashboard() {
                                     />
                                     <select 
                                         name="status" // Asegúrate de que el nombre sea "status" aquí
-                                        value={editData.status}
+                                        value={editData.row_status}
                                         onChange={handleEditFormChange}
                                         className={styles.editList} // Clase para los estilos
                                     >
@@ -1278,7 +1408,7 @@ export default function Dashboard() {
                                     <input 
                                         type="text"
                                         name="startTime"
-                                        value={editData.startTime}
+                                        value={editData.start_time}
                                         onChange={handleEditFormChange}
                                         placeholder="Start Time"
                                         required
@@ -1287,7 +1417,7 @@ export default function Dashboard() {
                                     <input 
                                         type="text"
                                         name="endTime"
-                                        value={editData.endTime}
+                                        value={editData.end_time}
                                         onChange={handleEditFormChange}
                                         placeholder="End Time"
                                         required

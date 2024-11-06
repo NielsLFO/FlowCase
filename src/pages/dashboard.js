@@ -161,7 +161,7 @@ export default function Dashboard() {
                 if (availableStatusOptions.length > 0) {
                     setFormData(prevData => ({ ...prevData, status: availableStatusOptions[0] }));
                 }
-            }, [availableStatusOptions,formData.status]);
+            }, []);
 
             const resetForm = () => {
                 setFormData({
@@ -175,14 +175,14 @@ export default function Dashboard() {
 
             useEffect(() => {
                 // Si `task` está vacío y hay opciones disponibles, selecciona la primera
-                if (!formData.task && taskOptionsByRole.length > 0) {
+                if (taskOptionsByRole.length > 0) {
                     setFormData(prevData => ({ ...prevData, task: taskOptionsByRole[0].id }));
                 }
             }, [taskOptionsByRole]);
     
             useEffect(() => {
                 // Si `type` está vacío y hay opciones disponibles, selecciona la primera
-                if (!formData.type && AvailableTypeOptions.length > 0) {
+                if (AvailableTypeOptions.length > 0) {
                     setFormData(prevData => ({ ...prevData, type: AvailableTypeOptions[0].id }));
                 }
             }, [AvailableTypeOptions]);
@@ -259,7 +259,6 @@ export default function Dashboard() {
                     total_time: elapsedMinutes, 
                     role: userRole,
                 };
-                alert(formData.status);
                 // Envía la solicitud PUT a la API para actualizar la fila
                 const response = await fetch('/api/Production/update_rows', { 
                     method: 'PUT',
@@ -591,7 +590,6 @@ export default function Dashboard() {
                 const user_id = localStorage.getItem('user_id');
                 const startDate = searchData.startDate;
                 const endDate = searchData.endDate;
-                alert(user_id +" " + startDate+" " + endDate);
                 try {
                     const response = await fetch('/api/Production/production_report', { 
                         method: 'POST',
