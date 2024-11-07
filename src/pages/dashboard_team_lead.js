@@ -29,6 +29,8 @@ export default function Dashboard() {
     const [dataRows, setDataRows] = useState();
     const [dataRows_Report, setDataRows_Report] = useState();
     const [TL_Technitians, setTL_Technitians] = useState([]);
+    const [taskOptionsByRole, setTaskOptionsByRole] = useState([]);
+    const [AvailableTypeOptions, setAvailableTypeOptions] = useState([]);
     const [passwordChangeData, setPasswordChangeData] = useState({
         oldPassword: '',
         newPassword: '',
@@ -216,479 +218,6 @@ export default function Dashboard() {
 
     //#endregion
 
-    //#region Values for type options according to task roll
-
-        /*********************************************************************************************/
-        /***                                 Type base on Roll                                     ***/
-        /*********************************************************************************************/
-        const typeOptions_OTP = {
-            Production: [
-                { value: 'New case', label: 'New case' },
-                { value: 'Clinical rework', label: 'Clinical rework' },
-                { value: 'QA rework', label: 'QA rework' },
-                { value: 'Doctor rework', label: 'Doctor rework' },
-                { value: 'QA review', label: 'QA review' },
-                { value: 'Doctor rework review', label: 'Doctor rework review' },
-                { value: 'Final MFG review', label: 'Final MFG review' },
-            ],
-            Call: [
-                { value: 'Support from TL', label: 'Support from TL' },
-                { value: 'Support from clinical', label: 'Support from clinical' },
-                { value: 'Support from QA', label: 'Support from QA' },
-                { value: 'Feedback from TL', label: 'Feedback from TL' },
-                { value: 'Feedback from clinical', label: 'Feedback from clinical' },
-                { value: 'Feedback from QA', label: 'Feedback from QA' },
-            ],
-            Meeting: [
-                { value: 'OTP team huddle', label: 'OTP team huddle' },
-                { value: 'Training', label: 'Training' },
-                { value: '1:1', label: '1:1' },
-                { value: 'Monthly all hands', label: 'Monthly all hands' },
-                { value: 'How its made', label: 'How its made' },
-                { value: 'Coffee talk', label: 'Coffee talk' },
-                { value: 'CR town hall', label: 'CR town hall' },
-                { value: 'UKR global stand-up', label: 'UKR global stand-up' },
-                { value: 'UKR team', label: 'UKR team' },
-                { value: 'Other', label: 'Other' },
-            ],
-            Other_Task: [
-                { value: 'Projects', label: 'Projects' },
-                { value: 'Backup', label: 'Backup' },
-                { value: 'Certification', label: 'Certification' },
-                { value: 'Mentoring', label: 'Mentoring' },
-                { value: 'Other', label: 'Other' },
-            ],
-            Idle_Time: [
-                { value: 'Waiting for case', label: 'Waiting for case' },
-                { value: 'Waiting for support', label: 'Waiting for support' },
-                { value: 'Electricity problem', label: 'Electricity problem' },
-                { value: 'Internet problem', label: 'Internet problem' },
-                { value: 'Lunch', label: 'Lunch' },
-                { value: 'Break', label: 'Break' },
-                { value: 'Reposition', label: 'Reposition' },
-                { value: 'Personal needs', label: 'Personal needs' },
-                { value: 'Other', label: 'Other' },
-            ],
-        };
-        const typeOptions_Clinical_Ops = {
-            Production: [
-                { value: 'Full review', label: 'Full review' },
-                { value: 'Second review', label: 'Second review' },
-                { value: 'Doctor rework review', label: 'Doctor rework review' },
-            ],
-            Call: [
-                { value: 'Clinical outreach', label: 'Clinical outreach' },
-                { value: 'Support to OTP', label: 'Support to OTP' },
-                { value: 'Support to QA', label: 'Support to QA' },
-                { value: 'Feedback to OTP', label: 'Feedback to OTP' },
-                { value: 'Feedback to QA', label: 'Feedback to QA' },
-                { value: 'Internal support requested', label: 'Internal support requested' },
-                { value: 'Internal support provided', label: 'Internal support provided' },
-            ],
-            Meeting: [
-                { value: 'OTP team huddle', label: 'OTP team huddle' },
-                { value: 'Clinical team huddle', label: 'Clinical team huddle' },
-                { value: 'Clinical general meeting', label: 'Clinical general meeting' },
-                { value: 'Training', label: 'Trainingnds' },
-                { value: '1:1', label: '1:1' },
-                { value: 'Lightplan review', label: 'Lightplan review' },
-                { value: 'Monthly all hands', label: 'Monthly all hands' },
-                { value: 'How it´s made', label: 'How it´s made' },
-                { value: 'Coffee talk', label: 'Coffee talk' },
-                { value: 'CR town hall', label: 'CR town hall' },
-                { value: 'Other', label: 'Other' },
-            ],
-            Other_Task: [
-                { value: 'Internal assessment', label: 'Internal assessment' },
-                { value: 'Reviews audit', label: 'Reviews audit' },
-                { value: 'Clinical escalation', label: 'Clinical escalation' },
-                { value: 'Infographics', label: 'Infographics' },
-                { value: 'KB', label: 'KB' },
-                { value: 'Low score', label: 'Low score' },
-                { value: 'OTP rework audit', label: 'OTP rework audit' },
-                { value: 'Certification', label: 'Certification' },
-                { value: 'Mentoring', label: 'Mentoring' },
-                { value: 'Project', label: 'Project' },
-                { value: 'Other', label: 'Other' },
-            ],
-            Idle_Time: [
-                { value: 'Waiting for case', label: 'Waiting for case' },
-                { value: 'Waiting for support', label: 'Waiting for support' },
-                { value: 'Electricity problem', label: 'Electricity problem' },
-                { value: 'Internet problem', label: 'Internet problem' },
-                { value: 'Lunch', label: 'Lunch' },
-                { value: 'Break', label: 'Break' },
-                { value: 'Reposition', label: 'Reposition' },
-                { value: 'Personal needs', label: 'Personal needs' },
-                { value: 'Other', label: 'Other' },
-            ],
-        };
-        const typeOptions_Clinical_Exc = {
-            Production: [
-                { value: 'Full review', label: 'Full review' },
-                { value: 'Second review', label: 'Second review' },
-                { value: 'Doctor rework review', label: 'Doctor rework review' },
-            ],
-            Call: [
-                { value: 'Clinical outreach', label: 'Clinical outreach' },
-                { value: 'Support to OTP', label: 'Support to OTP' },
-                { value: 'Support to QA', label: 'Support to QA' },
-                { value: 'Feedback to OTP', label: 'Feedback to OTP' },
-                { value: 'Feedback to QA', label: 'Feedback to QA' },
-                { value: 'Internal support requested', label: 'Internal support requested' },
-                { value: 'Internal support provided', label: 'Internal support provided' },
-            ],
-            Meeting: [
-                { value: 'OTP team huddle', label: 'OTP team huddle' },
-                { value: 'Clinical team huddle', label: 'Clinical team huddle' },
-                { value: 'Clinical general meeting', label: 'Clinical general meeting' },
-                { value: 'Training', label: 'Trainingnds' },
-                { value: '1:1', label: '1:1' },
-                { value: 'Lightplan review', label: 'Lightplan review' },
-                { value: 'Monthly all hands', label: 'Monthly all hands' },
-                { value: 'How it´s made', label: 'How it´s made' },
-                { value: 'Coffee talk', label: 'Coffee talk' },
-                { value: 'CR town hall', label: 'CR town hall' },
-                { value: 'Other', label: 'Other' },
-            ],
-            Other_Task: [
-                { value: 'Internal assessment', label: 'Internal assessment' },
-                { value: 'Reviews audit', label: 'Reviews audit' },
-                { value: 'Clinical escalation', label: 'Clinical escalation' },
-                { value: 'Infographics', label: 'Infographics' },
-                { value: 'KB', label: 'KB' },
-                { value: 'Low score', label: 'Low score' },
-                { value: 'OTP rework audit', label: 'OTP rework audit' },
-                { value: 'Certification', label: 'Certification' },
-                { value: 'Mentoring', label: 'Mentoring' },
-                { value: 'Project', label: 'Project' },
-                { value: 'Outreach IA', label: 'Outreach IA' },
-                { value: 'Personal needs', label: 'Personal needs' },
-                { value: 'Other', label: 'Other' },
-            ],
-            Idle_Time: [
-                { value: 'Waiting for case', label: 'Waiting for case' },
-                { value: 'Waiting for support', label: 'Waiting for support' },
-                { value: 'Electricity problem', label: 'Electricity problem' },
-                { value: 'Internet problem', label: 'Internet problem' },
-                { value: 'Lunch', label: 'Lunch' },
-                { value: 'Break', label: 'Break' },
-                { value: 'Reposition', label: 'Reposition' },
-                { value: 'Other', label: 'Other' },
-            ],
-        };
-        const typeOptions_Ortho = {
-            Production: [
-                { value: 'Full review', label: 'Full review' },
-                { value: 'Second review', label: 'Second review' },
-                { value: 'Doctor rework review', label: 'Doctor rework review' },
-            ],
-            Support: [
-                { value: 'Support to CS', label: 'Support to CS' },
-                { value: 'Support to OTP', label: 'Support to OTP' },
-                { value: 'Support to QA', label: 'Support to QA' },
-                { value: 'Support to OE', label: 'Support to OE' },
-                { value: 'Support to clinical', label: 'Support to clinical' },
-                { value: 'Internal assessment', label: 'Internal assessment' },
-            ],
-            Meeting: [
-                { value: 'OE team huddle', label: 'OE team huddle' },
-                { value: 'OTP team huddle', label: 'OTP team huddle' },
-                { value: 'Clinical team huddle', label: 'Clinical team huddle' },
-                { value: 'Training', label: 'Training' },
-                { value: '1:1', label: '1:1' },
-                { value: 'Monthly all hands', label: 'Monthly all hands' },
-                { value: 'How it´s made', label: 'How it´s made' },
-                { value: 'Coffee talk', label: 'Coffee talk' },
-                { value: 'CR town hall', label: 'CR town hall' },
-                { value: 'UKR global stand-up', label: 'UKR global stand-up' },
-                { value: 'UKR team', label: 'UKR team' },
-                { value: 'Other', label: 'Other' },
-            ],
-            Other_Task: [
-                { value: 'KB', label: 'KB' },
-                { value: 'Project', label: 'Project' },
-                { value: 'Other', label: 'Other' },
-            ],
-            Idle_Time: [
-                { value: 'Waiting for case', label: 'Waiting for case' },
-                { value: 'Waiting for support', label: 'Waiting for support' },
-                { value: 'Electricity problem', label: 'Electricity problem' },
-                { value: 'Internet problem', label: 'Internet problem' },
-                { value: 'Lunch', label: 'Lunch' },
-                { value: 'Break', label: 'Break' },
-                { value: 'Reposition', label: 'Reposition' },
-                { value: 'Personal needs', label: 'Personal needs' },
-                { value: 'Other', label: 'Other' },
-            ],
-        };
-        const typeOptions_QC_OTP = {
-            Production: [
-                { value: 'QA review 1', label: 'QA review 1' },
-                { value: 'QA review 2', label: 'QA review 2' },
-                { value: 'QA review 3', label: 'QA review 3' },
-                { value: 'MFG rework', label: 'MFG rework' },
-                { value: 'Doctor rework 1', label: 'Doctor rework 1' },
-                { value: 'Doctor rework 2', label: 'Doctor rework 2' },
-                { value: 'Doctor rework 3', label: 'Doctor rework 3' },
-                { value: 'Final MFG review', label: 'Final MFG review' },
-            ],
-            Call: [
-                { value: 'Support to OTP', label: 'Support to OTP' },
-                { value: 'Support from TL', label: 'Support from TL' },
-                { value: 'Support from clinical', label: 'Support from clinical' },
-            ],
-            Meeting: [
-                { value: 'OTP team huddle', label: 'OTP team huddle' },
-                { value: 'QA team huddle', label: 'QA team huddle' },
-                { value: 'Training', label: 'Trainingnds' },
-                { value: '1:1', label: '1:1' },
-                { value: 'Monthly all hands', label: 'Monthly all hands' },
-                { value: 'How it´s made', label: 'How it´s made' },
-                { value: 'Coffee talk', label: 'Coffee talk' },
-                { value: 'CR town hall', label: 'CR town hall' },
-                { value: 'Other', label: 'Other' },
-            ],
-            Other_Task: [
-                { value: 'Projects', label: 'Projects' },
-                { value: 'Backup', label: 'Backup' },
-                { value: 'Nesting revision', label: 'Nesting revision' },
-                { value: 'Dr. communication', label: 'Dr. communication' },
-                { value: 'Certification', label: 'Certification' },
-                { value: 'Mentoring', label: 'Mentoring' },
-                { value: 'Other', label: 'Other' },
-            ],
-            Idle_Time: [
-                { value: 'Waiting for case', label: 'Waiting for case' },
-                { value: 'Waiting for support', label: 'Waiting for support' },
-                { value: 'Electricity problem', label: 'Electricity problem' },
-                { value: 'Internet problem', label: 'Internet problem' },
-                { value: 'Lunch', label: 'Lunch' },
-                { value: 'Break', label: 'Break' },
-                { value: 'Reposition', label: 'Reposition' },
-                { value: 'Personal needs', label: 'Personal needs' },
-                { value: 'Other', label: 'Other' },
-            ],
-        };
-        const typeOptions_Detailer_Finisher = {
-            Production: [
-                { value: 'Detailing', label: 'Detailing' },
-                { value: 'Short Final MFG', label: 'Short Final MFG' },
-                { value: 'Final MFG review', label: 'Final MFG review' },
-                { value: 'Doctor rework', label: 'Doctor rework' },
-            ],
-            Call: [
-                { value: 'Support from TL', label: 'Support from TL' },
-                { value: 'Support from clinical', label: 'Support from clinical' },
-                { value: 'RCF-Low Score from TL', label: 'RCF-Low Score from TL' },
-            ],
-            Meeting: [
-                { value: 'Prism huddle', label: 'Prism huddle' },
-                { value: 'Bi weekly Retrospective', label: 'Bi weekly Retrospective' },
-                { value: 'Training', label: 'Trainingnds' },
-                { value: '1:1', label: '1:1' },
-                { value: 'Monthly all hands', label: 'Monthly all hands' },
-                { value: 'How it´s made', label: 'How it´s made' },
-                { value: 'Coffee talk', label: 'Coffee talk' },
-                { value: 'CR town hall', label: 'CR town hall' },
-                { value: 'Other', label: 'Other' },
-            ],
-            Other_Task: [
-                { value: 'Projects', label: 'Projects' },
-                { value: 'Backup', label: 'Backup' },
-                { value: 'Certification', label: 'Certification' },
-                { value: 'Mentoring', label: 'Mentoring' },
-                { value: 'Audit', label: 'Audit' },
-                { value: 'Other', label: 'Other' },
-            ],
-            Idle_Time: [
-                { value: 'Waiting for case', label: 'Waiting for case' },
-                { value: 'Waiting for TL Assistance', label: 'Waiting for TL Assistance' },
-                { value: 'Electricity problem', label: 'Electricity problem' },
-                { value: 'Internet problem', label: 'Internet problem' },
-                { value: 'Lunch', label: 'Lunch' },
-                { value: 'Break', label: 'Break' },
-                { value: 'Reposition', label: 'Reposition' },
-                { value: 'Personal needs', label: 'Personal needs' },
-                { value: 'Other', label: 'Other' },
-            ],
-        };
-        const typeOptions_Clinical_Analyst = {
-            Production: [
-                { value: 'Clinical Analysis', label: 'Clinical Analysis' },
-                { value: 'Second Clinical Analysis', label: 'Second Clinical Analysis' },
-            ],
-            Call: [
-                { value: 'Internal Support to PRISM', label: 'Internal Support to PRISM' },
-                { value: 'Internal Support to TL PRISM', label: 'Internal Support to TL PRISM' },
-                { value: 'Clinical Coordinator Support', label: 'Clinical Coordinator Support' },
-                { value: 'Feedback to PRISM', label: 'Feedback to PRISM' },
-            ],
-            Meeting: [
-                { value: 'Prism huddle', label: 'Prism huddle' },
-                { value: 'Bi weekly Retrospective', label: 'Bi weekly Retrospective' },
-                { value: 'Clinical team huddle', label: 'Clinical team huddle' },
-                { value: 'Training', label: 'Trainingnds' },
-                { value: '1:1', label: '1:1' },
-                { value: 'Monthly all hands', label: 'Monthly all hands' },
-                { value: 'How it´s made', label: 'How it´s made' },
-                { value: 'Coffee talk', label: 'Coffee talk' },
-                { value: 'CR town hall', label: 'CR town hall' },
-                { value: 'Other', label: 'Other' },
-            ],
-            Other_Task: [
-                { value: 'IA Resolve', label: 'IA Resolve' },
-                { value: 'Special Task', label: 'Special Task' },
-                { value: 'Certification', label: 'Certification' },
-                { value: 'Mentoring', label: 'Mentoring' },
-                { value: 'Project', label: 'Project' },
-                { value: 'Other', label: 'Other' },
-            ],
-            Idle_Time: [
-                { value: 'Waiting for case', label: 'Waiting for case' },
-                { value: 'Waiting for support', label: 'Waiting for support' },
-                { value: 'Electricity problem', label: 'Electricity problem' },
-                { value: 'Internet problem', label: 'Internet problem' },
-                { value: 'Lunch', label: 'Lunch' },
-                { value: 'Break', label: 'Break' },
-                { value: 'Reposition', label: 'Reposition' },
-                { value: 'Personal needs', label: 'Personal needs' },
-                { value: 'Other', label: 'Other' },
-            ],
-        };
-        const typeOptions_CAD = {
-            Production: [
-                { value: 'Segmentation', label: 'Segmentation' },
-                { value: 'IDB design', label: 'IDB design' },
-                { value: 'Segmentation review', label: 'Segmentation review' },
-                { value: 'IDB review', label: 'IDB review' },
-                { value: 'Final MFG review', label: 'Final MFG review' },
-                { value: 'Order entry', label: 'Order entry' },
-                { value: 'OE+segmentation', label: 'OE+segmentation' },
-            ],
-            Call: [
-                { value: 'Support from TL', label: 'Support from TL' },
-                { value: 'Support from QA', label: 'Support from QA' },
-                { value: 'Feedback from TL', label: 'Feedback from TL' },
-                { value: 'Feedback from QA', label: 'Feedback from QA' },
-            ],
-            Meeting: [
-                { value: 'CAD team huddle', label: 'CAD team huddle' },
-                { value: 'Training', label: 'Trainingnds' },
-                { value: '1:1', label: '1:1' },
-                { value: 'Monthly all hands', label: 'Monthly all hands' },
-                { value: 'How it´s made', label: 'How it´s made' },
-                { value: 'Coffee talk', label: 'Coffee talk' },
-                { value: 'CR town hall', label: 'CR town hall' },
-                { value: 'UKR global stand-up', label: 'UKR global stand-up' },
-                { value: 'UKR team', label: 'UKR team' },
-                { value: 'Other', label: 'Other' },
-            ],
-            Other_Task: [
-                { value: 'Projects', label: 'Projects' },
-                { value: 'Backup', label: 'Backup' },
-                { value: 'Certification', label: 'Certification' },
-                { value: 'Mentoring', label: 'Mentoring' },
-                { value: 'Plating', label: 'Plating' },
-                { value: 'Reorder', label: 'Reorder' },
-                { value: 'Camera review', label: 'Camera review' },
-                { value: 'Scan association', label: 'Scan association' },
-                { value: 'Physical rework', label: 'Physical rework' },
-                { value: 'Other', label: 'Other' },
-            ],
-            Idle_Time: [
-                { value: 'Waiting for case', label: 'Waiting for case' },
-                { value: 'Waiting for support', label: 'Waiting for support' },
-                { value: 'Electricity problem', label: 'Electricity problem' },
-                { value: 'Internet problem', label: 'Internet problem' },
-                { value: 'Lunch', label: 'Lunch' },
-                { value: 'Break', label: 'Break' },
-                { value: 'Reposition', label: 'Reposition' },
-                { value: 'Personal needs', label: 'Personal needs' },
-                { value: 'Other', label: 'Other' },
-            ],
-        };
-        const typeOptions_QC_CAD = {
-            Production: [
-                { value: 'Segmentation', label: 'Segmentation' },
-                { value: 'IDB design', label: 'IDB design' },
-                { value: 'Segmentation review', label: 'Segmentation review' },
-                { value: 'IDB review', label: 'IDB review' },
-                { value: 'Final MFG review', label: 'Final MFG review' },
-                { value: 'Order entry', label: 'Order entry' },
-            ],
-            Call: [
-                { value: 'Support to CAD', label: 'Support to CAD' },
-                { value: 'Support from TL', label: 'Support from TL' },
-                { value: 'Support from clinical', label: 'Support from clinical' },
-            ],
-            Meeting: [
-                { value: 'QC-CAD team huddle', label: 'QC-CAD team huddle' },
-                { value: 'Training', label: 'Trainingnds' },
-                { value: '1:1', label: '1:1' },
-                { value: 'Monthly all hands', label: 'Monthly all hands' },
-                { value: 'How it´s made', label: 'How it´s made' },
-                { value: 'Coffee talk', label: 'Coffee talk' },
-                { value: 'CR town hall', label: 'CR town hall' },
-                { value: 'UKR global stand-up', label: 'UKR global stand-up' },
-                { value: 'UKR team', label: 'UKR team' },
-                { value: 'Other', label: 'Other' },
-            ],
-            Other_Task: [
-                { value: 'Projects', label: 'Projects' },
-                { value: 'Backup', label: 'Backup' },
-                { value: 'Certification', label: 'Certification' },
-                { value: 'Mentoring', label: 'Mentoring' },
-                { value: 'Scan association', label: 'Scan association' },
-                { value: 'Internal assessment', label: 'Internal assessment' },
-                { value: 'Treatment notes', label: 'Treatment notes' },
-                { value: 'Salesforce', label: 'Salesforce' },
-                { value: 'Segment. review', label: 'Segment. review' },
-                { value: 'IDB review', label: 'IDB review' },
-                { value: 'Plating review', label: 'Plating review' },
-                { value: 'Camera review', label: 'Camera review' },
-                { value: 'OSO', label: 'OSO' },
-                { value: 'Other', label: 'Other' },
-            ],
-            Idle_Time: [
-                { value: 'Waiting for case', label: 'Waiting for case' },
-                { value: 'Waiting for support', label: 'Waiting for support' },
-                { value: 'Electricity problem', label: 'Electricity problem' },
-                { value: 'Internet problem', label: 'Internet problem' },
-                { value: 'Lunch', label: 'Lunch' },
-                { value: 'Break', label: 'Break' },
-                { value: 'Reposition', label: 'Reposition' },
-                { value: 'Personal needs', label: 'Personal needs' },
-                { value: 'Other', label: 'Other' },
-            ],
-        };
-
-        function roll_available_Type_Options(userRole,userTask){
-            switch (userRole) {
-                case "OTP":
-                    return typeOptions_OTP[userTask];  
-                case "Clinical_Ops":
-                    return typeOptions_Clinical_Ops[userTask];  
-                case "Clinical_Exc":
-                    return typeOptions_Clinical_Exc[userTask]; 
-                case "Ortho":
-                    return typeOptions_Ortho[userTask];  
-                case "QC_OTP":
-                    return typeOptions_QC_OTP[userTask];  
-                case "Detailer_Finisher":
-                    return typeOptions_Detailer_Finisher[userTask]; 
-                case "Clinical_Analyst":
-                    return typeOptions_Clinical_Analyst[userTask];    
-                case "CAD":
-                    return typeOptions_CAD[userTask];    
-                case "QC_OTP":
-                    return typeOptions_QC_CAD[userTask];  
-                default:
-                    return [];
-            }
-        }
-    //#endregion
-
     //#region Code for Manage Times section
 
     /*********************************************************************************************/
@@ -706,18 +235,6 @@ export default function Dashboard() {
         const [editingIndex, setEditingIndex] = useState(null);
         const [editData, setEditData] = useState({});
         
-        // Opciones de Task basadas en el rol
-        const taskOptionsByRole = {
-            OTP: ['Production', 'Call', 'Meeting', 'Other_Task', 'Idle_Time'],
-            Clinical_Ops: ['Production', 'Call', 'Meeting', 'Other_Task', 'Idle_Time'],
-            Clinical_Exc: ['Production', 'Call', 'Meeting', 'Other_Task', 'Idle_Time'],
-            Ortho: ['Production', 'Support', 'Meeting', 'Other Task', 'Idle_Time'],
-            QC_OTP: ['Production', 'Call', 'Meeting', 'Other_Task', 'Idle_Time'],
-            Detailer_Finisher: ['Production', 'Call', 'Meeting', 'Other_Task', 'Idle_Time'],
-            Clinical_Analyst: ['Production', 'Call', 'Meeting', 'Other_Task', 'Idle_Time'],
-            CAD: ['Production', 'Call', 'Meeting', 'Other_Task', 'Idle_Time'],
-        };
-
         const handleSearchFormChange = (e) => {
             const { name, value } = e.target;
             setSearchData(prev => ({ ...prev, [name]: value }));
@@ -725,7 +242,6 @@ export default function Dashboard() {
 
         const handleSearchSubmit = (e) => {
             e.preventDefault();
-            alert(searchData.startDate +" / " + searchData.endDate + " / " + searchData.technician);
 
             if (searchData.startDate == "") { 
                 showAlert('error', 'Error', 'Please select both Task and Type.');
@@ -742,77 +258,137 @@ export default function Dashboard() {
         const handleModifyClick = (index) => {
             setIsEditing(true);
             setEditingIndex(index);
-            setEditData(dataRows_Report[index]);
-            setHighlightedRow(index); // Establece el índice de la fila seleccionada
+            setHighlightedRow(index);
+        
+            const selectedRow = dataRows_Report[index];
+        
+            // Separar fecha y hora para start_time y end_time
+            const [startDate, startTime] = selectedRow.start_time.split(' ');
+            const [endDate, endTime] = selectedRow.end_time.split(' ');
+        
+            // Actualizar editData con los valores separados
+            setEditData({
+                ...selectedRow,
+                start_date: startDate,
+                start_time: startTime, 
+                end_date: endDate, 
+                end_time: endTime, 
+            });
+        
+            // Obtener el id de la tarea
+            const task = taskOptionsByRole.find(task => task.task_name === selectedRow.task_name);
+            const task_id = task ? task.id : null;
+        
+            fetchTaskType(task_id);
         };
+        
+
+        const fetchTaskType = async (task_id) => {
+            try {
+                const res = await fetch('/api/TL/manage_times_types', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ task_id: task_id }), 
+                });
+                const data = await res.json();        
+                if (data.success) {
+                    setAvailableTypeOptions(data.types);
+                } else {
+                    console.error('Error fetching types:', data.message);
+                }
+            } catch (error) {
+                console.error('Error fetching types:', error);
+            }
+        };
+
+        const fetchTask = async () => {
+            if (localStorage.getItem('userEmail')) {
+                try {
+                    // Hacer una sola solicitud para obtener el rol y las tareas asociadas
+                    const res = await fetch('/api/TL/manage_times_tasks', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({ }),
+                    });
+                    const data = await res.json();
+                    if (data.success) {
+                        setTaskOptionsByRole(data.tasks);   
+                     
+                    } else {
+                        console.error('Failed to fetch role and tasks:', data.message);
+                    }
+                } catch (error) {
+                    console.error('Error fetching role and tasks:', error);
+                }
+            }
+        };
+
+        useEffect(() => {
+            fetchTask(); 
+        }, []);
 
         const handleEditFormChange = (e) => {
             const { name, value } = e.target;
             setEditData((prevState) => ({
                 ...prevState,
                 [name]: value,
-            }));
+            })); 
         };
+        
 
         const handleEditSubmit = (e) => {
             e.preventDefault();
         
             // Validar que el alias tenga 5 caracteres si task es "Production"
-            if (editData.task === "Production" && editData.alias.length !== 5) {
+            if (editData.task_id == 1 && editData.alias.length !== 5) {
                 showAlert('error', 'Error', 'Please, the alias must be 5 characters long.');
                 return;
             }
         
             // Validar que el campo de comentarios no esté vacío si type es 'Other'
-            if (editData.type === 'Other' && !editData.comments) {
+
+            if ((editData.type_id == 57 || editData.type_id == 58 || editData.type_id == 59) && !editData.comments) {
                 showAlert('error', 'Error', 'Please fill in the comments when selecting "Other".');
                 return;
             }
-        
-            // Expresión regular para el formato "YYYY-MM-DD HH:MM:SS"
-            const dateTimeFormat = /^\d{4}-\d{2}-\d{2}\s\d{2}:\d{2}:\d{2}$/;
+            
 
-            // Validar que las fechas coincida con el formato
-            if (!dateTimeFormat.test(editData.startTime)) {
-                showAlert('error', 'Error', 'The start date must be in the format YYYY-MM-DD HH:MM:SS.');
-                return;
-            }
+            // Concatenar fecha y hora para crear objetos `Date`
+            const startTime = new Date(`${editData.start_date} ${editData.start_time}`);
+            const endTime = new Date(`${editData.end_date} ${editData.end_time}`);
 
-            if (!dateTimeFormat.test(editData.endTime)) {
-                showAlert('error', 'Error', 'The end time must be in the format YYYY-MM-DD HH:MM:SS.');
-                return;
-            }
-
-            // Convertir startTime y endTime a objetos Date para comparar
-            const startTime = new Date(editData.startTime);
-            const endTime = new Date(editData.endTime);
-
-            // Verificar que startTime sea menor que endTime
+            // Verificar que `startTime` sea menor que `endTime`
             if (startTime >= endTime) {
                 showAlert('error', 'Error', 'The start time must be earlier than the end time.');
                 return;
             }
 
-            // Actualizar el tableData con los nuevos datos
-            const timeDifference = endTime - startTime; 
-            const elapsedMinutes = Math.floor(timeDifference / 60000); // Convertir a minutos
+            // Calcular el tiempo transcurrido
+            const timeDifference = endTime - startTime;
+            const elapsedMinutes = Math.floor(timeDifference / 60000);
 
-            // Resetear alias si task no es "Production"
+            // Formatear las fechas en el formato `YYYY-MM-DD HH:MM:SS`
+            const formattedStartTime = formatDateTime(startTime);
+            const formattedEndTime = formatDateTime(endTime);
+
             const updatedData = {
                 ...editData,
-                alias: editData.task === "Production" ? editData.alias : "", 
-                totalTime: `${elapsedMinutes} min`,
+                start_time: formattedStartTime, // Guardar en formato deseado
+                end_time: formattedEndTime,     // Guardar en formato deseado
+                totalTime: `${elapsedMinutes}`,
             };
-            const newTableData = [...tableData];
-            newTableData[editingIndex] = updatedData;
-            setTableData(newTableData);
+            update_data(editData.id,updatedData);
         
             // Resetear el estado de edición
             setIsEditing(false);
             setEditingIndex(null);
             setEditData({});
             setHighlightedRow(null);
-            showAlert('success', 'Update', 'The register was updated successfully.');
+            
         };
         
         const handleCancelClick = () => {
@@ -820,12 +396,20 @@ export default function Dashboard() {
             setHighlightedRow(null);
         };
 
-        // Obtener las opciones de tarea para el rol seleccionado
-        const getTaskOptions = (role) => {
-            return taskOptionsByRole[role] || [];
+        const formatDateTime = (date) => {
+            const year = date.getFullYear();
+            const month = String(date.getMonth() + 1).padStart(2, '0'); // Mes en dos dígitos
+            const day = String(date.getDate()).padStart(2, '0'); // Día en dos dígitos
+            const hours = String(date.getHours()).padStart(2, '0'); // Horas en dos dígitos
+            const minutes = String(date.getMinutes()).padStart(2, '0'); // Minutos en dos dígitos
+            const seconds = String(date.getSeconds()).padStart(2, '0'); // Segundos en dos dígitos
+        
+            return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
         };
+        
+
         const getStatusOptions = () => {
-            return ['Finished', 'Stop'] || [];
+            return ['Finish', 'Stop'] || [];
         };
 
         const fetchTechList = async () => {
@@ -853,27 +437,11 @@ export default function Dashboard() {
         useEffect(() => {
             fetchTechList();
         },[]);
-        /*
-        useEffect(() => {
-            // Obtener las opciones disponibles para `type` basado en el `role` y `task`
-            const typeOptions = roll_available_Type_Options(editData.role, editData.task);
-
-            // Si hay opciones disponibles, establecer el primer valor como `type` por defecto
-            if (typeOptions.length > 0) {
-                setEditData((prevState) => ({
-                    ...prevState,
-                    type: typeOptions[0].value,
-                }));
-            }
-        }, [editData.task]);
-*/
-
-
+        
         const fetchReports = async () => {
             const user_id = searchData.technician;
             const startDate = searchData.startDate;
             const endDate = searchData.endDate;
-
             try {
                 const response = await fetch('/api/TL/search_report', { 
                     method: 'POST',
@@ -881,14 +449,11 @@ export default function Dashboard() {
                         'Content-Type': 'application/json',
                     },
                     body: JSON.stringify({ user_id, startDate, endDate}),
-                });                    
-        
-                const result = await response.json();
-        
+                });                       
+                const result = await response.json();      
                 if (result.success) {
                     const data = result.reports;
                     setDataRows_Report(data); 
-
                 } else {
                     alert(result.message || "Error al actualizar la tabla.");
                 }
@@ -903,6 +468,26 @@ export default function Dashboard() {
                 setSearchData(prevData => ({ ...prevData, technician: TL_Technitians[0].id }));
             }
         }, [searchData.startDate, searchData.endDate]);
+
+        const update_data = async (id, updatedData) => {
+            try {
+                const res = await fetch('/api/TL/manage_times_update', {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ row_id: id, data: updatedData }), 
+                });
+                const data = await res.json();        
+                if (data.success) {
+                    showAlert('success', 'Update', 'The register was updated successfully.');
+                } else {
+                    console.error('Error fetching types:', data.message);
+                }
+            } catch (error) {
+                console.error('Error fetching types:', error);
+            }
+        };
 
 
     //#endregion
@@ -1293,7 +878,8 @@ export default function Dashboard() {
                             <table className={styles.table}>
                                 <thead>
                                     <tr>
-                                        <th>Technician</th>
+                                        <th>#</th>
+                                        <th>Technician</th>                               
                                         <th>Task</th>
                                         <th>Type</th>
                                         <th>Alias</th>
@@ -1313,7 +899,8 @@ export default function Dashboard() {
                                             key={index}
                                             style={{ backgroundColor: index === highlightedRow ? '#f0f8ff' : 'transparent' }} 
                                         >
-                                            <td>{row.user_name}</td>
+                                            <td>{row.id}</td>
+                                            <td>{row.user_name}</td>                        
                                             <td>{row.task_name}</td>
                                             <td>{row.type_value}</td>
                                             <td>{row.alias}</td>
@@ -1343,7 +930,7 @@ export default function Dashboard() {
                                     <h3>Edit Row</h3>
                                     <input 
                                         type="text"
-                                        name="technician"
+                                        name="user_name"
                                         value={editData.user_name}
                                         onChange={handleEditFormChange}
                                         placeholder="Technician"
@@ -1351,26 +938,26 @@ export default function Dashboard() {
                                         className={styles.searchInput} // Clase para los estilos
                                     />
                                     <select 
-                                        name="task"
-                                        value={editData.task_name}
+                                        name="task_id"
+                                        value={editData.task_id}
                                         onChange={handleEditFormChange}
                                         className={styles.editList} // Clase para los estilos
                                     >
-                                        {getTaskOptions(editData.role).map((task, index) => (
-                                            <option key={index} value={task}>
-                                                {task}
-                                            </option>
+                                        {taskOptionsByRole.map(task => (
+                                            <option key={task.id} value={task.id}>
+                                            {task.task_name}
+                                        </option>
                                         ))}
                                     </select>
                                     <select 
-                                        name="type"
-                                        value={editData.type_value}
+                                        name="type_id"
+                                        value={editData.type_id}
                                         onChange={handleEditFormChange}
                                         className={styles.editList} // Clase para los estilos
                                     >
-                                        {roll_available_Type_Options(editData.role, editData.task).map((typeObj, index) => (
-                                            <option key={index} value={typeObj.value}>
-                                                {typeObj.label}
+                                        {AvailableTypeOptions.map(type => (
+                                            <option key={type.id} value={String(type.id)}>
+                                                {type.type_value}
                                             </option>
                                         ))}
                                     </select>
@@ -1394,7 +981,7 @@ export default function Dashboard() {
                                         className={styles.searchInput} // Clase para los estilos
                                     />
                                     <select 
-                                        name="status" // Asegúrate de que el nombre sea "status" aquí
+                                        name="row_status" // Asegúrate de que el nombre sea "status" aquí
                                         value={editData.row_status}
                                         onChange={handleEditFormChange}
                                         className={styles.editList} // Clase para los estilos
@@ -1405,25 +992,31 @@ export default function Dashboard() {
                                             </option>
                                         ))}
                                     </select>
-                                    <input 
+
+                                    <input
                                         type="text"
-                                        name="startTime"
-                                        value={editData.start_time}
+                                        name="start_time"
+                                        value={editData.start_time} // Solo la parte de la hora
                                         onChange={handleEditFormChange}
                                         placeholder="Start Time"
                                         required
-                                        className={styles.searchInput} // Clase para los estilos
+                                        className="searchInput" // Puedes aplicar tus estilos aquí
+                                        maxLength={8} // Limita la longitud a 8 caracteres (hh:mm:ss)
+                                        pattern="([01]?[0-9]|2[0-3]):([0-5][0-9]):([0-5][0-9])" // Formato de hora
                                     />
-                                    <input 
+
+                                    <input
                                         type="text"
-                                        name="endTime"
-                                        value={editData.end_time}
+                                        name="end_time"
+                                        value={editData.end_time} // Solo la parte de la hora
                                         onChange={handleEditFormChange}
                                         placeholder="End Time"
                                         required
-                                        className={styles.searchInput} // Clase para los estilos
+                                        className="searchInput" 
+                                        maxLength={8} 
+                                        pattern="([01]?[0-9]|2[0-3]):([0-5][0-9]):([0-5][0-9])" 
                                     />
-                                    <button type="submit" className={styles.editButton}>Save Changes</button> {/* Clase para los estilos */}
+                                    <button type="submit" className={styles.editButton}>Save Changes</button> 
                                     <button type="button" onClick={handleCancelClick} className={styles.cancel_Edit_Button}>Cancel</button>
                                 </form>
                             </div>
