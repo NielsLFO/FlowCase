@@ -196,7 +196,12 @@ export default function Dashboard() {
         /*********************************************************************************************/
 
         const addNewRow = async () => {
-            const currentTime = getCurrentDateTime(); 
+            let currentTime = ""; 
+            if(dataRows.length == 0){
+                currentTime = getCurrentDateTime(); 
+            }else{
+                currentTime = dataRows[dataRows.length - 1].end_time;
+            }
             const date_row = new Date().toISOString().slice(0, 10).replace('T', ' '); // Formato YYYY-MM-DD
             try {
                 const newRowData = {

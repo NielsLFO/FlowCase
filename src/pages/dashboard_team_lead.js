@@ -256,12 +256,28 @@ export default function Dashboard() {
         };
 
         const handleModifyClick = (index) => {
+
             setIsEditing(true);
             setEditingIndex(index);
             setHighlightedRow(index);
-        
-            const selectedRow = dataRows_Report[index];
-        
+            let previous_selectedRow = "";
+            let selectedRow = "";
+            let follow_selectedRow = "";
+
+            if(index == 0){
+                previous_selectedRow = null;
+                selectedRow = dataRows_Report[index];
+                follow_selectedRow = dataRows_Report[index + 1];
+            }else if (index < (dataRows_Report.length - 1)){
+                previous_selectedRow = dataRows_Report[index - 1];
+                selectedRow = dataRows_Report[index];
+                follow_selectedRow = dataRows_Report[index + 1];
+            }else if (index == (dataRows_Report.length - 1)){
+                previous_selectedRow = dataRows_Report[index - 1];
+                selectedRow = dataRows_Report[index];
+                follow_selectedRow = null;
+            }
+    
             // Separar fecha y hora para start_time y end_time
             const [startDate, startTime] = selectedRow.start_time.split(' ');
             const [endDate, endTime] = selectedRow.end_time.split(' ');
@@ -272,7 +288,13 @@ export default function Dashboard() {
                 start_date: startDate,
                 start_time: startTime, 
                 end_date: endDate, 
-                end_time: endTime, 
+                end_time: endTime,
+                pre_row_id: previous_selectedRow ? previous_selectedRow.id : null,
+                pre_row_end_time: previous_selectedRow ? previous_selectedRow.end_time : null,
+                pre_row_start_time: previous_selectedRow ? previous_selectedRow.start_time : null,
+                next_row_id: follow_selectedRow ? follow_selectedRow.id : null,
+                next_row_star_time: follow_selectedRow ? follow_selectedRow.start_time : null,
+                next_row_end_time: follow_selectedRow ? follow_selectedRow.end_time : null,
             });
         
             // Obtener el id de la tarea
@@ -335,7 +357,7 @@ export default function Dashboard() {
             const { name, value } = e.target;
             setEditData((prevState) => ({
                 ...prevState,
-                [name]: value,
+                [name]: value || "",
             })); 
         };
         
@@ -369,18 +391,35 @@ export default function Dashboard() {
 
             // Calcular el tiempo transcurrido
             const timeDifference = endTime - startTime;
+            
             const elapsedMinutes = Math.floor(timeDifference / 60000);
 
             // Formatear las fechas en el formato `YYYY-MM-DD HH:MM:SS`
             const formattedStartTime = formatDateTime(startTime);
             const formattedEndTime = formatDateTime(endTime);
 
+            
+
+
             const updatedData = {
-                ...editData,
-                start_time: formattedStartTime, // Guardar en formato deseado
-                end_time: formattedEndTime,     // Guardar en formato deseado
-                totalTime: `${elapsedMinutes}`,
+                task_id: editData.task_id,
+                type_id: editData.type_id,
+                alias: editData.alias,
+                commment: editData.commment,
+                row_status: editData.row_status,
+                start_time: formattedStartTime, 
+                end_time: formattedEndTime,     
+                totalTime: elapsedMinutes,
+                role_id: editData.role_id,
+                pre_row_id: editData.pre_row_id,
+                pre_row_time: editData.pre_row_time,
+                next_row_id: editData.next_row_id,
+                pre_row_end_time: editData.pre_row_end_time,
+                pre_row_start_time:  editData.pre_row_start_time,
+                next_row_star_time: editData.next_row_star_time,
+                next_row_end_time: editData.next_row_end_time,
             };
+
             update_data(editData.id,updatedData);
         
             // Resetear el estado de edición
@@ -470,6 +509,7 @@ export default function Dashboard() {
         }, [searchData.startDate, searchData.endDate]);
 
         const update_data = async (id, updatedData) => {
+
             try {
                 const res = await fetch('/api/TL/manage_times_update', {
                     method: 'PUT',
@@ -879,6 +919,7 @@ export default function Dashboard() {
                                 <thead>
                                     <tr>
                                         <th>#</th>
+                                        <th>Date</th>                         
                                         <th>Technician</th>                               
                                         <th>Task</th>
                                         <th>Type</th>
@@ -900,6 +941,7 @@ export default function Dashboard() {
                                             style={{ backgroundColor: index === highlightedRow ? '#f0f8ff' : 'transparent' }} 
                                         >
                                             <td>{row.id}</td>
+                                            <td>{row.row_date.split('T')[0]}</td>
                                             <td>{row.user_name}</td>                        
                                             <td>{row.task_name}</td>
                                             <td>{row.type_value}</td>
