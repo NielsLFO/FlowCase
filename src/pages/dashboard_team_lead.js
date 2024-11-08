@@ -227,10 +227,9 @@ export default function Dashboard() {
         const [searchData, setSearchData] = useState({
             startDate: '',
             endDate: '',
-            technician: '',
+            user: '',
         });
         const [highlightedRow, setHighlightedRow] = useState(null);
-        const [tableData, setTableData] = useState([]);
         const [isEditing, setIsEditing] = useState(false);
         const [editingIndex, setEditingIndex] = useState(null);
         const [editData, setEditData] = useState({});
@@ -378,7 +377,6 @@ export default function Dashboard() {
                 return;
             }
             
-
             // Concatenar fecha y hora para crear objetos `Date`
             const startTime = new Date(`${editData.start_date} ${editData.start_time}`);
             const endTime = new Date(`${editData.end_date} ${editData.end_time}`);
@@ -397,9 +395,6 @@ export default function Dashboard() {
             // Formatear las fechas en el formato `YYYY-MM-DD HH:MM:SS`
             const formattedStartTime = formatDateTime(startTime);
             const formattedEndTime = formatDateTime(endTime);
-
-            
-
 
             const updatedData = {
                 task_id: editData.task_id,
@@ -478,7 +473,7 @@ export default function Dashboard() {
         },[]);
         
         const fetchReports = async () => {
-            const user_id = searchData.technician;
+            const user_id = searchData.user;
             const startDate = searchData.startDate;
             const endDate = searchData.endDate;
             try {
@@ -504,7 +499,7 @@ export default function Dashboard() {
 
         useEffect(() => {
             if (TL_Technitians.length > 0) {
-                setSearchData(prevData => ({ ...prevData, technician: TL_Technitians[0].id }));
+                setSearchData(prevData => ({ ...prevData, user: TL_Technitians[0].id }));
             }
         }, [searchData.startDate, searchData.endDate]);
 
@@ -521,6 +516,7 @@ export default function Dashboard() {
                 const data = await res.json();        
                 if (data.success) {
                     showAlert('success', 'Update', 'The register was updated successfully.');
+                    fetchReports();
                 } else {
                     console.error('Error fetching types:', data.message);
                 }
@@ -899,9 +895,9 @@ export default function Dashboard() {
                                     Select Technician
                                 </label>
 
-                                <select id="technician" name="type" value={searchData.technician} onChange={handleSearchFormChange} className={styles.searchInput}>
+                                <select id="technician" name="user" value={searchData.id} onChange={handleSearchFormChange} className={styles.searchInput}>
                                     {TL_Technitians.map(user => (
-                                        <option key={user.id} value={String(user.id)}>
+                                        <option key={user.id} value={user.id}>
                                             {user.user_name}
                                         </option>
                                     ))}

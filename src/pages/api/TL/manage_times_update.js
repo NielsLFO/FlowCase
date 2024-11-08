@@ -32,6 +32,7 @@ export default async function handler(req, res) {
             row_id
         ];
 
+        // Primera actualización
         const [result] = await connection.execute(
             `UPDATE daily_reports 
              SET task_id = ?, type_id = ?, alias = ?, commment = ?, row_status = ?, start_time = ?, end_time = ?, total_time = ?, role_id = ? 
@@ -39,7 +40,11 @@ export default async function handler(req, res) {
             values
         );
 
-        if(data.start_time !== data.pre_row_end_time && data.pre_row_end_time !== null){
+        let success_pre = true;
+        let success_next = true;
+
+        // Segunda actualización (anterior)
+        if(data.start_time !== data.pre_row_end_time && data.pre_row_end_time !== null) {
             const startTime = new Date(data.pre_row_start_time);
             const endTime = new Date(data.start_time);
             const timeDifference = endTime - startTime;
@@ -47,32 +52,40 @@ export default async function handler(req, res) {
 
             const [result_pre] = await connection.execute(
                 `UPDATE daily_reports 
-                 SET end_time = ?, total_time = ?
-                 WHERE id = ?
-            `,[data.start_time, elapsedMinutes, data.pre_row_id]);
+                 SET end_time = ?, total_time = ? 
+                 WHERE id = ?`,
+                [data.start_time, elapsedMinutes, data.pre_row_id]
+            );
+
+            // Verificar si tuvo éxito
+            success_pre = result_pre.affectedRows > 0;
         }
 
-        if(data.end_time !== data.next_row_star_time && data.next_row_star_time !== null){
-
+        // Tercera actualización (siguiente)
+        if(data.end_time !== data.next_row_star_time && data.next_row_star_time !== null) {
             const startTime = new Date(data.end_time);
             const endTime = new Date(data.next_row_end_time);
             const timeDifference = endTime - startTime;
-            
             const elapsedMinutes = Math.floor(timeDifference / 60000);
 
             const [result_next] = await connection.execute(
                 `UPDATE daily_reports 
-                 SET start_time = ?, total_time = ?
-                 WHERE id = ?
-            `,[data.end_time, elapsedMinutes, data.next_row_id]);
+                 SET start_time = ?, total_time = ? 
+                 WHERE id = ?`,
+                [data.end_time, elapsedMinutes, data.next_row_id]
+            );
+
+            // Verificar si tuvo éxito
+            success_next = result_next.affectedRows > 0;
         }
 
         await db.release(connection);
 
-        if (result.affectedRows > 0) {
+        // Validar si las tres actualizaciones fueron exitosas
+        if (result.affectedRows > 0 && success_pre && success_next) {
             res.status(200).json({ success: true });
         } else {
-            res.status(404).json({ success: false, message: 'Registro no encontrado.' });
+            res.status(400).json({ success: false, message: 'Una o más actualizaciones fallaron.' });
         }
     } catch (error) {
         console.error('Error al actualizar el registro:', error);
