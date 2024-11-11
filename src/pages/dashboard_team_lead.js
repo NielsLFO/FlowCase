@@ -81,6 +81,9 @@ export default function Dashboard() {
     const handleOptionChange = (option) => {
         setSelectedOption(option);
         setShowPasswordChangeForm(false);
+        if(option === "Role Management"){
+            loadRolesAndTechnicians();
+        }
     };
     const handleSettingsButtonClick = () => {
         setShowPasswordChangeForm(prev => !prev);
@@ -534,67 +537,122 @@ export default function Dashboard() {
         /***                    All The Validations needed for managing roles                      ***/
         /*********************************************************************************************/
 
-            // Lista de técnicos
-            const technicians = [
-                "Tech #1", "Tech #2", "Tech #3", "Tech #4", 
-                "Tech #5", "Tech #6", "Tech #7", "Tech #8", 
-                "Tech #9", "Tech #10", "Tech #11", "Tech #12"
-            ];
+            const [technicians, setTechnicians] = useState([]);
+            const [roles, setRoles] = useState([]);
+
+            const fetchAvailableRoles = async () => {
+                try {
+                    const response = await fetch('/api/TL/getAvailableRoles', { 
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({ }),
+                    });                    
+                
+                    const result = await response.json();
+                
+                    if (result.success) {
+                        setTechnicians(result.roleRows); 
+                    } else {
+                        alert(result.message || "Error al actualizar cargar los roles.");
+                    }
+                } catch (error) {
+                    console.error(error);
+                    alert("Error en la conexión.");
+                }
+            };
 
             // Estado para los roles de cada técnico
-            const [roles, setRoles] = useState(
-                technicians.map(name => ({
-                    name,
-                    OTP: true,
-                    Clinical_Ops: false,
-                    Clinical_Exc: false,
-                    Ortho: false,
-                    QC_OTP: false,
-                    Detailer_Finisher: false,
-                    Clinical_Analyst: false,
-                    CAD: false,
-                }))
-            );
+
+            const fetchTechniciansWithRoles = async () => {
+                const tl_name = localStorage.getItem('user_name');
+                try {
+                    const response = await fetch('/api/TL/getTechniciansWithRoles', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({ tl_name }),
+                    });
+            
+                    const result = await response.json();
+            
+                    if (result.success) {
+                        // Actualizamos el estado de roles con los técnicos y sus roles seleccionados
+                        const techniciansWithRoles = result.data.map(tech => {
+                            const roleAssignments = {};
+            
+                            // Para cada rol disponible, asignamos si el técnico tiene ese rol
+                            technicians.forEach(role => {
+                                // Si el id del rol del técnico coincide con el id de un rol, lo marcamos como `true`
+                                roleAssignments[role.role_name] = tech.role_id === role.id;
+                            });
+            
+                            // Devolvemos el técnico con los roles asignados
+                            return { name: tech.user_name, ...roleAssignments };
+                        });
+            
+                        setRoles(techniciansWithRoles); // Actualizamos el estado con los roles correctos
+                    } else {
+                        alert(result.message || "Error al obtener técnicos y roles.");
+                    }
+                } catch (error) {
+                    console.error("Error al obtener técnicos y roles:", error);
+                }
+            };
+            
+            
 
             // Manejar el cambio de checkbox para un técnico específico
             const handleCheckboxChange = (technicianIndex, role) => {
                 const updatedRoles = [...roles];
-
-                // Deseleccionar todos los roles de ese técnico
+                // Deselecciona todos los roles de este técnico
                 Object.keys(updatedRoles[technicianIndex]).forEach(r => {
                     if (r !== 'name') updatedRoles[technicianIndex][r] = false;
                 });
-
-                // Seleccionar solo el rol actual
+                // Selecciona solo el rol actual
                 updatedRoles[technicianIndex][role] = true;
-                
                 setRoles(updatedRoles);
             };
+            
 
             // Manejar el cambio de checkbox del encabezado
             const handleHeaderCheckboxChange = (role) => {
                 const updatedRoles = roles.map(tecnico => {
                     const newRoles = { ...tecnico };
-                    
+            
                     // Deseleccionar todos los roles de este técnico
                     Object.keys(newRoles).forEach(r => {
                         if (r !== 'name') newRoles[r] = false;
                     });
-
-                    // Seleccionar el rol actual
+            
+                    // Seleccionar solo el rol actual
                     newRoles[role] = true;
-                    
+            
                     return newRoles;
                 });
-
+            
                 setRoles(updatedRoles);
             };
+            
 
             // Guardar cambios
             const saveChanges = () => {
                 console.log("Datos guardados:", roles);
                 showAlert('success', 'Role Change', 'The role was updated successfully.');
             };
+
+    // Definir la función que cargará los roles y técnicos
+    const loadRolesAndTechnicians = async () => {
+        await fetchAvailableRoles();
+
+    };
+    useEffect(() => {
+        if (technicians.length > 0) {
+            fetchTechniciansWithRoles();
+        }
+    }, [technicians]);
 
     //#endregion
 
@@ -1068,14 +1126,14 @@ export default function Dashboard() {
                         <thead>
                             <tr>
                                 <th>Técnico</th>
-                                {['OTP', 'Clinical_Ops', 'Clinical_Exc', 'Ortho', 'QC_OTP', 'Detailer_Finisher', 'Clinical_Analyst', 'CAD'].map(role => (
-                                    <th key={role}>
+                                {technicians.map((role) => (
+                                    <th key={role.role_name}>
                                         <div style={{ textAlign: 'center' }}>
-                                            {role}<br />
+                                            {role.role_name}<br />
                                             <input 
                                                 type="checkbox" 
-                                                checked={roles.every(tecnico => tecnico[role])} 
-                                                onChange={() => handleHeaderCheckboxChange(role)} 
+                                                checked={roles.every((tecnico) => tecnico[role.role_name])} 
+                                                onChange={() => handleHeaderCheckboxChange(role.role_name)} 
                                             />
                                         </div>
                                     </th>
@@ -1086,12 +1144,12 @@ export default function Dashboard() {
                             {roles.map((tecnico, index) => (
                                 <tr key={tecnico.name}>
                                     <td>{tecnico.name}</td>
-                                    {['OTP', 'Clinical_Ops', 'Clinical_Exc', 'Ortho', 'QC_OTP', 'Detailer_Finisher', 'Clinical_Analyst', 'CAD'].map(role => (
-                                        <td key={role}>
+                                    {technicians.map((role) => (
+                                        <td key={role.role_name}>
                                             <input 
                                                 type="checkbox" 
-                                                checked={tecnico[role]} 
-                                                onChange={() => handleCheckboxChange(index, role)} 
+                                                checked={tecnico[role.role_name] || false} // Marcamos el checkbox según el estado
+                                                onChange={() => handleCheckboxChange(index, role.role_name)} 
                                             />
                                         </td>
                                     ))}
