@@ -548,10 +548,8 @@ export default function Dashboard() {
                             'Content-Type': 'application/json',
                         },
                         body: JSON.stringify({ }),
-                    });                    
-                
-                    const result = await response.json();
-                
+                    });                                 
+                    const result = await response.json();            
                     if (result.success) {
                         setTechnicians(result.roleRows); 
                     } else {
@@ -575,25 +573,17 @@ export default function Dashboard() {
                         },
                         body: JSON.stringify({ tl_name }),
                     });
-            
                     const result = await response.json();
-            
                     if (result.success) {
-                        // Actualizamos el estado de roles con los técnicos y sus roles seleccionados
                         const techniciansWithRoles = result.data.map(tech => {
                             const roleAssignments = {};
-            
                             // Para cada rol disponible, asignamos si el técnico tiene ese rol
                             technicians.forEach(role => {
-                                // Si el id del rol del técnico coincide con el id de un rol, lo marcamos como `true`
                                 roleAssignments[role.role_name] = tech.role_id === role.id;
                             });
-            
-                            // Devolvemos el técnico con los roles asignados
                             return { name: tech.user_name, ...roleAssignments };
                         });
-            
-                        setRoles(techniciansWithRoles); // Actualizamos el estado con los roles correctos
+                        setRoles(techniciansWithRoles);
                     } else {
                         alert(result.message || "Error al obtener técnicos y roles.");
                     }
@@ -602,9 +592,6 @@ export default function Dashboard() {
                 }
             };
             
-            
-
-            // Manejar el cambio de checkbox para un técnico específico
             const handleCheckboxChange = (technicianIndex, role) => {
                 const updatedRoles = [...roles];
                 // Deselecciona todos los roles de este técnico
@@ -616,43 +603,76 @@ export default function Dashboard() {
                 setRoles(updatedRoles);
             };
             
-
             // Manejar el cambio de checkbox del encabezado
             const handleHeaderCheckboxChange = (role) => {
                 const updatedRoles = roles.map(tecnico => {
                     const newRoles = { ...tecnico };
-            
                     // Deseleccionar todos los roles de este técnico
                     Object.keys(newRoles).forEach(r => {
                         if (r !== 'name') newRoles[r] = false;
                     });
-            
-                    // Seleccionar solo el rol actual
                     newRoles[role] = true;
-            
                     return newRoles;
                 });
-            
                 setRoles(updatedRoles);
             };
-            
 
-            // Guardar cambios
-            const saveChanges = () => {
-                console.log("Datos guardados:", roles);
-                showAlert('success', 'Role Change', 'The role was updated successfully.');
+            const roleMap = {};
+            technicians.forEach(role => {
+                roleMap[role.role_name] = role.id;
+            });
+
+            // Función para preparar los datos para la base de datos
+            const prepareRolesDataForDB = () => {
+                const dataToSave = roles.map(tecnico => {
+                    const assignedRoleId = Object.keys(tecnico)
+                        .filter(roleName => roleName !== 'name' && tecnico[roleName]) // Filtra roles activos
+                        .map(roleName => roleMap[roleName])[0]; // Solo toma el primer rol encontrado
+            
+                    return {
+                        name: tecnico.name,
+                        assignedRoleId: assignedRoleId // Esto debe ser un solo ID de rol
+                    };
+                });
+            
+                console.log("Datos a enviar:", dataToSave); // Verificar datos antes de enviarlos
+                return dataToSave;
+            };
+            
+            const saveChanges = async () => {
+
+                const dataToSave = prepareRolesDataForDB(); // Ahora obtiene solo un assignedRoleId por técnico
+
+                try {
+                    const response = await fetch('/api/TL/update_roles', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ roles: dataToSave }) // Asegúrate de que 'roles' es un array
+                    });
+                    const data = await response.json();
+                    if (data.success) {
+                        showAlert('success', 'Role Change', 'The role was updated successfully.');
+                    } else {
+                        console.error("Error al actualizar roles:", data.message);
+                        showAlert('error', 'Role Change', 'Failed to update roles.');
+                    }
+                } catch (error) {
+                    console.error("Error al enviar la solicitud:", error);
+                    showAlert('error', 'Role Change', 'Failed to update roles.');
+                }
             };
 
-    // Definir la función que cargará los roles y técnicos
-    const loadRolesAndTechnicians = async () => {
-        await fetchAvailableRoles();
+            const loadRolesAndTechnicians = async () => {
+                await fetchAvailableRoles();
+            };
 
-    };
-    useEffect(() => {
-        if (technicians.length > 0) {
-            fetchTechniciansWithRoles();
-        }
-    }, [technicians]);
+            useEffect(() => {
+                if (technicians.length > 0) {
+                    fetchTechniciansWithRoles();
+                }
+            }, [technicians]);
 
     //#endregion
 
@@ -1125,7 +1145,7 @@ export default function Dashboard() {
                     <table>
                         <thead>
                             <tr>
-                                <th>Técnico</th>
+                                <th>Technician</th>
                                 {technicians.map((role) => (
                                     <th key={role.role_name}>
                                         <div style={{ textAlign: 'center' }}>

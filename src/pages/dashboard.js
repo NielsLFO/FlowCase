@@ -228,8 +228,6 @@ export default function Dashboard() {
                 const result = await response.json();
         
                 if (result.success) {
-                    // Almacena el ID en localStorage
-                    localStorage.setItem('lastStatus', "Start");
                     fetchDailyReports(); //Refresh the table
                     // Mantiene el formulario
                     setFormData({
@@ -240,11 +238,11 @@ export default function Dashboard() {
                         status: 'Finish',
                     });
                 } else {
-                    alert(result.message || "Error al añadir el registro.");
+                    showAlert('error', 'Error', result.message || "Error adding the record."); 
                 }
             } catch (error) {
                 console.error(error);
-                alert("Error en la conexión aaaa");
+                showAlert('error', 'Error', "Connection error"); 
             }
         };
 
@@ -283,11 +281,11 @@ export default function Dashboard() {
                     fetchAndUpdateRole();
                     fetchWeeklyReports();
                 } else {
-                    alert(result.message || "Error al actualizar el registro.");
+                    showAlert('error', 'Error', result.message || "Error updating the record."); 
                 }
             } catch (error) {
                 console.error(error);
-                alert("Error en la conexión.");
+                showAlert('error', 'Error', "Connection error"); 
             }
         };
 
@@ -317,11 +315,11 @@ export default function Dashboard() {
                         setlastStarTime(data[data.length - 1].start_time);
                     }
                 } else {
-                    alert(result.message || "Error al actualizar la tabla.");
+                    showAlert('error', 'Error', result.message || "Error updating the table."); 
                 }
             } catch (error) {
                 console.error(error);
-                alert("Error en la conexión.");
+                showAlert('error', 'Error', "Connection error");
             }
         };
 
@@ -338,10 +336,10 @@ export default function Dashboard() {
                 if (data.success) {
                     setAvailableTypeOptions(data.types);
                 } else {
-                    console.error('Error fetching types:', data.message);
+                    showAlert('error', 'Error', 'Error fetching types: ' + data.message); 
                 }
             } catch (error) {
-                console.error('Error fetching types:', error);
+                showAlert('error', 'Error', 'Error fetching types: ' + data.message); 
             }
         };
 
@@ -369,10 +367,10 @@ export default function Dashboard() {
                             setUserRole(role);
                         }
                     } else {
-                        console.error('Failed to fetch role and tasks:', data.message);
+                        showAlert('error', 'Error', 'Failed to fetch role and tasks: ' + data.message); 
                     }
                 } catch (error) {
-                    console.error('Error fetching role and tasks:', error);
+                    showAlert('error', 'Error', 'Failed to fetch role and tasks: ' + data.message); 
                 }
             }
         };
@@ -411,13 +409,51 @@ export default function Dashboard() {
                 setSelectedOption(option);
                 setShowPasswordChangeForm(false);
             };
-            const handleSettingsButtonClick = () => {
+            const handleSettingsButtonClick  = async (e) => {
+                
                 setShowPasswordChangeForm(prev => !prev);
                 // Si el formulario ya está mostrado, selecciona "Today Work"
                 if (showPasswordChangeForm) {
                     setSelectedOption('Today Work');
+
                 } else {
                     setSelectedOption(''); // Limpiar opción al abrir el formulario de configuración
+                }
+
+                try {
+                    const user_name = localStorage.getItem('user_name');
+                    // Llamada a la API para actualizar la contraseña
+                    const response = await fetch('/api/pass_change', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            userName: user_name,
+                            oldPassword: passwordChangeData.oldPassword,
+                            newPassword: passwordChangeData.newPassword,
+                        })
+                    });
+        
+                    const data = await response.json();
+        
+                    if (response.ok) {
+                        console.log('Password changed successfully');
+                        showAlert('success', 'Password Change', 'Password changed successfully.');
+                        setPasswordChangeData({
+                            oldPassword: '',
+                            newPassword: '',
+                            confirmPassword: '',
+                        });
+                        setShowPasswordChangeForm(false);
+                        setSelectedOption('Today Work');
+                    } else {
+                        console.error('Error changing password:', data.message);
+                        showAlert('error', 'Password Change', data.message || 'Error changing password.');
+                    }
+                } catch (error) {
+                    console.error('Error en la solicitud:', error);
+                    showAlert('error', 'Password Change', 'Failed to update password.');
                 }
             };
     //#endregion
@@ -547,11 +583,11 @@ export default function Dashboard() {
                         ],
                     }));
                 } else {
-                    alert(result.message || "Error al actualizar la tabla.");
+                    showAlert('error', 'Password Change', result.message || "Error updating the table.");
                 }
             } catch (error) {
                 console.error(error);
-                alert("Error en la conexión.");
+                showAlert('error', 'Password Change', "Connection error.");
             }
         };
         useEffect(() => {
@@ -609,13 +645,12 @@ export default function Dashboard() {
                     if (result.success) {
                         const data = result.reports;
                         setDataRows_report(data); 
-                        alert(data.length);
                     } else {
-                        alert(result.message || "Error al actualizar la tabla.");
+                        showAlert('error', 'Error', result.message || "Error updating the table.");
                     }
                 } catch (error) {
                     console.error(error);
-                    alert("Error en la conexión.");
+                    showAlert('error', 'Error', 'Connection error.');
                 }
             };
 

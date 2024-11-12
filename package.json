@@ -12,6 +12,7 @@
     "@emotion/react": "^11.13.3",
     "@emotion/styled": "^11.13.0",
     "@mui/material": "^6.1.2",
+    "bcryptjs": "^2.4.3",
     "chart.js": "^4.4.4",
     "chartjs-plugin-annotation": "^3.0.1",
     "generic-pool": "^3.9.0",
