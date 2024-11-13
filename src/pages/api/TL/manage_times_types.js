@@ -5,7 +5,7 @@ export default async function handler(req, res) {
         return res.status(405).json({ message: 'Método no permitido' });
     }
 
-    const { task_id } = req.body;
+    const { task_id, role_id } = req.body;
     let connection;
 
     try {
@@ -15,17 +15,15 @@ export default async function handler(req, res) {
 
         // Query the option types for the first task
         const [typeRows] = await connection.query(`
-            SELECT id, type_value, task_id 
+            SELECT id, type_value 
             FROM type_options 
-            WHERE task_id = ?
-            `, [task_id]);
-
+            WHERE task_id = ? 
+            AND FIND_IN_SET(?, REPLACE(REPLACE(role_id, '[', ''), ']', '')) > 0
+            `, [task_id, role_id]);
         types = typeRows.map(row => ({
             id: row.id,
             type_value: row.type_value
         }));
-
-
         await db.release(connection);
         return res.status(200).json({ success: true, types });
 

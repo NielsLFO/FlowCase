@@ -318,6 +318,7 @@ export default function Dashboard() {
             // Separate date and time for start_time and end_time
             const [startDate, startTime] = selectedRow.start_time.split(' ');
             const [endDate, endTime] = selectedRow.end_time.split(' ');
+            const role_id = dataRows_Report[index].role_id;
         
             // Update editData with the separated values
             setEditData({
@@ -338,18 +339,19 @@ export default function Dashboard() {
             const task = taskOptionsByRole.find(task => task.task_name === selectedRow.task_name);
             const task_id = task ? task.id : null;
         
-            fetchTaskType(task_id);
+
+            fetchTaskType(task_id,role_id);
         };
         
 
-        const fetchTaskType = async (task_id) => {
+        const fetchTaskType = async (task_id,role_id) => {
             try {
                 const res = await fetch('/api/TL/manage_times_types', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
                     },
-                    body: JSON.stringify({ task_id: task_id }), 
+                    body: JSON.stringify({ task_id: task_id, role_id: role_id }), 
                 });
                 const data = await res.json();        
                 if (data.success) {
@@ -376,7 +378,6 @@ export default function Dashboard() {
                     const data = await res.json();
                     if (data.success) {
                         setTaskOptionsByRole(data.tasks);   
-                     
                     } else {
                         console.error('Failed to fetch role and tasks:', data.message);
                     }
@@ -427,7 +428,6 @@ export default function Dashboard() {
             // Calculate the elapsed time
 
             const timeDifference = endTime - startTime;
-            
             const elapsedMinutes = Math.floor(timeDifference / 60000);
 
             // Format the dates in the `YYYY-MM-DD HH:MM:SS` format
@@ -1084,7 +1084,10 @@ export default function Dashboard() {
                                     <select 
                                         name="task_id"
                                         value={editData.task_id}
-                                        onChange={handleEditFormChange}
+                                        onChange={(e) => { 
+                                            handleEditFormChange(e);
+                                            fetchTaskType(e.target.value, editData.role_id);
+                                        }}
                                         className={styles.editList} 
                                     >
                                         {taskOptionsByRole.map(task => (
