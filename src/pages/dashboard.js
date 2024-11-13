@@ -39,7 +39,7 @@ export default function Dashboard() {
                 newPassword: '',
                 confirmPassword: '',
             });
-            // Estado para el Snackbar y la alerta
+            // State for the Snackbar and the alert
             const [alertConfig, setAlertConfig] = useState({
                 open: false,
                 severity: 'error', // 'success', 'info', 'warning', o 'error'
@@ -70,7 +70,7 @@ export default function Dashboard() {
                 setPasswordChangeData(prev => ({ ...prev, [name]: value }));
             };
             const handleTaskChange = async (e) => {
-                const selectedTaskId = e.target.value; // Obtener el ID de la tarea seleccionada
+                const selectedTaskId = e.target.value; // Get the ID of the selected task
                 setFormData(prevData => ({ ...prevData, task: selectedTaskId }));    
                 fetchTaskType(selectedTaskId);
             };       
@@ -85,7 +85,7 @@ export default function Dashboard() {
         const [userRole, setUserRole] = useState(null);
         const [userId, setUserId] = useState(null);
         const [taskOptionsByRole, setTaskOptionsByRole] = useState([]);
-        // Verificar si estamos en el entorno del cliente
+        // Check if we are in the client-side environment
         useEffect(() => {
             if (typeof window !== 'undefined') {
                 const emailFromStorage = localStorage.getItem('userEmail');
@@ -127,7 +127,7 @@ export default function Dashboard() {
                     showAlert('error', 'Error', 'You must complete the previous task before adding a new one.');
                     return;
                 } else if (lastTask == formData.task && lastType == formData.type && lastAlias == formData.alias) {
-                    // Llama a la función para actualizar la fila
+                    // Call the function to update the row
                    await updateRow(lastID); 
                 } else {
                     showAlert('error', 'Error', 'You must complete the previous task before adding a new one.'); 
@@ -140,14 +140,14 @@ export default function Dashboard() {
             function getCurrentDateTime() {
                 const currentDate = new Date();
                 const year = currentDate.getFullYear();
-                const month = String(currentDate.getMonth() + 1).padStart(2, '0'); // Enero es 0
+                const month = String(currentDate.getMonth() + 1).padStart(2, '0'); // January is 0
                 const day = String(currentDate.getDate()).padStart(2, '0');
                 const hours = String(currentDate.getHours()).padStart(2, '0');
                 const minutes = String(currentDate.getMinutes()).padStart(2, '0');
                 const seconds = String(currentDate.getSeconds()).padStart(2, '0');
                 return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
             }
-            const getStatusOptions = () => {// Función para obtener las opciones dinámicas de estado
+            const getStatusOptions = () => {// Function to get dynamic state options
                 if (lastStatus === 'Start') {
                     return ['Finish', 'Stop'];
                 } else if (lastStatus === 'Stop' || lastStatus === 'Finish') {
@@ -157,7 +157,7 @@ export default function Dashboard() {
             };
             const availableStatusOptions = getStatusOptions();
             useEffect(() => {
-                // Si `status` está vacío y hay opciones de estado disponibles, selecciona la primera
+                // If `status` is empty and there are available status options, select the first one
                 if (availableStatusOptions.length > 0) {
                     setFormData(prevData => ({ ...prevData, status: availableStatusOptions[0] }));
                 }
@@ -174,14 +174,14 @@ export default function Dashboard() {
             };
 
             useEffect(() => {
-                // Si `task` está vacío y hay opciones disponibles, selecciona la primera
+                // If `task` is empty and there are available options, select the first one
                 if (taskOptionsByRole.length > 0) {
                     setFormData(prevData => ({ ...prevData, task: taskOptionsByRole[0].id }));
                 }
             }, [taskOptionsByRole]);
     
             useEffect(() => {
-                // Si `type` está vacío y hay opciones disponibles, selecciona la primera
+                // If `type` is empty and there are available options, select the first one
                 if (AvailableTypeOptions.length > 0) {
                     setFormData(prevData => ({ ...prevData, type: AvailableTypeOptions[0].id }));
                 }
@@ -202,7 +202,7 @@ export default function Dashboard() {
             }else{
                 currentTime = dataRows[dataRows.length - 1].end_time;
             }
-            const date_row = new Date().toISOString().slice(0, 10).replace('T', ' '); // Formato YYYY-MM-DD
+            const date_row = new Date().toISOString().slice(0, 10).replace('T', ' '); // Format YYYY-MM-DD
             try {
                 const newRowData = {
                     user_id: userId,
@@ -216,7 +216,7 @@ export default function Dashboard() {
                     total_time: 0, 
                     role_id: userRole,
                 };
-                // Envía la solicitud POST a la API
+                // Send the POST request to the API
                 const response = await fetch('/api/Production/register_rows', {
                     method: 'POST',
                     headers: {
@@ -229,7 +229,7 @@ export default function Dashboard() {
         
                 if (result.success) {
                     fetchDailyReports(); //Refresh the table
-                    // Mantiene el formulario
+                    // Keep the form
                     setFormData({
                         task: formData.task,
                         type: formData.type,
@@ -254,7 +254,7 @@ export default function Dashboard() {
                 const timeDifference = endTime - startTime; 
                 const elapsedMinutes = Math.floor(timeDifference / (1000 * 60));
 
-                // Crear el objeto de datos actualizado
+                // Create the updated data object
                 const updatedRowData = {
                     comments: formData.comments,
                     status: formData.status,
@@ -262,7 +262,7 @@ export default function Dashboard() {
                     total_time: elapsedMinutes, 
                     role: userRole,
                 };
-                // Envía la solicitud PUT a la API para actualizar la fila
+                // Send the PUT request to the API to update the row
                 const response = await fetch('/api/Production/update_rows', { 
                     method: 'PUT',
                     headers: {
@@ -290,7 +290,7 @@ export default function Dashboard() {
         };
 
         const fetchDailyReports = async () => {
-            const currentDate = new Date().toISOString().slice(0, 10).replace('T', ' '); // Formato YYYY-MM-DD HH:mm:ss
+            const currentDate = new Date().toISOString().slice(0, 10).replace('T', ' '); // Format YYYY-MM-DD HH:mm:ss
             const user_id = localStorage.getItem('user_id');
             try {
                 const response = await fetch('/api/Production/production_daily_report', { 
@@ -346,7 +346,7 @@ export default function Dashboard() {
         const fetchAndUpdateRole = async () => {
             if (localStorage.getItem('userEmail')) {
                 try {
-                    // Hacer una sola solicitud para obtener el rol y las tareas asociadas
+                    // Make a single request to get the role and associated tasks
                     const res = await fetch('/api/Production/role', {
                         method: 'POST',
                         headers: {
@@ -359,7 +359,7 @@ export default function Dashboard() {
                         const role = data.role;
                         setTaskOptionsByRole(data.tasks);
                         setAvailableTypeOptions(data.types);
-                        // Verificar si el rol cambió
+                        // Check if the role has changed
                         if (userRole !== role && (lastStatus === 'Stop' || lastStatus === 'Finish')) {
                             setUserRole(role);
                             showAlert('warning', 'Role Changed', "Please be advised that your Team Lead has changed your user role. You will now be working in the following role: " + role);
@@ -396,12 +396,12 @@ export default function Dashboard() {
                 
                 setShowPasswordChangeForm(prev => !prev);
                 
-                // Si el formulario ya está mostrado, selecciona "Today Work"
+                // If the form is already shown, select "Today Work"
                 if (showPasswordChangeForm) {
                     setSelectedOption('Today Work');
 
                 } else {
-                    setSelectedOption(''); // Limpiar opción al abrir el formulario de configuración
+                    setSelectedOption(''); // Clear option when opening the configuration form
                 }
             };
             const handleChangePasswordCancel = async (e) => {          
@@ -483,7 +483,7 @@ export default function Dashboard() {
                 x: {beginAtZero: true, ticks: {stepSize: 1,}},
                 y: {beginAtZero: true, ticks: {stepSize: 1,},
                     grid: {display: true, drawBorder: true,
-                    color: '#e0e0e0', },// Color para las líneas de la cuadrícula
+                    color: '#e0e0e0', },// Color for the grid lines
                     afterDataLimits: function(scale) {scale.max = Math.max(targetCases, completedCases);}
                 }
             },
@@ -517,14 +517,14 @@ export default function Dashboard() {
             datasets: [
                 {
                     label: 'Cases per Day',
-                    data: [0, 0, 0, 0, 0], // Inicializado en cero
+                    data: [0, 0, 0, 0, 0], // Initialized to zero
                     backgroundColor: 'rgba(75, 192, 192, 0.6)',
                     borderColor: 'rgba(75, 192, 192, 1)',
                     borderWidth: 1,
                 },
             ],
         });
-        // Opciones para el gráfico
+        // Options for the chart
         const weeklyChartOptions = {
             responsive: true,
             plugins: {
@@ -556,17 +556,17 @@ export default function Dashboard() {
                 const result = await response.json();
         
                 if (result.success) {
-                    // Mapear los datos recibidos a los días de la semana
+                    // Map the received data to the days of the week
                     const weeklyCases = [0, 0, 0, 0, 0]; // Lunes a viernes
 
-                    // Procesar cada resultado y asignarlo al índice correspondiente
+                    // Process each result and assign it to the corresponding index
                     result.reports.forEach(report => {
-                        const dayIndex = report.day_of_week - 2; // Mapea 2=Lunes, 3=Martes, ..., 6=Viernes a índice 0-4
+                        const dayIndex = report.day_of_week - 2; // Map 2=Monday, 3=Tuesday, ..., 6=Friday to index 0-4
                         if (dayIndex >= 0 && dayIndex < 5) {
                             weeklyCases[dayIndex] = report.cases_per_day;
                         }
                     });
-                    // Actualizar el estado de los datos del gráfico
+                    // Update the chart data state
                     setWeeklyData(prevData => ({
                         ...prevData,
                         datasets: [
@@ -600,13 +600,13 @@ export default function Dashboard() {
                 endDate: '',
             });
 
-            // Función para manejar los cambios en el formulario de búsqueda
+            // Function to handle changes in the search form
             const handleSearchFormChange = (e) => {
                 const { name, value } = e.target;
                 setSearchData(prev => ({ ...prev, [name]: value }));
             };
 
-            // Función para manejar la búsqueda (aún sin funcionalidad)
+            // Function to handle the search (still without functionality)
             const handleSearchSubmit = (e) => {
                 e.preventDefault();
                 if (searchData.startDate == "") { 
@@ -655,14 +655,14 @@ export default function Dashboard() {
         /***                                   Alert Messages                                      ***/
         /*********************************************************************************************/
 
-        // Función para abrir el Snackbar
+        // Function to open the Snackbar
         const showAlert = (severity, title, message) => {
             setAlertConfig({ open: true, severity, title, message });
         };
     
-        // Función para cerrar el Snackbar
+        // Function to close the Snackbar
         const handleClose = (event, reason) => {
-            if (reason === 'clickaway') return; // Evita el cierre accidental
+            if (reason === 'clickaway') return; // Prevent accidental closure
             setAlertConfig({ ...alertConfig, open: false });
         };
     //#endregion
@@ -716,7 +716,7 @@ export default function Dashboard() {
                 </nav>
             </header>
             <main className={styles.content}>
-                {/* Snackbar para mostrar el mensaje de alerta */}
+                {/* Snackbar to display the alert message */}
                 <Snackbar
                     open={alertConfig.open}
                     autoHideDuration={6000}

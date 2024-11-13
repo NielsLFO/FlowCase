@@ -974,8 +974,8 @@ export default function Dashboard() {
                 {selectedOption === 'Manage Times' && !showPasswordChangeForm && (
                     <div className={styles.container_searchForm}>
                         <form onSubmit={handleSearchSubmit} className={styles.searchForm}>
-                            <div className={styles.searchForm}> {/* Cambiado a className */}
-                                <label htmlFor="startDate" className={styles.searchLabel}> {/* Cambiado a htmlFor */}
+                            <div className={styles.searchForm}> 
+                                <label htmlFor="startDate" className={styles.searchLabel}> 
                                     Start Date
                                 </label>
                                 <input
@@ -986,7 +986,7 @@ export default function Dashboard() {
                                     onChange={handleSearchFormChange}
                                     className={styles.searchInput} 
                                 />
-                                <label htmlFor="endDate" className={styles.searchLabel}> {/* Cambiado a htmlFor */}
+                                <label htmlFor="endDate" className={styles.searchLabel}> 
                                     End Date
                                 </label>
                                 <input
@@ -997,7 +997,7 @@ export default function Dashboard() {
                                     onChange={handleSearchFormChange}
                                     className={styles.searchInput} 
                                 />
-                                <label htmlFor="technician" className={styles.searchLabel}> {/* Cambiado a htmlFor */}
+                                <label htmlFor="technician" className={styles.searchLabel}> 
                                     Select Technician
                                 </label>
 
@@ -1079,7 +1079,7 @@ export default function Dashboard() {
                                         onChange={handleEditFormChange}
                                         placeholder="Technician"
                                         disabled
-                                        className={styles.searchInput} // Clase para los estilos
+                                        className={styles.searchInput} 
                                     />
                                     <select 
                                         name="task_id"
@@ -1105,7 +1105,7 @@ export default function Dashboard() {
                                             </option>
                                         ))}
                                     </select>
-                                    {/* Mostrar alias solo si task es "Production" */}
+                                    {/* Show alias only if task is "Production" */}
                                     {editData.task_name === 'Production' && (
                                         <input 
                                             type="text"
@@ -1140,19 +1140,19 @@ export default function Dashboard() {
                                     <input
                                         type="text"
                                         name="start_time"
-                                        value={editData.start_time} // Solo la parte de la hora
+                                        value={editData.start_time} 
                                         onChange={handleEditFormChange}
                                         placeholder="Start Time"
                                         required
-                                        className="searchInput" // Puedes aplicar tus estilos aquí
-                                        maxLength={8} // Limita la longitud a 8 caracteres (hh:mm:ss)
-                                        pattern="([01]?[0-9]|2[0-3]):([0-5][0-9]):([0-5][0-9])" // Formato de hora
+                                        className="searchInput" 
+                                        maxLength={8} 
+                                        pattern="([01]?[0-9]|2[0-3]):([0-5][0-9]):([0-5][0-9])" 
                                     />
 
                                     <input
                                         type="text"
                                         name="end_time"
-                                        value={editData.end_time} // Solo la parte de la hora
+                                        value={editData.end_time} 
                                         onChange={handleEditFormChange}
                                         placeholder="End Time"
                                         required
@@ -1196,7 +1196,7 @@ export default function Dashboard() {
                                         <td key={role.role_name}>
                                             <input 
                                                 type="checkbox" 
-                                                checked={tecnico[role.role_name] || false} // Marcamos el checkbox según el estado
+                                                checked={tecnico[role.role_name] || false} // Mark the checkbox according to the state
                                                 onChange={() => handleCheckboxChange(index, role.role_name)} 
                                             />
                                         </td>
