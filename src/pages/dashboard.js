@@ -106,18 +106,18 @@ export default function Dashboard() {
         /*********************************************************************************************/
         const handleFormSubmit = async (e) => { 
             e.preventDefault();
-        
+     
             if (!formData.task && !formData.type) { 
                 showAlert('error', 'Error', 'Please select both Task and Type.');
                 return;
             }
         
-            if (formData.type === 'Other' && !formData.comments) {
+            if ((formData.type == 57 ||  formData.type == 58 || formData.type == 59) && !formData.comments) {
                 showAlert('error', 'Error', 'Please fill in the comments when selecting "Other".');
                 return;
             }             
         
-            if (formData.task === "Production" && formData.alias.length !== 5) { 
+            if (formData.task == 1 && formData.alias.length !== 5) { 
                 showAlert('error', 'Error', 'Please, the alias must be 5 characters long.');
                 return;
             }  
@@ -610,14 +610,13 @@ export default function Dashboard() {
             const handleSearchSubmit = (e) => {
                 e.preventDefault();
                 if (searchData.startDate == "") { 
-                    showAlert('error', 'Error', 'Please select both Task and Type.');
+                    showAlert('error', 'Error', 'Please select a start date.');
                     return;
                 }
                 if (searchData.endDate == "") { 
-                    showAlert('error', 'Error', 'Please select both Task and Type.');
+                    showAlert('error', 'Error', 'Please select an end date.');
                     return;
-                }
-                
+                }                            
                 fetchReports();
             };
 

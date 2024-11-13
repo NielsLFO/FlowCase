@@ -64,6 +64,11 @@ export default function Dashboard() {
         const handleOptionChange = (option) => {
             setSelectedOption(option);
             setShowPasswordChangeForm(false);
+            if(option == "Role Management"){
+                loadRolesAndTechnicians();
+            }else if (option == "Today Team Work"){
+                fetchDailyReportsTl();
+            }
         };
         const handleSettingsButtonClick  = async (e) => {
             
@@ -276,11 +281,11 @@ export default function Dashboard() {
             e.preventDefault();
 
             if (searchData.startDate == "") { 
-                showAlert('error', 'Error', 'Please select both Task and Type.');
+                showAlert('error', 'Error', 'Please select a start date.');
                 return;
             }
             if (searchData.endDate == "") { 
-                showAlert('error', 'Error', 'Please select both Task and Type.');
+                showAlert('error', 'Error', 'Please select an end date.');
                 return;
             }
             
@@ -392,7 +397,6 @@ export default function Dashboard() {
                 [name]: value || "",
             })); 
         };
-        
 
         const handleEditSubmit = (e) => {
             e.preventDefault();
@@ -405,7 +409,7 @@ export default function Dashboard() {
         
             // Validate that the comment field is not empty if type is 'Other'
 
-            if ((editData.type_id == 57 || editData.type_id == 58 || editData.type_id == 59) && !editData.comments) {
+            if ((editData.type_id == 57 || editData.type_id == 58 || editData.type_id == 59) && !editData.commment) {
                 showAlert('error', 'Error', 'Please fill in the comments when selecting "Other".');
                 return;
             }
@@ -681,11 +685,11 @@ export default function Dashboard() {
                     if (data.success) {
                         showAlert('success', 'Role Change', 'The role was updated successfully.');
                     } else {
-                        console.error("Error al actualizar roles:", data.message);
+                        console.error("Error updating roles:", data.message);
                         showAlert('error', 'Role Change', 'Failed to update roles.');
                     }
                 } catch (error) {
-                    console.error("Error al enviar la solicitud:", error);
+                    console.error("Error sending the request:", error);
                     showAlert('error', 'Role Change', 'Failed to update roles.');
                 }
             };
@@ -709,109 +713,107 @@ export default function Dashboard() {
         /*********************************************************************************************/
 
         const fetchDailyReportsTl = async () => {
-        const currentDate = new Date().toISOString().slice(0, 10).replace('T', ' '); // Formato YYYY-MM-DD
-        const tl_name = localStorage.getItem('user_name');
-        try {
-            const response = await fetch('/api/TL/report_tl', { 
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ tl_name, currentDate }),
-            });
-
-            const result = await response.json();
-
-            if (result.success) {
-                const data = result.reports;
-                setDataRows(data);
-
-                // Obtener nombres únicos y contar casos por cada técnico
-                const uniqueUsers = Array.from(new Set(data.map(item => item.user_name)));
-                const caseCounts = uniqueUsers.map(user => 
-                    data.filter(item => item.user_name === user).length
-                );
-
-                // Crear datos dinámicos para el gráfico
-                const dynamicIndividualData = {
-                    labels: uniqueUsers,
-                    datasets: [
-                        {
-                            label: 'Cases per Technician',
-                            data: caseCounts,
-                            backgroundColor: techColors.slice(0, uniqueUsers.length),
-                            borderColor: techColors.slice(0, uniqueUsers.length).map(color => color.replace('0.6', '1')),
-                            borderWidth: 1,
-                        },
-                    ],
-                };
-                setIndividualData(dynamicIndividualData);
-
-                const uniqueType = Array.from(new Set(data.map(item => item.type_value)));
-                const taskCounts = uniqueType.map(task =>
-                    data.filter(item => item.type_value === task).length
-                );
-
-                // Crear datos dinámicos para el gráfico
-                const dynamicGroupData = {
-                    labels: uniqueType,
-                    datasets: [
-                        {
-                            label: 'Tasks per Type',
-                            data: taskCounts,
-                            backgroundColor: taskColors.slice(0, uniqueType.length),
-                            borderColor: taskColors.slice(0, uniqueType.length).map(color => color.replace('0.6', '1')),
-                            borderWidth: 1,
-                        },
-                    ],
-                };
-
-                // Actualizar el estado del gráfico
-                setGroupData(dynamicGroupData);
-
-
-                // Sumar el tiempo total de "Idle_Time" para cada usuario
-                const idleTimeCounts = uniqueUsers.map(user => {
-                    // Filtrar registros que corresponden a "Idle_Time" y al usuario actual
-                    const idleTimeRecords = data.filter(
-                        item => item.user_name === user && item.task_name === "Idle_Time"
-                    );
-
-                    // Sumar el tiempo total para este usuario en "Idle_Time"
-                    const totalIdleTime = idleTimeRecords.reduce((sum, record) => {
-                        // Convertir total_time a número entero y sumar
-                        return sum + parseInt(record.total_time, 10);
-                    }, 0);
-
-                    return totalIdleTime;
+            const currentDate = new Date().toISOString().slice(0, 10).replace('T', ' '); // Formato YYYY-MM-DD
+            const tl_name = localStorage.getItem('user_name');
+            try {
+                const response = await fetch('/api/TL/report_tl', { 
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ tl_name, currentDate }),
                 });
 
-                // Crear datos dinámicos para el gráfico
-                const dynamicIndividualData_Idle_Time = {
-                    labels: uniqueUsers,
-                    datasets: [
-                        {
-                            label: 'Total Idle Time per Technician',
-                            data: idleTimeCounts,
-                            backgroundColor: techColors.slice(0, uniqueUsers.length),
-                            borderColor: techColors.slice(0, uniqueUsers.length).map(color => color.replace('0.6', '1')),
-                            borderWidth: 1,
-                        },
-                    ],
-                };
+                const result = await response.json();
 
-                // Actualizar el estado del gráfico
-                setIndividualData_Idle_Time(dynamicIndividualData_Idle_Time);
+                if (result.success) {
+                    const data = result.reports;
+                    setDataRows(data);
 
-            } else {
-                alert(result.message || "Error al actualizar la tabla.");
+                    // Get unique names and count cases for each technician
+                    const uniqueUsers = Array.from(new Set(data.map(item => item.user_name)));
+                    const caseCounts = uniqueUsers.map(user => 
+                        data.filter(item => item.user_name === user).length
+                    );
+
+                    // Create dynamic data for the chart
+                    const dynamicIndividualData = {
+                        labels: uniqueUsers,
+                        datasets: [
+                            {
+                                label: 'Cases per Technician',
+                                data: caseCounts,
+                                backgroundColor: techColors.slice(0, uniqueUsers.length),
+                                borderColor: techColors.slice(0, uniqueUsers.length).map(color => color.replace('0.6', '1')),
+                                borderWidth: 1,
+                            },
+                        ],
+                    };
+                    setIndividualData(dynamicIndividualData);
+
+                    const uniqueType = Array.from(new Set(data.map(item => item.type_value)));
+                    const taskCounts = uniqueType.map(task =>
+                        data.filter(item => item.type_value === task).length
+                    );
+
+                    // Create dynamic data for the chart
+                    const dynamicGroupData = {
+                        labels: uniqueType,
+                        datasets: [
+                            {
+                                label: 'Tasks per Type',
+                                data: taskCounts,
+                                backgroundColor: taskColors.slice(0, uniqueType.length),
+                                borderColor: taskColors.slice(0, uniqueType.length).map(color => color.replace('0.6', '1')),
+                                borderWidth: 1,
+                            },
+                        ],
+                    };
+
+                    // Update the chart state
+                    setGroupData(dynamicGroupData);
+
+
+                    // Sum the total "Idle_Time" for each user
+                    const idleTimeCounts = uniqueUsers.map(user => {
+                        // Filter records corresponding to "Idle_Time" and the current user
+                        const idleTimeRecords = data.filter(
+                            item => item.user_name === user && item.task_name === "Idle_Time"
+                        );
+                        // Sum the total time for this user in "Idle_Time"
+                        const totalIdleTime = idleTimeRecords.reduce((sum, record) => {
+                            // Convert total_time to an integer and sum it
+                            return sum + parseInt(record.total_time, 10);
+                        }, 0);
+                        return totalIdleTime;
+                    });
+
+                    // Create dynamic data for the chart
+                    const dynamicIndividualData_Idle_Time = {
+                        labels: uniqueUsers,
+                        datasets: [
+                            {
+                                label: 'Total Idle Time per Technician',
+                                data: idleTimeCounts,
+                                backgroundColor: techColors.slice(0, uniqueUsers.length),
+                                borderColor: techColors.slice(0, uniqueUsers.length).map(color => color.replace('0.6', '1')),
+                                borderWidth: 1,
+                            },
+                        ],
+                    };
+
+                    // Update the chart state
+                    setIndividualData_Idle_Time(dynamicIndividualData_Idle_Time);
+
+                } else {
+                    showAlert('error', 'Error', result.message || "Error updating the table.");
+                }
+            } catch (error) {
+                console.error(error);
+                showAlert('error', 'Error', "Connection error.");
             }
-        } catch (error) {
-            console.error(error);
-            alert("Error en la conexión.");
-        }
-    };
-        
+        };
+    
         useEffect(() => {
             fetchDailyReportsTl(); 
         }, []);
@@ -1083,7 +1085,7 @@ export default function Dashboard() {
                                         name="task_id"
                                         value={editData.task_id}
                                         onChange={handleEditFormChange}
-                                        className={styles.editList} // Clase para los estilos
+                                        className={styles.editList} 
                                     >
                                         {taskOptionsByRole.map(task => (
                                             <option key={task.id} value={task.id}>
@@ -1095,7 +1097,7 @@ export default function Dashboard() {
                                         name="type_id"
                                         value={editData.type_id}
                                         onChange={handleEditFormChange}
-                                        className={styles.editList} // Clase para los estilos
+                                        className={styles.editList} 
                                     >
                                         {AvailableTypeOptions.map(type => (
                                             <option key={type.id} value={String(type.id)}>
@@ -1111,22 +1113,22 @@ export default function Dashboard() {
                                             value={editData.alias}
                                             onChange={handleEditFormChange}
                                             placeholder="Alias"
-                                            className={styles.searchInput} // Clase para los estilos
+                                            className={styles.searchInput} 
                                         />
                                     )}
                                     <input 
                                         type="text"
-                                        name="comments"
-                                        value={editData.comments}
+                                        name="commment"
+                                        value={editData.commment}
                                         onChange={handleEditFormChange}
                                         placeholder="Comments"
-                                        className={styles.searchInput} // Clase para los estilos
+                                        className={styles.searchInput} 
                                     />
                                     <select 
-                                        name="row_status" // Asegúrate de que el nombre sea "status" aquí
+                                        name="row_status" 
                                         value={editData.row_status}
                                         onChange={handleEditFormChange}
-                                        className={styles.editList} // Clase para los estilos
+                                        className={styles.editList} 
                                     >
                                         {getStatusOptions().map((typeObj, index) => (
                                             <option key={index} value={typeObj}>

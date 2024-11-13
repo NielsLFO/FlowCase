@@ -12,6 +12,15 @@ export default async function handler(req, res) {
         return res.status(400).json({ success: false, message: 'El ID de la fila es obligatorio.' });
     }
 
+    const startTime = new Date(data.start_time);
+    const endTime = new Date(data.end_time);
+    const timeDifference = endTime - startTime;
+    const elapsedMinutes = Math.floor(timeDifference / 60000);
+
+    if(elapsedMinutes < 0){
+        return res.status(400).json({ success: false, message: 'The Start Time cannot be later than the End Time.'  + startTime + " / " + endTime + " / " + elapsedMinutes});
+    }
+
     let connection;
 
     try {
