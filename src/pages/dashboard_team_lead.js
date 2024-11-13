@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from 'react'; // Asegúrate de incluir useEffect aquí
+import React, { useState, useEffect } from 'react';
 import { Bar } from 'react-chartjs-2';
 import { Chart as ChartJS, Title, Tooltip, Legend, BarElement, CategoryScale, LinearScale } from 'chart.js';
-import { FaCog } from 'react-icons/fa'; // Importa el ícono de engranaje
+import { FaCog } from 'react-icons/fa'; 
 import styles from '../styles/dashboard_TL.module.css';
 import Snackbar from '@mui/material/Snackbar';
 import Alert from '@mui/material/Alert';
@@ -9,7 +9,7 @@ import AlertTitle from '@mui/material/AlertTitle';
 import { useRouter } from 'next/router';
 
 
-// Registrar componentes para el gráfico
+// Register components for the chart
 ChartJS.register(
     Title,
     Tooltip,
@@ -36,7 +36,7 @@ export default function Dashboard() {
         newPassword: '',
         confirmPassword: '',
     });
-    // Estado para el Snackbar y la alerta
+    // State for the Snackbar and the alert
     const [alertConfig, setAlertConfig] = useState({
         open: false,
         severity: 'error', // 'success', 'info', 'warning', o 'error'
@@ -69,12 +69,12 @@ export default function Dashboard() {
             
             setShowPasswordChangeForm(prev => !prev);
             
-            // Si el formulario ya está mostrado, selecciona "Today Work"
+            // If the form is already shown, select "Today Work"
             if (showPasswordChangeForm) {
                 setSelectedOption('Today Work');
 
             } else {
-                setSelectedOption(''); // Limpiar opción al abrir el formulario de configuración
+                setSelectedOption(''); // Clear option when opening the settings form
             }
         };
 
@@ -132,31 +132,31 @@ export default function Dashboard() {
     /***                                    Grafic Code                                        ***/
     /*********************************************************************************************/
 
-       // Paleta de colores para los técnicos (elegantes y consistentes)
+     // Color palette for the technicians (elegant and consistent)
         const techColors = [
-            'rgba(75, 123, 139, 0.6)',  // Color para Tech #1
-            'rgba(153, 102, 255, 0.6)', // Color para Tech #2
-            'rgba(255, 159, 64, 0.6)',  // Color para Tech #3
-            'rgba(54, 162, 235, 0.6)',  // Color para Tech #4
-            'rgba(255, 206, 86, 0.6)',  // Color para Tech #5
-            'rgba(105, 195, 140, 0.6)', // Color para Tech #6
+            'rgba(75, 123, 139, 0.6)',  
+            'rgba(153, 102, 255, 0.6)', 
+            'rgba(255, 159, 64, 0.6)',  
+            'rgba(54, 162, 235, 0.6)', 
+            'rgba(255, 206, 86, 0.6)',  
+            'rgba(105, 195, 140, 0.6)',
         ];
 
-        // Datos para el gráfico de producción individual
-    const [individualData, setIndividualData] = useState({
-        labels: [],
-        datasets: [
-            {
-                label: 'Cases per Technician',
-                data: [],
-                backgroundColor: [],
-                borderColor: [],
-                borderWidth: 1,
-            },
-        ],
-    });
+       // Data for the individual production chart
+        const [individualData, setIndividualData] = useState({
+            labels: [],
+            datasets: [
+                {
+                    label: 'Cases per Technician',
+                    data: [],
+                    backgroundColor: [],
+                    borderColor: [],
+                    borderWidth: 1,
+                },
+            ],
+        });
 
-        // Opciones para el gráfico
+        // Options for the chart
         const current_production_ChartOptions = {
             responsive: true,
             plugins: {
@@ -173,12 +173,12 @@ export default function Dashboard() {
 
 
         const taskColors = [
-            'rgba(66, 135, 245, 0.6)',  // Color para 'New Cases'
-            'rgba(255, 166, 0, 0.6)',   // Color para 'Reworks'
-            'rgba(231, 76, 60, 0.6)',   // Color para 'Team Lead Consult'
+            'rgba(66, 135, 245, 0.6)',  
+            'rgba(255, 166, 0, 0.6)',   
+            'rgba(231, 76, 60, 0.6)',  
         ];
     
-        // Estado para los datos del gráfico de tareas
+        // State for the task chart data
         const [groupData, setGroupData] = useState({
             labels: [],
             datasets: [
@@ -192,7 +192,7 @@ export default function Dashboard() {
             ],
         });
 
-        // Opciones para el gráfico
+       // Options for the chart
         const group_ChartOptions = {
             responsive: true,
             plugins: {
@@ -208,17 +208,17 @@ export default function Dashboard() {
         };
 
 
-       // Paleta de colores para los técnicos (elegantes y consistentes)
+       // Color palette for the technicians (elegant and consistent)
        const techColors_Idle_Time = [
-        'rgba(75, 123, 139, 0.6)',  // Color para Tech #1
-        'rgba(153, 102, 255, 0.6)', // Color para Tech #2
-        'rgba(255, 159, 64, 0.6)',  // Color para Tech #3
-        'rgba(54, 162, 235, 0.6)',  // Color para Tech #4
-        'rgba(255, 206, 86, 0.6)',  // Color para Tech #5
-        'rgba(105, 195, 140, 0.6)', // Color para Tech #6
+        'rgba(75, 123, 139, 0.6)',  
+        'rgba(153, 102, 255, 0.6)', 
+        'rgba(255, 159, 64, 0.6)', 
+        'rgba(54, 162, 235, 0.6)',  
+        'rgba(255, 206, 86, 0.6)',  
+        'rgba(105, 195, 140, 0.6)', 
         ];
 
-        // Datos para el gráfico de producción individual
+        // Data for the individual production chart
         const [individualData_Idle_Time, setIndividualData_Idle_Time] = useState({
             labels: [],
             datasets: [
@@ -232,7 +232,7 @@ export default function Dashboard() {
             ],
         });
 
-            // Opciones para el gráfico
+            // Options for the chart
             const current_Idle_Time_ChartOptions = {
                 responsive: true,
                 plugins: {
@@ -310,11 +310,11 @@ export default function Dashboard() {
                 follow_selectedRow = null;
             }
     
-            // Separar fecha y hora para start_time y end_time
+            // Separate date and time for start_time and end_time
             const [startDate, startTime] = selectedRow.start_time.split(' ');
             const [endDate, endTime] = selectedRow.end_time.split(' ');
         
-            // Actualizar editData con los valores separados
+            // Update editData with the separated values
             setEditData({
                 ...selectedRow,
                 start_date: startDate,
@@ -329,7 +329,7 @@ export default function Dashboard() {
                 next_row_end_time: follow_selectedRow ? follow_selectedRow.end_time : null,
             });
         
-            // Obtener el id de la tarea
+            // Get the task ID
             const task = taskOptionsByRole.find(task => task.task_name === selectedRow.task_name);
             const task_id = task ? task.id : null;
         
@@ -360,7 +360,7 @@ export default function Dashboard() {
         const fetchTask = async () => {
             if (localStorage.getItem('userEmail')) {
                 try {
-                    // Hacer una sola solicitud para obtener el rol y las tareas asociadas
+                    // Make a single request to get the role and associated tasks
                     const res = await fetch('/api/TL/manage_times_tasks', {
                         method: 'POST',
                         headers: {
@@ -397,35 +397,36 @@ export default function Dashboard() {
         const handleEditSubmit = (e) => {
             e.preventDefault();
         
-            // Validar que el alias tenga 5 caracteres si task es "Production"
+            // Validate that the alias has 5 characters if the task is "Production"
             if (editData.task_id == 1 && editData.alias.length !== 5) {
                 showAlert('error', 'Error', 'Please, the alias must be 5 characters long.');
                 return;
             }
         
-            // Validar que el campo de comentarios no esté vacío si type es 'Other'
+            // Validate that the comment field is not empty if type is 'Other'
 
             if ((editData.type_id == 57 || editData.type_id == 58 || editData.type_id == 59) && !editData.comments) {
                 showAlert('error', 'Error', 'Please fill in the comments when selecting "Other".');
                 return;
             }
             
-            // Concatenar fecha y hora para crear objetos `Date`
+            // Concatenate date and time to create `Date` objects
             const startTime = new Date(`${editData.start_date} ${editData.start_time}`);
             const endTime = new Date(`${editData.end_date} ${editData.end_time}`);
 
-            // Verificar que `startTime` sea menor que `endTime`
+            // Verify that `startTime` is earlier than `endTime`
             if (startTime >= endTime) {
                 showAlert('error', 'Error', 'The start time must be earlier than the end time.');
                 return;
             }
 
-            // Calcular el tiempo transcurrido
+            // Calculate the elapsed time
+
             const timeDifference = endTime - startTime;
             
             const elapsedMinutes = Math.floor(timeDifference / 60000);
 
-            // Formatear las fechas en el formato `YYYY-MM-DD HH:MM:SS`
+            // Format the dates in the `YYYY-MM-DD HH:MM:SS` format
             const formattedStartTime = formatDateTime(startTime);
             const formattedEndTime = formatDateTime(endTime);
 
@@ -450,7 +451,7 @@ export default function Dashboard() {
 
             update_data(editData.id,updatedData);
         
-            // Resetear el estado de edición
+            // Reset the edit state
             setIsEditing(false);
             setEditingIndex(null);
             setEditData({});
@@ -459,18 +460,17 @@ export default function Dashboard() {
         };
         
         const handleCancelClick = () => {
-            setIsEditing(false); // Oculta el formulario al hacer clic en "Cancel"
+            setIsEditing(false); // Hide the form when clicking "Cancel"
             setHighlightedRow(null);
         };
 
         const formatDateTime = (date) => {
             const year = date.getFullYear();
-            const month = String(date.getMonth() + 1).padStart(2, '0'); // Mes en dos dígitos
-            const day = String(date.getDate()).padStart(2, '0'); // Día en dos dígitos
-            const hours = String(date.getHours()).padStart(2, '0'); // Horas en dos dígitos
-            const minutes = String(date.getMinutes()).padStart(2, '0'); // Minutos en dos dígitos
-            const seconds = String(date.getSeconds()).padStart(2, '0'); // Segundos en dos dígitos
-        
+            const month = String(date.getMonth() + 1).padStart(2, '0'); // Month in two digits
+            const day = String(date.getDate()).padStart(2, '0'); // Day in two digits
+            const hours = String(date.getHours()).padStart(2, '0'); // Hours in two digits
+            const minutes = String(date.getMinutes()).padStart(2, '0'); // Minutes in two digits
+            const seconds = String(date.getSeconds()).padStart(2, '0'); // Seconds in two digits 
             return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
         };
         
@@ -558,7 +558,6 @@ export default function Dashboard() {
             }
         };
 
-
     //#endregion
 
     //#region Code for role managing
@@ -591,8 +590,6 @@ export default function Dashboard() {
                 }
             };
 
-            // Estado para los roles de cada técnico
-
             const fetchTechniciansWithRoles = async () => {
                 const tl_name = localStorage.getItem('user_name');
                 try {
@@ -607,7 +604,7 @@ export default function Dashboard() {
                     if (result.success) {
                         const techniciansWithRoles = result.data.map(tech => {
                             const roleAssignments = {};
-                            // Para cada rol disponible, asignamos si el técnico tiene ese rol
+                            // For each available role, we assign whether the technician has that role
                             technicians.forEach(role => {
                                 roleAssignments[role.role_name] = tech.role_id === role.id;
                             });
@@ -624,20 +621,20 @@ export default function Dashboard() {
             
             const handleCheckboxChange = (technicianIndex, role) => {
                 const updatedRoles = [...roles];
-                // Deselecciona todos los roles de este técnico
+                // Deselect all roles for this technician
                 Object.keys(updatedRoles[technicianIndex]).forEach(r => {
                     if (r !== 'name') updatedRoles[technicianIndex][r] = false;
                 });
-                // Selecciona solo el rol actual
+                // Select only the current role
                 updatedRoles[technicianIndex][role] = true;
                 setRoles(updatedRoles);
             };
             
-            // Manejar el cambio de checkbox del encabezado
+            // Handle the checkbox change in the header
             const handleHeaderCheckboxChange = (role) => {
                 const updatedRoles = roles.map(tecnico => {
                     const newRoles = { ...tecnico };
-                    // Deseleccionar todos los roles de este técnico
+                    // Deselect all roles for this technician
                     Object.keys(newRoles).forEach(r => {
                         if (r !== 'name') newRoles[r] = false;
                     });
@@ -652,26 +649,25 @@ export default function Dashboard() {
                 roleMap[role.role_name] = role.id;
             });
 
-            // Función para preparar los datos para la base de datos
+            // Function to prepare the data for the database
             const prepareRolesDataForDB = () => {
                 const dataToSave = roles.map(tecnico => {
                     const assignedRoleId = Object.keys(tecnico)
-                        .filter(roleName => roleName !== 'name' && tecnico[roleName]) // Filtra roles activos
-                        .map(roleName => roleMap[roleName])[0]; // Solo toma el primer rol encontrado
-            
+                        .filter(roleName => roleName !== 'name' && tecnico[roleName]) // Filter active roles
+                        .map(roleName => roleMap[roleName])[0]; // Only take the first role found       
                     return {
                         name: tecnico.name,
-                        assignedRoleId: assignedRoleId // Esto debe ser un solo ID de rol
+                        assignedRoleId: assignedRoleId // This should be a single role ID
                     };
                 });
             
-                console.log("Datos a enviar:", dataToSave); // Verificar datos antes de enviarlos
+                console.log("Datos a enviar:", dataToSave); // Verify data before sending it
                 return dataToSave;
             };
             
             const saveChanges = async () => {
 
-                const dataToSave = prepareRolesDataForDB(); // Ahora obtiene solo un assignedRoleId por técnico
+                const dataToSave = prepareRolesDataForDB(); // Now it gets only one assignedRoleId per technician
 
                 try {
                     const response = await fetch('/api/TL/update_roles', {
@@ -679,7 +675,7 @@ export default function Dashboard() {
                         headers: {
                             'Content-Type': 'application/json'
                         },
-                        body: JSON.stringify({ roles: dataToSave }) // Asegúrate de que 'roles' es un array
+                        body: JSON.stringify({ roles: dataToSave }) // Ensure that 'roles' is an array
                     });
                     const data = await response.json();
                     if (data.success) {
@@ -895,7 +891,7 @@ export default function Dashboard() {
                 </nav>
             </header>
             <main className={styles.content}>
-                {/* Snackbar para mostrar el mensaje de alerta */}
+                {/* Snackbar to display the alert message */}
                 <Snackbar
                     open={alertConfig.open}
                     autoHideDuration={6000}
@@ -1015,7 +1011,7 @@ export default function Dashboard() {
                         </form>
                     </div>
                 )}
-                {/* Tabla con los campos especificados */}
+                {/* Table with the specified fields */}
                 {selectedOption === 'Manage Times' && !showPasswordChangeForm && (
                     <div className={styles.container}>
                         <div className={`${styles.tableContainer} ${isEditing ? styles.shrinkTable : ''}`}>
