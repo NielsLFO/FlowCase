@@ -9,10 +9,10 @@ export default async function handler(req, res) {
     let connection;
 
     try {
-        // Adquiere una conexión del pool usando `generic-pool`
+        // Acquire a connection from the pool using `generic-pool`
         connection = await db.acquire();
 
-        // Realiza la consulta para obtener los tipos según `task_id` y `role_id`
+        // Perform the query to get the types based on `task_id` and `role_id`
         const [data] = await connection.query(`
             SELECT u.id, u.user_name from users u
             INNER JOIN tl t ON u.tl_id = t.id 
@@ -23,8 +23,6 @@ export default async function handler(req, res) {
             id: row.id,
             user_name: row.user_name
         }));
-
-        // Libera la conexión de vuelta al pool
         await db.release(connection);
         res.status(200).json({ success: true, users });
     } catch (error) {

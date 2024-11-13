@@ -15,10 +15,7 @@ export default async function handler(req, res) {
     let connection;
 
     try {
-        // Obtener una conexión del pool
         connection = await db.acquire();
-
-        // Verificar que todos los valores no sean undefined
         const values = [
             data.task_id, 
             data.type_id, 
@@ -32,7 +29,8 @@ export default async function handler(req, res) {
             row_id
         ];
 
-        // Primera actualización
+       // First update
+
         const [result] = await connection.execute(
             `UPDATE daily_reports 
              SET task_id = ?, type_id = ?, alias = ?, commment = ?, row_status = ?, start_time = ?, end_time = ?, total_time = ?, role_id = ? 
@@ -43,7 +41,8 @@ export default async function handler(req, res) {
         let success_pre = true;
         let success_next = true;
 
-        // Segunda actualización (anterior)
+        // Second update
+
         if(data.start_time !== data.pre_row_end_time && data.pre_row_end_time !== null) {
             const startTime = new Date(data.pre_row_start_time);
             const endTime = new Date(data.start_time);
@@ -56,12 +55,10 @@ export default async function handler(req, res) {
                  WHERE id = ?`,
                 [data.start_time, elapsedMinutes, data.pre_row_id]
             );
-
-            // Verificar si tuvo éxito
             success_pre = result_pre.affectedRows > 0;
         }
 
-        // Tercera actualización (siguiente)
+        // Third update
         if(data.end_time !== data.next_row_star_time && data.next_row_star_time !== null) {
             const startTime = new Date(data.end_time);
             const endTime = new Date(data.next_row_end_time);
@@ -74,14 +71,11 @@ export default async function handler(req, res) {
                  WHERE id = ?`,
                 [data.end_time, elapsedMinutes, data.next_row_id]
             );
-
-            // Verificar si tuvo éxito
             success_next = result_next.affectedRows > 0;
         }
 
         await db.release(connection);
 
-        // Validar si las tres actualizaciones fueron exitosas
         if (result.affectedRows > 0 && success_pre && success_next) {
             res.status(200).json({ success: true });
         } else {

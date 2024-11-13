@@ -9,11 +9,11 @@ export default async function handler(req, res) {
     let connection;
 
     try {
-        // Adquiere una conexión del pool usando `generic-pool`
+        // Acquire a connection from the pool using `generic-pool`
         connection = await db.acquire();
         let types = [];
 
-        // Consultar los tipos de opciones para la primera tarea
+        // Query the option types for the first task
         const [typeRows] = await connection.query(`
             SELECT id, type_value, task_id 
             FROM type_options 

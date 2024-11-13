@@ -8,10 +8,9 @@ export default async function handler(req, res) {
     let connection;
 
     try {
-        // Adquiere una conexión del pool usando `generic-pool`
+         // Acquire a connection from the pool using `generic-pool`
         connection = await db.acquire();
-
-            // Consultar las tareas asociadas al rol
+            // Query the tasks associated with the role
             const [taskRows] = await connection.query(`
                 SELECT id, task_name 
                 FROM tasks 

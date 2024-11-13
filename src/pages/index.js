@@ -42,7 +42,7 @@ export default function Home() {
                     router.push('/dashboard');
                 } else if (data.role === 10) {
                     router.push('/dashboard_team_lead');
-                } else if (data.role === 1){
+                } else if (data.role !== 10){
                     router.push('/dashboard');
                 }
             } else {

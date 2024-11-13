@@ -2,27 +2,27 @@ import db from '../../../lib/db';
 
 export default async function handler(req, res) {
     if (req.method !== 'POST') {
-        return res.status(405).json({ message: 'Método no permitido' });
+        return res.status(405).json({ message: 'Method not allowed' });
     }
 
-    // Asegúrate de que el cuerpo de la solicitud contiene "roles"
+    // Ensure the request body contains "roles"
     const { roles } = req.body;
-    console.log("Roles recibidos:", roles); // Verificar los datos recibidos
+    console.log("Received roles:", roles); // Verify the received data
 
     if (!Array.isArray(roles)) {
-        return res.status(400).json({ success: false, message: 'Los roles deben ser un array.' });
+        return res.status(400).json({ success: false, message: 'Roles must be an array.' });
     }
 
     let connection;
 
     try {
-        // Adquiere una conexión del pool
+        // Acquire a connection from the pool
         connection = await db.acquire();
 
-        for (const tecnico of roles) {
-            const { name, assignedRoleId } = tecnico; // Un solo role ID por técnico
+        for (const technician of roles) {
+            const { name, assignedRoleId } = technician; // A single role ID per technician
 
-            // Actualiza el rol en la base de datos
+            // Update the role in the database
             await connection.query(
                 'UPDATE users SET role_id = ? WHERE user_name = ?',
                 [assignedRoleId, name]
@@ -30,11 +30,11 @@ export default async function handler(req, res) {
         }
 
         await db.release(connection);
-        return res.status(200).json({ success: true, message: 'Roles actualizados exitosamente' });
+        return res.status(200).json({ success: true, message: 'Roles updated successfully' });
 
     } catch (error) {
-        console.error('Error al actualizar roles:', error);
+        console.error('Error updating roles:', error);
         if (connection) await db.release(connection);
-        return res.status(500).json({ success: false, message: 'Error al actualizar roles' });
+        return res.status(500).json({ success: false, message: 'Error updating roles' });
     }
 }

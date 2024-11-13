@@ -9,16 +9,16 @@ export default async function handler(req, res) {
     let connection;
 
     try {
-        // Adquiere una conexión del pool usando `generic-pool`
+        // Acquire a connection from the pool
         connection = await db.acquire();
 
-        // Consultar el rol del usuario
+        // Query the user's role
         const [roleRows] = await connection.query('SELECT role_id FROM users WHERE email = ?', [email]);
         
         if (roleRows.length > 0) {
             const role = roleRows[0].role_id;
 
-            // Consultar las tareas asociadas al rol
+            // Query the tasks associated with the role
             const [taskRows] = await connection.query(`
                 SELECT id, task_name 
                 FROM tasks 
@@ -32,7 +32,7 @@ export default async function handler(req, res) {
 
             let types = [];
             if (tasks.length > 0) {
-                // Consultar los tipos de opciones para la primera tarea
+               // Query the option types for the first task
                 const [typeRows] = await connection.query(`
                     SELECT id, type_value, task_id 
                     FROM type_options 

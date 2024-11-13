@@ -10,7 +10,6 @@ export default async function handler(req, res) {
     let connection;
 
     try {
-        // Obtiene una conexión del pool con `generic-pool`
         connection = await db.acquire();
 
         const [result] = await connection.execute(

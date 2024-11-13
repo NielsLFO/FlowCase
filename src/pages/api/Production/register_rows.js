@@ -20,16 +20,12 @@ export default async function handler(req, res) {
 
     let connection;
     try {
-        // Adquiere una conexión del pool usando `generic-pool`
+        // Acquire a connection from the pool
         connection = await db.acquire();
-
-        // Inserta el nuevo registro en la tabla
         const [result] = await connection.query(`
             INSERT INTO daily_reports (user_id, row_date, task_id, type_id, alias, commment, row_status, start_time, total_time, role_id)
             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         `, [user_id, row_date, task_id, type_id, alias, commment, row_status, start_time, total_time, role_id]);
-
-        // Devuelve el ID del registro insertado
         await db.release(connection);
         res.status(201).json({ success: true, insertId: result.insertId });
     } catch (error) {

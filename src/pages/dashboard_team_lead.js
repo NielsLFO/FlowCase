@@ -55,46 +55,76 @@ export default function Dashboard() {
     };
     //#endregion
 
-    //#region for Password changes
+   //#region for Password changes
 
-    /*********************************************************************************************/
-    /***                                 Code for Change Password                              ***/
-    /*********************************************************************************************/
+        /*********************************************************************************************/
+        /***                                 Code for Change Password                              ***/
+        /*********************************************************************************************/
 
-    const handlePasswordChangeSubmit = (e) => {
-        e.preventDefault();
-        if (passwordChangeData.newPassword === passwordChangeData.confirmPassword) {
-            // Lógica para cambiar la contraseña
-            console.log('Password changed successfully');
+        const handleOptionChange = (option) => {
+            setSelectedOption(option);
+            setShowPasswordChangeForm(false);
+        };
+        const handleSettingsButtonClick  = async (e) => {
+            
+            setShowPasswordChangeForm(prev => !prev);
+            
+            // Si el formulario ya está mostrado, selecciona "Today Work"
+            if (showPasswordChangeForm) {
+                setSelectedOption('Today Work');
+
+            } else {
+                setSelectedOption(''); // Limpiar opción al abrir el formulario de configuración
+            }
+        };
+
+        const handleChangePassword = async (e) => {
+            e.preventDefault();           
+            try {
+                const user_name = localStorage.getItem('user_name');
+                const oldPassword = passwordChangeData.oldPassword;
+                const newPassword = passwordChangeData.newPassword;
+        
+                const response = await fetch('/api/pass_change', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        user_name,
+                        oldPassword,
+                        newPassword
+                    })
+                });
+        
+                const result = await response.json();
+        
+                if (result.success) {
+                    console.log('Password changed successfully');
+                    showAlert('success', 'Password Change', 'Password changed successfully.');
+                    setPasswordChangeData({
+                        oldPassword: '',
+                        newPassword: '',
+                        confirmPassword: '',
+                    });
+                } else {
+                    console.error('Error changing password:', result.message);
+                    showAlert('error', 'Password Change', result.message || 'Error changing password.');
+                }
+            } catch (error) {
+                console.error('Error en la solicitud:', error);
+                showAlert('error', 'Password Change', 'Failed to update password.');
+            }
+        };
+
+        const handleChangePasswordCancel = async (e) => {          
             setPasswordChangeData({
                 oldPassword: '',
                 newPassword: '',
                 confirmPassword: '',
-            });
-            setShowPasswordChangeForm(false);
-            setSelectedOption('Today Team Work');
-        } else {
-            console.log('New passwords do not match');
-            showAlert('error', 'Password Change', 'New passwords do not match.');
-        }
-    };
-    const handleOptionChange = (option) => {
-        setSelectedOption(option);
-        setShowPasswordChangeForm(false);
-        if(option === "Role Management"){
-            loadRolesAndTechnicians();
-        }
-    };
-    const handleSettingsButtonClick = () => {
-        setShowPasswordChangeForm(prev => !prev);
-        // Si el formulario ya está mostrado, selecciona "Today Team Work"
-        if (showPasswordChangeForm) {
-            setSelectedOption('Today Team Work');
-        } else {
-            setSelectedOption(''); // Limpiar opción al abrir el formulario de configuración
-        }
-    };
-    //#endregion
+            });       
+        };
+//#endregion
 
     //#region Grafic Code
 
@@ -1183,7 +1213,7 @@ export default function Dashboard() {
                 {showPasswordChangeForm && (
                     <div className={styles.changePasswordForm}>
                         <h2>Change Password</h2>
-                        <form onSubmit={handlePasswordChangeSubmit}>
+                        <form onSubmit={handleChangePassword}>
                             <div>
                                 <label>Old Password:</label>
                                 <input
@@ -1215,7 +1245,7 @@ export default function Dashboard() {
                                 />
                             </div>
                             <button className={styles.submitButton_reset} type="submit">Change Password</button>
-                            <button className={styles.cancelButton} type="button" onClick={() => setShowPasswordChangeForm(false)}>Cancel</button>
+                            <button className={styles.cancelButton} type="button" onClick={() => handleChangePasswordCancel()}>Cancel</button>
                         </form>
                     </div>
                 )}

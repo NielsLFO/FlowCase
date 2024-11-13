@@ -388,23 +388,6 @@ export default function Dashboard() {
         /***                                 Code for Change Password                              ***/
         /*********************************************************************************************/
 
-            const handlePasswordChangeSubmit = (e) => {
-                e.preventDefault();
-                if (passwordChangeData.newPassword === passwordChangeData.confirmPassword) {
-                    // Lógica para cambiar la contraseña
-                    console.log('Password changed successfully');
-                    setPasswordChangeData({
-                        oldPassword: '',
-                        newPassword: '',
-                        confirmPassword: '',
-                    });
-                    setShowPasswordChangeForm(false);
-                    setSelectedOption('Today Work');
-                } else {
-                    console.log('New passwords do not match');
-                    showAlert('error', 'Password Change', 'New passwords do not match.');
-                }
-            };
             const handleOptionChange = (option) => {
                 setSelectedOption(option);
                 setShowPasswordChangeForm(false);
@@ -412,6 +395,7 @@ export default function Dashboard() {
             const handleSettingsButtonClick  = async (e) => {
                 
                 setShowPasswordChangeForm(prev => !prev);
+                
                 // Si el formulario ya está mostrado, selecciona "Today Work"
                 if (showPasswordChangeForm) {
                     setSelectedOption('Today Work');
@@ -419,25 +403,37 @@ export default function Dashboard() {
                 } else {
                     setSelectedOption(''); // Limpiar opción al abrir el formulario de configuración
                 }
+            };
+            const handleChangePasswordCancel = async (e) => {          
+                setPasswordChangeData({
+                    oldPassword: '',
+                    newPassword: '',
+                    confirmPassword: '',
+                });       
+            };
 
+            const handleChangePassword = async (e) => {
+                e.preventDefault();           
                 try {
                     const user_name = localStorage.getItem('user_name');
-                    // Llamada a la API para actualizar la contraseña
+                    const oldPassword = passwordChangeData.oldPassword;
+                    const newPassword = passwordChangeData.newPassword;
+            
                     const response = await fetch('/api/pass_change', {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json'
                         },
                         body: JSON.stringify({
-                            userName: user_name,
-                            oldPassword: passwordChangeData.oldPassword,
-                            newPassword: passwordChangeData.newPassword,
+                            user_name,
+                            oldPassword,
+                            newPassword
                         })
                     });
-        
-                    const data = await response.json();
-        
-                    if (response.ok) {
+            
+                    const result = await response.json();
+            
+                    if (result.success) {
                         console.log('Password changed successfully');
                         showAlert('success', 'Password Change', 'Password changed successfully.');
                         setPasswordChangeData({
@@ -445,11 +441,9 @@ export default function Dashboard() {
                             newPassword: '',
                             confirmPassword: '',
                         });
-                        setShowPasswordChangeForm(false);
-                        setSelectedOption('Today Work');
                     } else {
-                        console.error('Error changing password:', data.message);
-                        showAlert('error', 'Password Change', data.message || 'Error changing password.');
+                        console.error('Error changing password:', result.message);
+                        showAlert('error', 'Password Change', result.message || 'Error changing password.');
                     }
                 } catch (error) {
                     console.error('Error en la solicitud:', error);
@@ -829,7 +823,7 @@ export default function Dashboard() {
                 {showPasswordChangeForm && (
                     <div className={styles.changePasswordForm}>
                         <h2>Change Password</h2>
-                        <form onSubmit={handlePasswordChangeSubmit}>
+                        <form onSubmit={handleChangePassword}>
                             <div>
                                 <label>Old Password:</label>
                                 <input
@@ -861,7 +855,7 @@ export default function Dashboard() {
                                 />
                             </div>
                             <button className={styles.submitButton_reset} type="submit">Change Password</button>
-                            <button className={styles.cancelButton} type="button" onClick={() => setShowPasswordChangeForm(false)}>Cancel</button>
+                            <button className={styles.cancelButton} type="button" onClick={() => handleChangePasswordCancel()}>Cancel</button>
                         </form>
                     </div>
                 )}

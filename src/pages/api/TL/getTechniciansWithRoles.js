@@ -9,10 +9,9 @@ export default async function handler(req, res) {
     let connection;
 
     try {
-        // Adquiere una conexión del pool usando `generic-pool`
+         // Acquire a connection from the pool using `generic-pool`
         connection = await db.acquire();
-
-        // Consultar las tareas asociadas al rol
+        // Query the tasks associated with the role
         const [technitian_role] = await connection.query(`
             SELECT u.id, u.user_name, u.role_id
                 FROM users u
@@ -22,8 +21,6 @@ export default async function handler(req, res) {
                                 ORDER BY u.user_name ASC
             `, [tl_name, tl_name]);
         await db.release(connection);
-
-        // Devolver los datos en la clave `data` para que coincida con el código cliente
         return res.status(200).json({ success: true, data: technitian_role });
     } catch (error) {
         console.error('Error en la consulta:', error);

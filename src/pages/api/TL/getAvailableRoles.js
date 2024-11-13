@@ -2,16 +2,16 @@ import db from '../../../lib/db';
 
 export default async function handler(req, res) {
     if (req.method !== 'POST') {
-        return res.status(405).json({ message: 'Método no permitido' });
+        return res.status(405).json({ message: 'Method not allowed' });
     }
 
     let connection;
 
     try {
-        // Adquiere una conexión del pool usando `generic-pool`
+        // Acquire a connection from the pool using `generic-pool`
         connection = await db.acquire();
 
-        // Consultar el rol del usuario
+        // Query the user's role
         const [roleRows] = await connection.query('SELECT id, role_name FROM roles');
         
         if (roleRows.length > 0) {
@@ -19,11 +19,11 @@ export default async function handler(req, res) {
             return res.status(200).json({ success: true, roleRows });
         } else {
             await db.release(connection);
-            return res.status(404).json({ success: false, message: 'Rol no encontrado' });
+            return res.status(404).json({ success: false, message: 'Role not found' });
         }
     } catch (error) {
-        console.error('Error en la consulta:', error);
+        console.error('Error in query:', error);
         if (connection) await db.release(connection);
-        return res.status(500).json({ success: false, message: 'Error en el servidor' });
+        return res.status(500).json({ success: false, message: 'Server error' });
     } 
 }
