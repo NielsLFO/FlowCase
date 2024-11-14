@@ -19,6 +19,22 @@ ChartJS.register(
 );
 export default function Dashboard() {
 
+    const router = useRouter();
+    const [isLoading, setIsLoading] = useState(true);
+    useEffect(() => {
+        // Verificar si existe un usuario en sessionStorage
+        const userEmail = sessionStorage.getItem('userEmail');  
+        if (!userEmail) {
+            // Si no hay datos de sesión, redirigir a la página de inicio
+            router.push('/');
+        }
+    }, [router]);
+
+    if (isLoading) {
+        // Mostrar un loader o nada mientras se verifica la sesión
+        return <div>Loading...</div>;
+    }
+
     //#region States 
         /*********************************************************************************************/
         /***                                    state variables                                    ***/
@@ -88,9 +104,9 @@ export default function Dashboard() {
         // Check if we are in the client-side environment
         useEffect(() => {
             if (typeof window !== 'undefined') {
-                const emailFromStorage = localStorage.getItem('userEmail');
-                const roleFromStorage = localStorage.getItem('roleId');
-                const user_id_FromStorage = localStorage.getItem('user_id');
+                const emailFromStorage = sessionStorage.getItem('userEmail');
+                const roleFromStorage = sessionStorage.getItem('roleId');
+                const user_id_FromStorage = sessionStorage.getItem('user_id');
                 setUserEmail(emailFromStorage);
                 setUserRole(roleFromStorage);
                 setUserId(user_id_FromStorage);
@@ -291,7 +307,7 @@ export default function Dashboard() {
 
         const fetchDailyReports = async () => {
             const currentDate = new Date().toISOString().slice(0, 10).replace('T', ' '); // Format YYYY-MM-DD HH:mm:ss
-            const user_id = localStorage.getItem('user_id');
+            const user_id = sessionStorage.getItem('user_id');
             try {
                 const response = await fetch('/api/Production/production_daily_report', { 
                     method: 'POST',
@@ -344,7 +360,7 @@ export default function Dashboard() {
         };
 
         const fetchAndUpdateRole = async () => {
-            if (localStorage.getItem('userEmail')) {
+            if (sessionStorage.getItem('userEmail')) {
                 try {
                     // Make a single request to get the role and associated tasks
                     const res = await fetch('/api/Production/role', {
@@ -352,7 +368,7 @@ export default function Dashboard() {
                         headers: {
                             'Content-Type': 'application/json',
                         },
-                        body: JSON.stringify({ email: localStorage.getItem('userEmail') }),
+                        body: JSON.stringify({ email: sessionStorage.getItem('userEmail') }),
                     });
                     const data = await res.json();
                     if (data.success) {
@@ -415,7 +431,7 @@ export default function Dashboard() {
             const handleChangePassword = async (e) => {
                 e.preventDefault();           
                 try {
-                    const user_name = localStorage.getItem('user_name');
+                    const user_name = sessionStorage.getItem('user_name');
                     const oldPassword = passwordChangeData.oldPassword;
                     const newPassword = passwordChangeData.newPassword;
             
@@ -543,7 +559,7 @@ export default function Dashboard() {
         };
 
         const fetchWeeklyReports = async () => {
-            const user_id = localStorage.getItem('user_id');
+            const user_id = sessionStorage.getItem('user_id');
             try {
                 const response = await fetch('/api/Production/grafic', { 
                     method: 'POST',
@@ -621,7 +637,7 @@ export default function Dashboard() {
             };
 
             const fetchReports = async () => {
-                const user_id = localStorage.getItem('user_id');
+                const user_id = sessionStorage.getItem('user_id');
                 const startDate = searchData.startDate;
                 const endDate = searchData.endDate;
                 try {
@@ -673,9 +689,8 @@ export default function Dashboard() {
         /***                                     Login Out                                         ***/
         /*********************************************************************************************/
 
-        const router = useRouter(); // Create router instance
-
         const handleSignOut = () => {
+            sessionStorage.clear();
             console.log('User signed out'); // Handle sign out logic if needed
             router.push('/'); // Redirect to the index page
         };

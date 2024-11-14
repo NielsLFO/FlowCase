@@ -20,6 +20,22 @@ ChartJS.register(
 );
 export default function Dashboard() {
 
+    const router = useRouter();
+    const [isLoading, setIsLoading] = useState(true);
+    useEffect(() => {
+        // Verificar si existe un usuario en sessionStorage
+        const userEmail = sessionStorage.getItem('userEmail');  
+        if (!userEmail) {
+            // Si no hay datos de sesión, redirigir a la página de inicio
+            router.push('/');
+        }
+    }, [router]);
+
+    if (isLoading) {
+        // Mostrar un loader o nada mientras se verifica la sesión
+        return <div>Loading...</div>;
+    }
+
     //#region States 
     /*********************************************************************************************/
     /***                                    state variables                                    ***/
@@ -86,7 +102,7 @@ export default function Dashboard() {
         const handleChangePassword = async (e) => {
             e.preventDefault();           
             try {
-                const user_name = localStorage.getItem('user_name');
+                const user_name = sessionStorage.getItem('user_name');
                 const oldPassword = passwordChangeData.oldPassword;
                 const newPassword = passwordChangeData.newPassword;
         
@@ -365,7 +381,7 @@ export default function Dashboard() {
         };
 
         const fetchTask = async () => {
-            if (localStorage.getItem('userEmail')) {
+            if (sessionStorage.getItem('userEmail')) {
                 try {
                     // Make a single request to get the role and associated tasks
                     const res = await fetch('/api/TL/manage_times_tasks', {
@@ -485,7 +501,7 @@ export default function Dashboard() {
 
         const fetchTechList = async () => {
         
-            const tl = localStorage.getItem('user_name');
+            const tl = sessionStorage.getItem('user_name');
             try {
                 const res = await fetch('/api/TL/manage_times', {
                     method: 'POST',
@@ -595,7 +611,7 @@ export default function Dashboard() {
             };
 
             const fetchTechniciansWithRoles = async () => {
-                const tl_name = localStorage.getItem('user_name');
+                const tl_name = sessionStorage.getItem('user_name');
                 try {
                     const response = await fetch('/api/TL/getTechniciansWithRoles', {
                         method: 'POST',
@@ -714,7 +730,7 @@ export default function Dashboard() {
 
         const fetchDailyReportsTl = async () => {
             const currentDate = new Date().toISOString().slice(0, 10).replace('T', ' '); // Formato YYYY-MM-DD
-            const tl_name = localStorage.getItem('user_name');
+            const tl_name = sessionStorage.getItem('user_name');
             try {
                 const response = await fetch('/api/TL/report_tl', { 
                     method: 'POST',
@@ -843,11 +859,9 @@ export default function Dashboard() {
         /*********************************************************************************************/
         /***                                     Login Out                                         ***/
         /*********************************************************************************************/
-
-        const router = useRouter(); // Create router instance
-
         const handleSignOut = () => {
             console.log('User signed out'); // Handle sign out logic if needed
+            sessionStorage.clear();
             router.push('/'); // Redirect to the index page
         };
 

@@ -7,6 +7,7 @@ import Alert from '@mui/material/Alert';
 import AlertTitle from '@mui/material/AlertTitle';
 
 export default function Home() {
+
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
@@ -17,7 +18,7 @@ export default function Home() {
         title: 'Error',
         message: '',
     });
-
+    
     const handleSubmit = async (event) => {
         event.preventDefault();
         setError('');
@@ -33,11 +34,11 @@ export default function Home() {
             const data = await res.json();
     
             if (data.success) {
-                localStorage.setItem('userEmail', data.email);
-                localStorage.setItem('roleId', data.role);
-                localStorage.setItem('user_name', data.user_name);
-                localStorage.setItem('schedule_id', data.schedule_id); 
-                localStorage.setItem('user_id', data.user_id);
+                sessionStorage.setItem('userEmail', data.email);
+                sessionStorage.setItem('roleId', data.role);
+                sessionStorage.setItem('user_name', data.user_name);
+                sessionStorage.setItem('schedule_id', data.schedule_id); 
+                sessionStorage.setItem('user_id', data.user_id);
                 if (data.role === 'admin') {
                     router.push('/dashboard');
                 } else if (data.role === 10) {
