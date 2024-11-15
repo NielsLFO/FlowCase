@@ -20,7 +20,6 @@ ChartJS.register(
 export default function Dashboard() {
 
     const router = useRouter();
-    const [isLoading, setIsLoading] = useState(true);
     useEffect(() => {
         // Verificar si existe un usuario en sessionStorage
         const userEmail = sessionStorage.getItem('userEmail');  
@@ -29,11 +28,6 @@ export default function Dashboard() {
             router.push('/');
         }
     }, [router]);
-
-    if (isLoading) {
-        // Mostrar un loader o nada mientras se verifica la sesión
-        return <div>Loading...</div>;
-    }
 
     //#region States 
         /*********************************************************************************************/

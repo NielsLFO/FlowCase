@@ -53,34 +53,41 @@ export default async function handler(req, res) {
         // Second update
 
         if(data.start_time !== data.pre_row_end_time && data.pre_row_end_time !== null) {
-            const startTime = new Date(data.pre_row_start_time);
-            const endTime = new Date(data.start_time);
-            const timeDifference = endTime - startTime;
-            const elapsedMinutes = Math.floor(timeDifference / 60000);
 
-            const [result_pre] = await connection.execute(
-                `UPDATE daily_reports 
-                 SET end_time = ?, total_time = ? 
-                 WHERE id = ?`,
-                [data.start_time, elapsedMinutes, data.pre_row_id]
-            );
-            success_pre = result_pre.affectedRows > 0;
+            const checkdate = compare_date (data.pre_row_start_time, data.start_time);
+            if(checkdate){
+                const startTime = new Date(data.pre_row_start_time);
+                const endTime = new Date(data.start_time);
+                const timeDifference = endTime - startTime;
+                const elapsedMinutes = Math.floor(timeDifference / 60000);
+    
+                const [result_pre] = await connection.execute(
+                    `UPDATE daily_reports 
+                     SET end_time = ?, total_time = ? 
+                     WHERE id = ?`,
+                    [data.start_time, elapsedMinutes, data.pre_row_id]
+                );
+                success_pre = result_pre.affectedRows > 0; 
+            }
         }
 
         // Third update
         if(data.end_time !== data.next_row_star_time && data.next_row_star_time !== null) {
-            const startTime = new Date(data.end_time);
-            const endTime = new Date(data.next_row_end_time);
-            const timeDifference = endTime - startTime;
-            const elapsedMinutes = Math.floor(timeDifference / 60000);
+            const checkdate = compare_date (data.end_time,data.next_row_end_time);
+            if(checkdate){
+                const startTime = new Date(data.end_time);
+                const endTime = new Date(data.next_row_end_time);
+                const timeDifference = endTime - startTime;
+                const elapsedMinutes = Math.floor(timeDifference / 60000);
 
-            const [result_next] = await connection.execute(
-                `UPDATE daily_reports 
-                 SET start_time = ?, total_time = ? 
-                 WHERE id = ?`,
-                [data.end_time, elapsedMinutes, data.next_row_id]
-            );
-            success_next = result_next.affectedRows > 0;
+                const [result_next] = await connection.execute(
+                    `UPDATE daily_reports 
+                    SET start_time = ?, total_time = ? 
+                    WHERE id = ?`,
+                    [data.end_time, elapsedMinutes, data.next_row_id]
+                );
+                success_next = result_next.affectedRows > 0;
+            }
         }
 
         await db.release(connection);
@@ -94,5 +101,24 @@ export default async function handler(req, res) {
         console.error('Error al actualizar el registro:', error);
         if (connection) await db.release(connection);
         res.status(500).json({ success: false, message: 'Error en el servidor.' });
+    }
+
+    function compare_date (pstartTime, pendTime){
+
+        const startTime = new Date(pstartTime);
+        const endTime = new Date(pendTime);
+
+        const startDay = startTime.getDate();
+        const startMonth = startTime.getMonth(); // Los meses empiezan en 0 (enero = 0)
+        const startYear = startTime.getFullYear();
+
+        const endDay = endTime.getDate();
+        const endMonth = endTime.getMonth();
+        const endYear = endTime.getFullYear();
+
+        // Verificar si son días diferentes
+        const isDifferentDay = startDay == endDay && startMonth == endMonth && startYear == endYear;
+
+        return isDifferentDay;
     }
 }

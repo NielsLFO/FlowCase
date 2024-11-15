@@ -21,7 +21,6 @@ ChartJS.register(
 export default function Dashboard() {
 
     const router = useRouter();
-    const [isLoading, setIsLoading] = useState(true);
     useEffect(() => {
         // Verificar si existe un usuario en sessionStorage
         const userEmail = sessionStorage.getItem('userEmail');  
@@ -30,11 +29,6 @@ export default function Dashboard() {
             router.push('/');
         }
     }, [router]);
-
-    if (isLoading) {
-        // Mostrar un loader o nada mientras se verifica la sesión
-        return <div>Loading...</div>;
-    }
 
     //#region States 
     /*********************************************************************************************/
@@ -749,7 +743,7 @@ export default function Dashboard() {
                     // Get unique names and count cases for each technician
                     const uniqueUsers = Array.from(new Set(data.map(item => item.user_name)));
                     const caseCounts = uniqueUsers.map(user => 
-                        data.filter(item => item.user_name === user).length
+                        data.filter(item => item.user_name === user && item.type_value === "New case").length
                     );
 
                     // Create dynamic data for the chart
