@@ -743,7 +743,7 @@ export default function Dashboard() {
                     // Get unique names and count cases for each technician
                     const uniqueUsers = Array.from(new Set(data.map(item => item.user_name)));
                     const caseCounts = uniqueUsers.map(user => 
-                        data.filter(item => item.user_name === user && item.type_value === "New case").length
+                        data.filter(item => item.user_name === user && item.type_value === "New case" && item.row_status == "Finish").length
                     );
 
                     // Create dynamic data for the chart
