@@ -186,14 +186,14 @@ export default function Dashboard() {
             useEffect(() => {
                 // If `task` is empty and there are available options, select the first one
                 if (taskOptionsByRole.length > 0) {
-                    setFormData(prevData => ({ ...prevData, task: taskOptionsByRole[0].id }));
+                    setFormData(prevData => ({ ...prevData, task: taskOptionsByRole[0].id, status: availableStatusOptions[0] }));
                 }
             }, [taskOptionsByRole]);
     
             useEffect(() => {
                 // If `type` is empty and there are available options, select the first one
                 if (AvailableTypeOptions.length > 0) {
-                    setFormData(prevData => ({ ...prevData, type: AvailableTypeOptions[0].id }));
+                    setFormData(prevData => ({ ...prevData, type: AvailableTypeOptions[0].id, status: availableStatusOptions[0] }));
                 }
             }, [AvailableTypeOptions]);
                 

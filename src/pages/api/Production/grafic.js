@@ -24,6 +24,7 @@ export default async function handler(req, res) {
                 AND dr.user_id = ?
                 AND dr.task_id = 1
                 AND dr.type_id = 54
+                AND dr.row_status = "Finish"
             GROUP BY 
                 DAYOFWEEK(dr.row_date)
             ORDER BY 
