@@ -1060,7 +1060,7 @@ export default function Dashboard() {
                                             <td>{row.row_status}</td>
                                             <td>{row.start_time}</td> 
                                             <td>{row.end_time}</td> 
-                                            <td>{row.total_time + ' min'}</td> 
+                                            <td>{Math.floor(row.total_time / 60) + ' h ' + (row.total_time % 60) + ' min'}</td> 
                                             <td>{row.role_name}</td>
                                             <td>
                                                 <button onClick={() => handleModifyClick(index)}>Modify</button>
