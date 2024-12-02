@@ -20,49 +20,52 @@ ChartJS.register(
 );
 export default function Dashboard() {
 
-    const router = useRouter();
-    const INACTIVITY_LIMIT = 4 * 60 * 60 * 1000; // 4 hours in milliseconds
-    
-    const handleUserActivity = () => {
-        // Update the time of the last activity
-        sessionStorage.setItem('lastActivity', Date.now());
-    };
-    
-    const checkInactivity = () => {
-        const lastActivity = sessionStorage.getItem('lastActivity');
-        if (lastActivity) {
-            const currentTime = Date.now();
-            const timeSinceLastActivity = currentTime - parseInt(lastActivity, 10);
-    
-            // If more than 4 hours have passed, redirect to the home page
-            if (timeSinceLastActivity > INACTIVITY_LIMIT) {
-                performSignOut();
-            }
-        }
-    };
-    
-    useEffect(() => {
-        // Check if the user is authenticated
-        const userEmail = sessionStorage.getItem('userEmail');
-        if (!userEmail) {
-            router.push('/');
-        }
-    
-        // Set up events to track user activity
-        window.addEventListener('mousemove', handleUserActivity);
-        window.addEventListener('keydown', handleUserActivity);
-    
-        // Start the interval to check for inactivity
-        const interval = setInterval(checkInactivity, 60 * 1000); // Check every minute
-    
-        // Clean up events and interval when the component unmounts
-        return () => {
-            window.removeEventListener('mousemove', handleUserActivity);
-            window.removeEventListener('keydown', handleUserActivity);
-            clearInterval(interval);
+    //#region Session  
+        const router = useRouter();
+        const INACTIVITY_LIMIT = 4 * 60 * 60 * 1000; // 4 hours in milliseconds
+        
+        const handleUserActivity = () => {
+            // Update the time of the last activity
+            sessionStorage.setItem('lastActivity', Date.now());
         };
-    }, [router]);
+        
+        const checkInactivity = () => {
+            const lastActivity = sessionStorage.getItem('lastActivity');
+            if (lastActivity) {
+                const currentTime = Date.now();
+                const timeSinceLastActivity = currentTime - parseInt(lastActivity, 10);
+        
+                // If more than 4 hours have passed, redirect to the home page
+                if (timeSinceLastActivity > INACTIVITY_LIMIT) {
+                    performSignOut();
+                }
+            }
+        };
+        
+        useEffect(() => {
+            // Check if the user is authenticated
+            const userEmail = sessionStorage.getItem('userEmail');
+            const role = sessionStorage.getItem('roleId');
+            if (!userEmail || role !== 10) {
+                router.push('/');
+            }
+        
+            // Set up events to track user activity
+            window.addEventListener('mousemove', handleUserActivity);
+            window.addEventListener('keydown', handleUserActivity);
+        
+            // Start the interval to check for inactivity
+            const interval = setInterval(checkInactivity, 60 * 1000); // Check every minute
+        
+            // Clean up events and interval when the component unmounts
+            return () => {
+                window.removeEventListener('mousemove', handleUserActivity);
+                window.removeEventListener('keydown', handleUserActivity);
+                clearInterval(interval);
+            };
+        }, [router]);
     
+    //#endregion
 
     //#region States 
     /*********************************************************************************************/
@@ -945,6 +948,18 @@ export default function Dashboard() {
                             onClick={() => handleOptionChange('Role Management')}
                         >
                             Role Management
+                        </button>
+                        <button
+                            className={`${styles.optionButton} ${selectedOption === 'Overtime' ? styles.activeOption : ''}`}
+                            onClick={() => handleOptionChange('Overtime')}
+                        >
+                            Overtime
+                        </button>
+                        <button
+                            className={`${styles.optionButton} ${selectedOption === 'Report' ? styles.activeOption : ''}`}
+                            onClick={() => handleOptionChange('Report')}
+                        >
+                            Report 
                         </button>
                     </div>
                     <div className={styles.rightOptions}>
