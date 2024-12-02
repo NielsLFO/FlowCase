@@ -502,3 +502,80 @@
 .container_roll .saveButton:focus {
     outline: none; /* Sin borde de enfoque */
 }
+
+/*Estilos para filtro de busqueda*/
+
+/* Contenedor de los filtros */
+.filters {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+
+    justify-content: flex-start;
+}
+
+/* Estilo general para los inputs */
+.filters input {
+    padding: 10px 15px;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+    font-size: 14px;
+    width: 250px;
+    transition: all 0.3s ease;
+    background-color: #f9f9f9;
+}
+
+/* Estilo cuando el input está en foco */
+.filters input:focus {
+    border-color: #007bff;
+    background-color: #ffffff;
+    outline: none;
+}
+
+/* Estilo para los placeholders */
+.filters input::placeholder {
+    color: #aaa;
+    font-style: italic;
+}
+
+/* Estilo específico para cada input usando su ID */
+
+/* Filtro de Technician */
+.filterTechnician {
+    background-color: #eaf2f8; /* Fondo ligeramente diferente */
+}
+
+/* Filtro de Task */
+.filterTask {
+    background-color: #f2e9f1; /* Fondo diferente */
+}
+
+/* Filtro de Type */
+.filterType {
+    background-color: #f2f8ea; /* Fondo diferente */
+}
+
+/* Filtro de Alias */
+.filterAlias {
+    background-color: #f8f1e4; /* Fondo diferente */
+}
+
+/* Filtro de Status */
+.filterStatus {
+    background-color: #f1e4f8; /* Fondo diferente */
+}
+
+/* Ajuste para pequeños pantallas */
+@media (max-width: 768px) {
+    .filters {
+        justify-content: center;
+    }
+
+    .filters input {
+        width: 200px;
+    }
+}
+
+
+
+

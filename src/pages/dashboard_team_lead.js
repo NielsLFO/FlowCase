@@ -21,14 +21,48 @@ ChartJS.register(
 export default function Dashboard() {
 
     const router = useRouter();
+    const INACTIVITY_LIMIT = 4 * 60 * 60 * 1000; // 4 hours in milliseconds
+    
+    const handleUserActivity = () => {
+        // Update the time of the last activity
+        sessionStorage.setItem('lastActivity', Date.now());
+    };
+    
+    const checkInactivity = () => {
+        const lastActivity = sessionStorage.getItem('lastActivity');
+        if (lastActivity) {
+            const currentTime = Date.now();
+            const timeSinceLastActivity = currentTime - parseInt(lastActivity, 10);
+    
+            // If more than 4 hours have passed, redirect to the home page
+            if (timeSinceLastActivity > INACTIVITY_LIMIT) {
+                performSignOut();
+            }
+        }
+    };
+    
     useEffect(() => {
-        // Verificar si existe un usuario en sessionStorage
-        const userEmail = sessionStorage.getItem('userEmail');  
+        // Check if the user is authenticated
+        const userEmail = sessionStorage.getItem('userEmail');
         if (!userEmail) {
-            // Si no hay datos de sesión, redirigir a la página de inicio
             router.push('/');
         }
+    
+        // Set up events to track user activity
+        window.addEventListener('mousemove', handleUserActivity);
+        window.addEventListener('keydown', handleUserActivity);
+    
+        // Start the interval to check for inactivity
+        const interval = setInterval(checkInactivity, 60 * 1000); // Check every minute
+    
+        // Clean up events and interval when the component unmounts
+        return () => {
+            window.removeEventListener('mousemove', handleUserActivity);
+            window.removeEventListener('keydown', handleUserActivity);
+            clearInterval(interval);
+        };
     }, [router]);
+    
 
     //#region States 
     /*********************************************************************************************/
@@ -45,6 +79,13 @@ export default function Dashboard() {
         oldPassword: '',
         newPassword: '',
         confirmPassword: '',
+    });
+    const [filters, setFilters] = useState({
+        technician: '',
+        task: '',
+        type: '',
+        alias: '',
+        status: ''
     });
     // State for the Snackbar and the alert
     const [alertConfig, setAlertConfig] = useState({
@@ -828,6 +869,24 @@ export default function Dashboard() {
             fetchDailyReportsTl(); 
         }, []);
 
+        const handleFilterChange = (e) => {
+            setFilters({
+                ...filters,
+                [e.target.name]: e.target.value
+            });
+        };
+    
+        // Filtrar los datos según los filtros establecidos
+        const filteredData = Array.isArray(dataRows) ? dataRows.filter((row) => {
+            return (
+                (filters.technician === '' || row.user_name.toLowerCase().includes(filters.technician.toLowerCase())) &&
+                (filters.task === '' || row.task_name.toLowerCase().includes(filters.task.toLowerCase())) &&
+                (filters.type === '' || row.type_value.toLowerCase().includes(filters.type.toLowerCase())) &&
+                (filters.alias === '' || row.alias.toLowerCase().includes(filters.alias.toLowerCase())) &&
+                (filters.status === '' || row.row_status.toLowerCase().includes(filters.status.toLowerCase()))
+            );
+        }) : [];
+        
     //#endregion
 
     //#region Code for alert messagess
@@ -854,9 +913,13 @@ export default function Dashboard() {
         /***                                     Login Out                                         ***/
         /*********************************************************************************************/
         const handleSignOut = () => {
-            console.log('User signed out'); // Handle sign out logic if needed
+            performSignOut();
+        };
+
+        const performSignOut = () => {
             sessionStorage.clear();
-            router.push('/'); // Redirect to the index page
+            console.log('User signed out');
+            router.push('/'); // Redirige al inicio
         };
 
     //#endregion
@@ -936,47 +999,96 @@ export default function Dashboard() {
                         </div>       
                     </div>
                 )}
+                 {/* Filtros */}
+                 {selectedOption === 'Today Team Work' && !showPasswordChangeForm && (
+                 <div className={styles.container}>
+                    {/* Filtros */}
+                    <div className={styles.filters}>
+                        <input
+                            type="text"
+                            name="technician"
+                            value={filters.technician}
+                            onChange={handleFilterChange}
+                            placeholder="Filter by Technician"
+                        />
+                        <input
+                            type="text"
+                            name="task"
+                            value={filters.task}
+                            onChange={handleFilterChange}
+                            placeholder="Filter by Task"
+                        />
+                        <input
+                            type="text"
+                            name="type"
+                            value={filters.type}
+                            onChange={handleFilterChange}
+                            placeholder="Filter by Type"
+                        />
+                        <input
+                            type="text"
+                            name="alias"
+                            value={filters.alias}
+                            onChange={handleFilterChange}
+                            placeholder="Filter by Alias"
+                        />
+                        <input
+                            type="text"
+                            name="status"
+                            value={filters.status}
+                            onChange={handleFilterChange}
+                            placeholder="Filter by Status"
+                        />
+                    </div>
+                </div>
+                )}
                 {selectedOption === 'Today Team Work' && !showPasswordChangeForm && (
                     <div className={styles.tableSection}>
                         <table className={styles.table}>
-                            <thead>
-                                <tr>
-                                    <th>Technician</th>
-                                    <th>Task</th>
-                                    <th>Type</th>
-                                    <th>Alias</th>
-                                    <th>Comments</th>
-                                    <th>Status</th>
-                                    <th>Start Time</th>
-                                    <th>End Time</th>
-                                    <th>Total Time</th>
-                                    <th>Role</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {Array.isArray(dataRows) && dataRows.length > 0 ? (
-                                    dataRows.map((row, index) => (
-                                        <tr key={index}>
-                                            <td>{row.user_name}</td>
-                                            <td>{row.task_name}</td>
-                                            <td>{row.type_value}</td>
-                                            <td>{row.alias}</td>
-                                            <td>{row.commment}</td>
-                                            <td>{row.row_status}</td>
-                                            <td>{row.start_time}</td> 
-                                            <td>{row.end_time}</td> 
-                                            <td>{row.total_time + ' min'}</td> 
-                                            <td>{row.role_name}</td>
-                                        </tr>
-                                    ))
-                                ) : (
-                                    <tr>
-                                        <td colSpan="9">No data available</td>
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Date</th>
+                                <th>Technician</th>
+                                <th>Task</th>
+                                <th>Type</th>
+                                <th>Alias</th>
+                                <th>Comments</th>
+                                <th>Status</th>
+                                <th>Start Time</th>
+                                <th>End Time</th>
+                                <th>Total Time</th>
+                                <th>Role</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {filteredData.length > 0 ? (
+                                filteredData.map((row, index) => (
+                                    <tr
+                                        key={index}
+                                        style={{ backgroundColor: index === highlightedRow ? '#f0f8ff' : 'transparent' }}
+                                    >
+                                        <td>{row.id}</td>
+                                        <td>{row.row_date.split('T')[0]}</td>
+                                        <td>{row.user_name}</td>
+                                        <td>{row.task_name}</td>
+                                        <td>{row.type_value}</td>
+                                        <td>{row.alias}</td>
+                                        <td>{row.commment}</td>
+                                        <td>{row.row_status}</td>
+                                        <td>{row.start_time}</td>
+                                        <td>{row.end_time}</td>
+                                        <td>{Math.floor(row.total_time / 60) + ' h ' + (row.total_time % 60) + ' min'}</td>
+                                        <td>{row.role_name}</td>
                                     </tr>
-                                )}
-                            </tbody>
-
-                        </table>
+                                ))
+                            ) : (
+                                <tr>
+                                    <td colSpan="13">No data available</td>
+                                </tr>
+                            )}
+                        </tbody>
+                    </table>
                     </div>
                 )}
                 {selectedOption === 'Manage Times' && !showPasswordChangeForm && (

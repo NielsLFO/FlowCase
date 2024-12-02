@@ -18,17 +18,49 @@ ChartJS.register(
     LinearScale
 );
 export default function Dashboard() {
-
     const router = useRouter();
+    const INACTIVITY_LIMIT = 4 * 60 * 60 * 1000; // 4 hours in milliseconds
+    
+    const handleUserActivity = () => {
+        // Update the time of the last activity
+        sessionStorage.setItem('lastActivity', Date.now());
+    };
+    
+    const checkInactivity = () => {
+        const lastActivity = sessionStorage.getItem('lastActivity');
+        if (lastActivity) {
+            const currentTime = Date.now();
+            const timeSinceLastActivity = currentTime - parseInt(lastActivity, 10);
+    
+            // If more than 4 hours have passed, redirect to the home page
+            if (timeSinceLastActivity > INACTIVITY_LIMIT) {
+                performSignOut();
+            }
+        }
+    };
+    
     useEffect(() => {
-        // Verificar si existe un usuario en sessionStorage
-        const userEmail = sessionStorage.getItem('userEmail');  
+        // Check if the user is authenticated
+        const userEmail = sessionStorage.getItem('userEmail');
         if (!userEmail) {
-            // Si no hay datos de sesión, redirigir a la página de inicio
             router.push('/');
         }
+    
+        // Set up events to track user activity
+        window.addEventListener('mousemove', handleUserActivity);
+        window.addEventListener('keydown', handleUserActivity);
+    
+        // Start the interval to check for inactivity
+        const interval = setInterval(checkInactivity, 60 * 1000); // Check every minute
+    
+        // Clean up events and interval when the component unmounts
+        return () => {
+            window.removeEventListener('mousemove', handleUserActivity);
+            window.removeEventListener('keydown', handleUserActivity);
+            clearInterval(interval);
+        };
     }, [router]);
-
+    
     //#region States 
         /*********************************************************************************************/
         /***                                    state variables                                    ***/
@@ -684,10 +716,15 @@ export default function Dashboard() {
         /*********************************************************************************************/
 
         const handleSignOut = () => {
-            sessionStorage.clear();
-            console.log('User signed out'); // Handle sign out logic if needed
-            router.push('/'); // Redirect to the index page
+            performSignOut();
         };
+
+        const performSignOut = () => {
+            sessionStorage.clear();
+            console.log('User signed out');
+            router.push('/'); 
+        };
+        
 
     //#endregion
     return (
