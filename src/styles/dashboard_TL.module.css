@@ -364,7 +364,7 @@
     padding: 10px 16px;
     font-size: 1rem;
     cursor: pointer;
-    background-color: #17a2b8; /* Azul suave */
+    background-color: #17a2b8; 
     color: white;
     border: none;
     border-radius: 4px;
@@ -403,7 +403,7 @@
 /*Estilos para la seccion de roles*/
 .container_roll {
     padding: 20px;
-    width: 95%; /* Ancho máximo del contenedor */
+    width: 95%; 
     margin: 0 auto;
     font-family: Arial, sans-serif;
     background-color: #f9f9f9;
@@ -418,89 +418,89 @@
 }
 
 .container_roll table {
-    width: 100%; /* Ancho completo */
-    border-collapse: collapse; /* Sin espacios entre bordes */
-    margin-bottom: 20px; /* Espacio debajo de la tabla */
-    min-width: 800px; /* Ancho mínimo de la tabla */
+    width: 100%; 
+    border-collapse: collapse; 
+    margin-bottom: 20px; 
+    min-width: 800px; 
 }
 
 .container_roll th,
 .container_roll td {
-    padding: 12px; /* Espaciado interno */
-    border: 1px solid #ddd; /* Borde gris claro */
+    padding: 12px; 
+    border: 1px solid #ddd; 
 }
 
 /* Estilo para la columna de nombre */
 .container_roll th:first-child,
 .container_roll td:first-child {
-    width: 200px; /* Ancho específico para la columna de nombres */
-    text-align: left; /* Alinear texto a la izquierda */
+    width: 200px; 
+    text-align: left; 
 }
 
 /* Establecer un ancho fijo para las columnas restantes */
 .container_roll th:not(:first-child),
 .container_roll td:not(:first-child) {
-    width: calc((100% - 200px) / 8); /* Resto del ancho dividido entre 8 columnas */
+    width: calc((100% - 200px) / 8); 
 }
 
 /* Alternativamente, si prefieres un ancho fijo para cada columna */
 .container_roll th:not(:first-child),
 .container_roll td:not(:first-child) {
-    width: 100px; /* Ancho fijo para cada columna, ajusta según sea necesario */
+    width: 100px; 
 }
 
 .container_roll th {
-    background-color: #4a90e2; /* Color de fondo azul para encabezados */
+    background-color: #4a90e2; 
     color: white; 
 }
 
 .container_roll td {
-    background-color: white; /* Color de fondo blanco para celdas */
+    background-color: white;
 }
 
 /* Centrar checkboxes en las celdas */
 .container_roll td input[type="checkbox"] {
-    margin: 0 auto; /* Centrar el checkbox */
-    display: block; /* Hacer que el checkbox se comporte como un bloque */
+    margin: 0 auto; 
+    display: block; 
 }
 
 /* Alinear el texto de las celdas de checkbox al centro */
 .container_roll th,
 .container_roll td {
-    text-align: center; /* Centrar texto (incluyendo checkboxes) */
+    text-align: center; 
 }
 
 .container_roll tr:nth-child(even) {
-    background-color: #f2f2f2; /* Color de fondo para filas pares */
+    background-color: #f2f2f2; 
 }
 
 .container_roll tr:hover {
-    background-color: #e9ecef; /* Color de fondo al pasar el mouse */
+    background-color: #e9ecef; 
 }
 
 .container_roll input[type="checkbox"] {
-    cursor: pointer; /* Cambiar cursor al pasar sobre checkbox */
+    cursor: pointer; 
 }
 
 .container_roll .saveButton {
-    background-color: #007bff; /* Color de fondo azul para el botón */
-    color: white; /* Color de texto blanco */
-    padding: 10px 20px; /* Espaciado interno del botón */
-    border: none; /* Sin borde */
-    border-radius: 4px; /* Bordes redondeados */
-    cursor: pointer; /* Cambiar cursor al pasar sobre el botón */
-    font-size: 16px; /* Tamaño de fuente */
-    display: block; /* Hacer que el botón se comporte como un bloque */
-    margin: 0 auto; /* Centrar el botón */
-    transition: background-color 0.3s; /* Transición suave para el color de fondo */
+    background-color: #007bff; 
+    color: white; 
+    padding: 10px 20px; 
+    border: none; 
+    border-radius: 4px; 
+    cursor: pointer; 
+    font-size: 16px; 
+    display: block; 
+    margin: 0 auto; 
+    transition: background-color 0.3s; 
 }
 
 .container_roll .saveButton:hover {
-    background-color: #0056b3; /* Color de fondo al pasar el mouse por el botón */
+    background-color: #0056b3; 
 }
 
 .container_roll .saveButton:focus {
-    outline: none; /* Sin borde de enfoque */
+    outline: none; 
 }
 
 /*Estilos para filtro de busqueda*/
@@ -540,29 +540,24 @@
 
 /* Estilo específico para cada input usando su ID */
 
-/* Filtro de Technician */
 .filterTechnician {
-    background-color: #eaf2f8; /* Fondo ligeramente diferente */
+    background-color: #eaf2f8;
 }
 
-/* Filtro de Task */
 .filterTask {
-    background-color: #f2e9f1; /* Fondo diferente */
+    background-color: #f2e9f1; 
 }
 
-/* Filtro de Type */
 .filterType {
-    background-color: #f2f8ea; /* Fondo diferente */
+    background-color: #f2f8ea; 
 }
 
-/* Filtro de Alias */
 .filterAlias {
-    background-color: #f8f1e4; /* Fondo diferente */
+    background-color: #f8f1e4; 
 }
 
-/* Filtro de Status */
 .filterStatus {
-    background-color: #f1e4f8; /* Fondo diferente */
+    background-color: #f1e4f8; 
 }
 
 /* Ajuste para pequeños pantallas */
@@ -578,4 +573,80 @@
 
 
 
+/*OvertimeTable*/
 
+.tableContainer {
+    width: 100%;
+    overflow-x: auto;
+    margin-top: 20px;
+  }
+  
+  .overtimeTable {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 20px 0;
+    font-size: 16px;
+    text-align: left;
+  }
+  
+  .overtimeTable th,
+  .overtimeTable td {
+    padding: 12px 15px;
+    border: 1px solid #ddd;
+  }
+  
+  .overtimeTable th {
+    background-color: #f4f4f4;
+    font-weight: bold;
+  }
+  
+  .overtimeTable tbody tr:nth-child(even) {
+    background-color: #f9f9f9;
+  }
+  
+  .overtimeTable tbody tr:hover {
+    background-color: #f1f1f1;
+  }
+  
+  .inputField {
+    width: 96%;
+    padding: 8px;
+    font-size: 14px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+  }
+  
+  .selectDropdown {
+    width: 100%;
+    font-size: 14px;
+  }
+  
+  .datePicker {
+    width: 100%;
+    font-size: 14px;
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+  }
+  
+  .saveButton {
+    margin-top: 20px;
+    background-color: #007BFF;
+    color: white;
+    font-size: 16px;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+  
+  .saveButton:hover {
+    background-color: #0056b3;
+  }
+  
+  .saveButton:disabled {
+    background-color: #ddd;
+    color: #aaa;
+    cursor: not-allowed;
+  }
+  

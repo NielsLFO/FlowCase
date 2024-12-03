@@ -8,6 +8,9 @@ import Alert from '@mui/material/Alert';
 import AlertTitle from '@mui/material/AlertTitle';
 import { useRouter } from 'next/router';
 
+import Select from "react-select"; // npm install react-select
+import DatePicker from "react-datepicker"; // npm install react-datepicker
+import "react-datepicker/dist/react-datepicker.css";
 
 // Register components for the chart
 ChartJS.register(
@@ -46,7 +49,8 @@ export default function Dashboard() {
             // Check if the user is authenticated
             const userEmail = sessionStorage.getItem('userEmail');
             const role = sessionStorage.getItem('roleId');
-            if (!userEmail || role !== 10) {
+            if (!userEmail || role !== "10") {
+                alert(role);
                 router.push('/');
             }
         
@@ -926,6 +930,74 @@ export default function Dashboard() {
         };
 
     //#endregion
+   
+    const [activeTab, setActiveTab] = useState('add');
+
+    const [overtimeData, setOvertimeData] = useState([]);
+  const timeOptions = Array.from({ length: 24 }, (_, hour) =>
+    Array.from({ length: 2 }, (_, half) => ({
+      value: `${hour.toString().padStart(2, "0")}:${half === 0 ? "00" : "30"}`,
+      label: `${hour.toString().padStart(2, "0")}:${half === 0 ? "00" : "30"}`,
+    }))
+  ).flat();
+
+  useEffect(() => {
+    const fetchTechnicians = async () => {
+      const tl_name = sessionStorage.getItem("user_name");
+      try {
+        const response = await fetch("/api/TL/getTechnicians", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ tl_name }),
+        });
+        const result = await response.json();
+        if (result.success) {
+          const techniciansWithRoles = result.data.map((tech) => ({
+            id: tech.id,
+            user: tech.user_name, // Nombre del técnico
+            option: "", // Opción inicial vacía
+            date: null, // Fecha inicial vacía
+            start: "", // Hora de inicio vacía
+            end: "", // Hora de finalización vacía
+            comments: "", // Comentarios vacíos
+          }));
+          setOvertimeData(techniciansWithRoles);
+        } else {
+          alert(result.message || "Error al obtener técnicos y roles.");
+        }
+      } catch (error) {
+        console.error("Error al obtener técnicos y roles:", error);
+      }
+    };
+
+    fetchTechnicians();
+    }, []);
+
+    const handleInputChange = (index, field, value) => {
+        const updatedData = [...overtimeData];
+        updatedData[index][field] = value;
+        setOvertimeData(updatedData);
+    };
+
+    const handleSubmit = () => {
+        // Filtrar solo los usuarios con información adicional
+        const dataToSave = overtimeData.filter(
+            (row) =>
+            row.option && row.date && row.start && row.end || row.comments
+        );
+
+        if (dataToSave.length === 0) {
+            alert("No hay datos para guardar.");
+            return;
+        }
+
+        // Aquí puedes manejar el envío de los datos al servidor
+        alert("Overtime data to save: " + JSON.stringify(dataToSave, null, 2));
+
+        };
+
     return (
         <div className={styles.dashboard}>
             <header className={styles.header}>
@@ -1383,6 +1455,132 @@ export default function Dashboard() {
                             <button className={styles.submitButton_reset} type="submit">Change Password</button>
                             <button className={styles.cancelButton} type="button" onClick={() => handleChangePasswordCancel()}>Cancel</button>
                         </form>
+                    </div>
+                )}
+                {selectedOption === 'Overtime' && !showPasswordChangeForm && (
+                    <div className="tabs-container">
+                        {/* Pestañas */}
+                        <div className="tabs">
+                            <button
+                            className={activeTab === 'add' ? 'tab active' : 'tab'}
+                            onClick={() => setActiveTab('add')}
+                            >
+                            Add Overtime
+                            </button>
+                            <button
+                            className={activeTab === 'modify' ? 'tab active' : 'tab'}
+                            onClick={() => setActiveTab('modify')}
+                            >
+                            Modify Overtime
+                            </button>
+                            <button
+                            className={activeTab === 'review' ? 'tab active' : 'tab'}
+                            onClick={() => setActiveTab('review')}
+                            >
+                            Review Overtime
+                            </button>
+                        </div>
+
+                        {/* Contenido de las pestañas */}
+                        <div className="tab-content">
+                            {activeTab === 'add' && (
+                            <div>
+                                <h2>Add Overtime</h2>
+                                <div className={styles.tableContainer}>
+                                    <table className={styles.overtimeTable}>
+                                    <thead>
+                                        <tr>
+                                        <th>User</th>
+                                        <th>Option</th>
+                                        <th>Date</th>
+                                        <th>Start Time</th>
+                                        <th>End Time</th>
+                                        <th>Comments</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {overtimeData.map((row, index) => (
+                                        <tr key={index}>
+                                            <td>{row.user}</td>
+                                            <td>
+                                            <Select
+                                                options={[
+                                                { value: "all-day", label: "All day" },
+                                                { value: "hours", label: "Hours" },
+                                                { value: "reposition", label: "Reposition" },
+                                                ]}
+                                                onChange={(selected) =>
+                                                handleInputChange(index, "option", selected.value)
+                                                }
+                                                placeholder="Select"
+                                                className={styles.selectDropdown}
+                                            />
+                                            </td>
+                                            <td>
+                                            <DatePicker
+                                                selected={row.date}
+                                                onChange={(date) =>
+                                                handleInputChange(index, "date", date)
+                                                }
+                                                dateFormat="yyyy/MM/dd"
+                                                placeholderText="Select date"
+                                                className={styles.datePicker}
+                                            />
+                                            </td>
+                                            <td>
+                                            <Select
+                                                options={timeOptions}
+                                                onChange={(selected) =>
+                                                handleInputChange(index, "start", selected.value)
+                                                }
+                                                placeholder="Start time"
+                                                className={styles.selectDropdown}
+                                            />
+                                            </td>
+                                            <td>
+                                            <Select
+                                                options={timeOptions}
+                                                onChange={(selected) =>
+                                                handleInputChange(index, "end", selected.value)
+                                                }
+                                                placeholder="End time"
+                                                className={styles.selectDropdown}
+                                            />
+                                            </td>
+                                            <td>
+                                            <input
+                                                type="text"
+                                                value={row.comments}
+                                                onChange={(e) =>
+                                                handleInputChange(index, "comments", e.target.value)
+                                                }
+                                                placeholder="Add comments"
+                                                className={styles.inputField}
+                                            />
+                                            </td>
+                                        </tr>
+                                        ))}
+                                    </tbody>
+                                    </table>
+                                </div>
+                                <button onClick={handleSubmit} className={styles.saveButton}>
+                                    Submit
+                                </button>
+                            </div>
+                            )}
+                            {activeTab === 'modify' && (
+                            <div>
+                                <h2>Modify Overtime</h2>
+                                <p>Formulario o contenido para modificar horas extra.</p>
+                            </div>
+                            )}
+                            {activeTab === 'review' && (
+                            <div>
+                                <h2>Review Overtime</h2>
+                                <p>Formulario o contenido para revisar horas extra.</p>
+                            </div>
+                            )}
+                        </div>
                     </div>
                 )}
             </main>

@@ -42,7 +42,8 @@ export default function Dashboard() {
     useEffect(() => {
         // Check if the user is authenticated
         const userEmail = sessionStorage.getItem('userEmail');
-        if (!userEmail) {
+        const role = sessionStorage.getItem('roleId');
+        if (!userEmail || role == "10") {
             router.push('/');
         }
     
