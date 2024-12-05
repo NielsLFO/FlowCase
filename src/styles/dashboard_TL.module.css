@@ -649,4 +649,47 @@
     color: #aaa;
     cursor: not-allowed;
   }
+
+  /*Buttons for overtime menu*/
+
+  .tableSection {
+    display: flex;
+    justify-content: flex-start; /* Alineación a la izquierda */
+    align-items: center;
+    background-color: #f4f4f9; /* Fondo claro */
+    padding: 10px 20px;
+    border-radius: 8px;
+    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+    gap: 10px; /* Espaciado entre botones */
+  }
+  
+  .tab {
+    background-color: #ffffff; /* Fondo del botón por defecto */
+    border: 1px solid #ccc; /* Borde gris claro */
+    color: #333; /* Color del texto */
+    font-size: 16px;
+    font-weight: bold;
+    padding: 10px 20px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+  }
+  
+  .tab:hover {
+    background-color: #e6e6e6; /* Fondo al pasar el mouse */
+    border-color: #aaa; /* Cambiar borde */
+  }
+  
+  .tab.active {
+    background-color: #007BFF; /* Fondo azul profesional */
+    color: #fff; /* Texto blanco */
+    border-color: #007BFF; /* Bordes azules */
+  }
+  
+  .tab:focus {
+    outline: none;
+    box-shadow: 0px 0px 8px rgba(0, 123, 255, 0.7); /* Resaltar al enfocar */
+  }
+  
+  
   
