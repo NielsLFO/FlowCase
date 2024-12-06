@@ -20,18 +20,18 @@ export default async function handler(req, res) {
 
         // Preparar la consulta para insertar múltiples filas
         const query = `
-            INSERT INTO overtime (user_id, option, row_date, start_time, end_time, comments)
+            INSERT INTO overtime (user_id, type_time, overtime_date, start_time, end_time, comments)
             VALUES ?
         `;
 
         // Mapear los datos de entrada para ajustarlos al formato esperado
         const values = overtimeData.map((row) => [
-            row.user,    // user_id
-            row.option,  // option
-            row.date,    // row_date
-            row.start,   // start_time
-            row.end,     // end_time
-            row.comments // comments
+            row.id,    
+            row.option,  
+            row.date.split('T')[0],   
+            row.start,   
+            row.end,     
+            row.comments 
         ]);
 
         // Ejecutar la consulta

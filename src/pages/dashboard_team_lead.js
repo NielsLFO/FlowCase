@@ -933,44 +933,46 @@ export default function Dashboard() {
     //#endregion
    
     const [activeTab, setActiveTab] = useState('add');
+    const [activeOvertimeData, setActiveOvertimeData] = useState([]);
+
 
     const [overtimeData, setOvertimeData] = useState([]);
-  const timeOptions = Array.from({ length: 24 }, (_, hour) =>
-    Array.from({ length: 2 }, (_, half) => ({
-      value: `${hour.toString().padStart(2, "0")}:${half === 0 ? "00" : "30"}`,
-      label: `${hour.toString().padStart(2, "0")}:${half === 0 ? "00" : "30"}`,
-    }))
-  ).flat();
+    const timeOptions = Array.from({ length: 24 }, (_, hour) =>
+        Array.from({ length: 2 }, (_, half) => ({
+        value: `${hour.toString().padStart(2, "0")}:${half === 0 ? "00" : "30"}`,
+        label: `${hour.toString().padStart(2, "0")}:${half === 0 ? "00" : "30"}`,
+        }))
+    ).flat();
 
-  useEffect(() => {
-    const fetchTechnicians = async () => {
-      const tl_name = sessionStorage.getItem("user_name");
-      try {
-        const response = await fetch("/api/TL/getTechnicians", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ tl_name }),
-        });
-        const result = await response.json();
-        if (result.success) {
-          const techniciansWithRoles = result.data.map((tech) => ({
-            id: tech.id,
-            user: tech.user_name, 
-            option: "", 
-            date: null, 
-            start: "", 
-            end: "", 
-            comments: "", 
-          }));
-          setOvertimeData(techniciansWithRoles);
-        } else {
-          alert(result.message || "Error al obtener técnicos y roles.");
+    useEffect(() => {
+        const fetchTechnicians = async () => {
+        const tl_name = sessionStorage.getItem("user_name");
+        try {
+            const response = await fetch("/api/TL/getTechnicians", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ tl_name }),
+            });
+            const result = await response.json();
+            if (result.success) {
+            const techniciansWithRoles = result.data.map((tech) => ({
+                id: tech.id,
+                user: tech.user_name, 
+                option: "", 
+                date: null, 
+                start: "", 
+                end: "", 
+                comments: "", 
+            }));
+            setOvertimeData(techniciansWithRoles);
+            } else {
+            alert(result.message || "Error al obtener técnicos y roles.");
+            }
+        } catch (error) {
+            console.error("Error al obtener técnicos y roles:", error);
         }
-      } catch (error) {
-        console.error("Error al obtener técnicos y roles:", error);
-      }
     };
 
     fetchTechnicians();
@@ -1027,6 +1029,39 @@ export default function Dashboard() {
             showAlert('error', 'Error', "Error de conexión al servidor.");
         }
     };
+
+    useEffect(() => {
+        fetchActiveOvertimeData();
+    }, []);
+    
+    const fetchActiveOvertimeData = async () => {
+        const tl_name = sessionStorage.getItem("user_name");
+        try {
+            const response = await fetch('/api/TL/change_overtime', {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+            });
+    
+            const result = await response.json({ tl_name });
+    
+            if (result.success) {
+                setActiveOvertimeData(result.data); // Carga los datos activos en el estado
+            } else {
+                alert(result.message || 'Error al cargar las horas extras activas.');
+            }
+        } catch (error) {
+            console.error('Error al cargar las horas extras activas:', error);
+        }
+    };
+
+    const handleInputChange2 = (index, field, value) => {
+        const updatedData = [...activeOvertimeData];
+        updatedData[index][field] = value;
+        setActiveOvertimeData(updatedData);
+    };
+    
     
     return (
         <div className={styles.dashboard}>
@@ -1602,95 +1637,76 @@ export default function Dashboard() {
                             <div>
                                 <h2>Modify Overtime</h2>
                                     <div className={styles.tableContainer}>
-                                    <table className={styles.overtimeTable}>
+                                    <table>
                                         <thead>
-                                        <tr>
-                                            <th>User</th>
-                                            <th>Option</th>
-                                            <th>Date</th>
-                                            <th>Start Time</th>
-                                            <th>End Time</th>
-                                            <th>Comments</th>
-                                            <th>Actions</th>
-                                        </tr>
+                                            <tr>
+                                                <th>User</th>
+                                                <th>Option</th>
+                                                <th>Date</th>
+                                                <th>Start Time</th>
+                                                <th>End Time</th>
+                                                <th>Comments</th>
+                                                <th>Actions</th>
+                                            </tr>
                                         </thead>
                                         <tbody>
-                                        {overtimeData.map((row, index) => (
-                                            <tr key={index}>
-                                            <td>{row.user}</td>
-                                            <td>
-                                                <Select
-                                                options={[
-                                                    { value: "all-day", label: "All day" },
-                                                    { value: "hours", label: "Hours" },
-                                                    { value: "reposition", label: "Reposition" },
-                                                ]}
-                                                value={row.option}
-                                                onChange={(selected) =>
-                                                    handleInputChange(index, "option", selected.value)
-                                                }
-                                                placeholder="Select"
-                                                className={styles.selectDropdown}
-                                                />
-                                            </td>
-                                            <td>
-                                                <DatePicker
-                                                selected={row.date}
-                                                onChange={(date) =>
-                                                    handleInputChange(index, "date", date)
-                                                }
-                                                dateFormat="yyyy/MM/dd"
-                                                placeholderText="Select date"
-                                                className={styles.datePicker}
-                                                />
-                                            </td>
-                                            <td>
-                                                <Select
-                                                options={timeOptions}
-                                                value={row.start}
-                                                onChange={(selected) =>
-                                                    handleInputChange(index, "start", selected.value)
-                                                }
-                                                placeholder="Start time"
-                                                className={styles.selectDropdown}
-                                                />
-                                            </td>
-                                            <td>
-                                                <Select
-                                                options={timeOptions}
-                                                value={row.end}
-                                                onChange={(selected) =>
-                                                    handleInputChange(index, "end", selected.value)
-                                                }
-                                                placeholder="End time"
-                                                className={styles.selectDropdown}
-                                                />
-                                            </td>
-                                            <td>
-                                                <input
-                                                type="text"
-                                                value={row.comments}
-                                                onChange={(e) =>
-                                                    handleInputChange(index, "comments", e.target.value)
-                                                }
-                                                placeholder="Add comments"
-                                                className={styles.inputField}
-                                                />
-                                            </td>
-                                            <td>
-                                                <button
-                                                onClick={() => handleSaveRow(index)}
-                                                className={styles.saveRowButton}
-                                                >
-                                                Save
-                                                </button>
-                                            </td>
-                                            </tr>
-                                        ))}
+                                            {activeOvertimeData.map((row, index) => (
+                                                <tr key={index}>
+                                                    <td>{row.user_id}</td>
+                                                    <td>
+                                                        <select
+                                                            value={row.type_time || ''}
+                                                            onChange={(e) => handleInputChange2(index, 'option', e.target.value)}
+                                                        >
+                                                            <option value="">Select</option>
+                                                            <option value="all Day">All Day</option>
+                                                            <option value="hours">Hours</option>
+                                                            <option value="reposition">Reposition</option>
+                                                        </select>
+                                                    </td>
+                                                    <td>
+                                                        <DatePicker
+                                                            selected={row.overtime_date ? new Date(row.overtime_date) : null}
+                                                            onChange={(date) => handleInputChange2(index, 'date', date)}
+                                                            dateFormat="yyyy-MM-dd"
+                                                            className="datePickerInput"
+                                                            placeholderText="Select a date"
+                                                        />
+                                                    </td>
+                                                    <td>
+                                                        <input
+                                                            type="time"
+                                                            value={row.start_time || ''}
+                                                            onChange={(e) => handleInputChange2(index, 'start', e.target.value)}
+                                                        />
+                                                    </td>
+                                                    <td>
+                                                        <input
+                                                            type="time"
+                                                            value={row.end_time || ''}
+                                                            onChange={(e) => handleInputChange2(index, 'end', e.target.value)}
+                                                        />
+                                                    </td>
+                                                    <td>
+                                                        <input
+                                                            type="text"
+                                                            value={row.comments || ''}
+                                                            onChange={(e) => handleInputChange2(index, 'comments', e.target.value)}
+                                                        />
+                                                    </td>
+                                                    <td>
+                                                        <button
+                                                            className={styles.saveButton}
+                                                            onClick={() => handleSaveRow(row, index)}
+                                                        >
+                                                            Save
+                                                        </button>
+                                                    </td>
+                                                </tr>
+                                            ))}
                                         </tbody>
                                     </table>
-                                    </div>
-
+                                </div>
                             </div>
                             )}
                             {activeTab === 'review' && (
