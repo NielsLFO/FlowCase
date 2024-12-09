@@ -25,7 +25,7 @@ export default function Dashboard() {
 
     //#region Session  
         const router = useRouter();
-        /*
+
         const INACTIVITY_LIMIT = 4 * 60 * 60 * 1000; // 4 hours in milliseconds
         
         const handleUserActivity = () => {
@@ -69,7 +69,7 @@ export default function Dashboard() {
                 clearInterval(interval);
             };
         }, [router]);
-    */
+
     //#endregion
 
     //#region States 
@@ -931,138 +931,181 @@ export default function Dashboard() {
         };
 
     //#endregion
+
+    //#region Overtime and Repo time
+
+        /*********************************************************************************************/
+        /***                                     Login Out                                         ***/
+        /*********************************************************************************************/
    
-    const [activeTab, setActiveTab] = useState('add');
-    const [activeOvertimeData, setActiveOvertimeData] = useState([]);
+        const [activeTab, setActiveTab] = useState('add');
+        const [activeOvertimeData, setActiveOvertimeData] = useState([]);
 
 
-    const [overtimeData, setOvertimeData] = useState([]);
-    const timeOptions = Array.from({ length: 24 }, (_, hour) =>
-        Array.from({ length: 2 }, (_, half) => ({
-        value: `${hour.toString().padStart(2, "0")}:${half === 0 ? "00" : "30"}`,
-        label: `${hour.toString().padStart(2, "0")}:${half === 0 ? "00" : "30"}`,
-        }))
-    ).flat();
+        const [overtimeData, setOvertimeData] = useState([]);
+        const timeOptions = Array.from({ length: 24 }, (_, hour) =>
+            Array.from({ length: 2 }, (_, half) => ({
+            value: `${hour.toString().padStart(2, "0")}:${half === 0 ? "00" : "30"}`,
+            label: `${hour.toString().padStart(2, "0")}:${half === 0 ? "00" : "30"}`,
+            }))
+        ).flat();
 
-    useEffect(() => {
-        const fetchTechnicians = async () => {
-        const tl_name = sessionStorage.getItem("user_name");
-        try {
-            const response = await fetch("/api/TL/getTechnicians", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-            },
-            body: JSON.stringify({ tl_name }),
-            });
-            const result = await response.json();
-            if (result.success) {
-            const techniciansWithRoles = result.data.map((tech) => ({
-                id: tech.id,
-                user: tech.user_name, 
-                option: "", 
-                date: null, 
-                start: "", 
-                end: "", 
-                comments: "", 
-            }));
-            setOvertimeData(techniciansWithRoles);
-            } else {
-            alert(result.message || "Error al obtener técnicos y roles.");
-            }
-        } catch (error) {
-            console.error("Error al obtener técnicos y roles:", error);
-        }
-    };
-
-    fetchTechnicians();
-    }, []);
-
-    const handleInputChange = (index, field, value) => {
-        const updatedData = [...overtimeData];
-        updatedData[index][field] = value;
-        setOvertimeData(updatedData);
-    };
-
-    const handleSubmit = () => {
-        // Filtrar solo los usuarios con todos los campos necesarios (excepto comentarios, que son opcionales)
-        const dataToSave = overtimeData.filter(
-            (row) => row.option && row.date && row.start && row.end
-        );
-    
-        if (dataToSave.length === 0) {
-            alert("No hay datos válidos para guardar.");
-            return;
-        }
-    
-        // Mostrar en consola los datos para depuración (opcional)
-        console.log("Overtime data to save:", dataToSave);
-    
-        // Llamar a la función para enviar los datos
-        addOvertime(dataToSave);
-    };
-    
-    const addOvertime = async (dataToSave) => {
-        try {
-            // Enviar la solicitud POST al servidor
-            const response = await fetch('/api/TL/add_overtime', {
-                method: 'POST',
+        useEffect(() => {
+            const fetchTechnicians = async () => {
+            const tl_name = sessionStorage.getItem("user_name");
+            try {
+                const response = await fetch("/api/TL/getTechnicians", {
+                method: "POST",
                 headers: {
-                    'Content-Type': 'application/json',
+                    "Content-Type": "application/json",
                 },
-                body: JSON.stringify(dataToSave), // Enviar los datos en el cuerpo de la solicitud
-            });
-    
-            const result = await response.json();
-    
-            if (result.success) {
-                // Manejar éxito: muestra mensaje, limpia datos o actualiza la UI
-                alert("Datos guardados exitosamente.");
-                // Aquí puedes limpiar el formulario o recargar datos
-            } else {
-                // Manejar errores desde el servidor
-                showAlert('error', 'Error', result.message || "Error al guardar los datos.");
+                body: JSON.stringify({ tl_name }),
+                });
+                const result = await response.json();
+                if (result.success) {
+                const techniciansWithRoles = result.data.map((tech) => ({
+                    id: tech.id,
+                    user: tech.user_name, 
+                    option: "", 
+                    date: null, 
+                    start: "", 
+                    end: "", 
+                    comments: "", 
+                }));
+                setOvertimeData(techniciansWithRoles);
+                } else {
+                alert(result.message || "Error al obtener técnicos y roles.");
+                }
+            } catch (error) {
+                console.error("Error al obtener técnicos y roles:", error);
             }
-        } catch (error) {
-            // Manejar errores de conexión o de servidor
-            console.error("Error al guardar los datos:", error);
-            showAlert('error', 'Error', "Error de conexión al servidor.");
-        }
-    };
+        };
 
-    useEffect(() => {
-        fetchActiveOvertimeData();
-    }, []);
-    
-    const fetchActiveOvertimeData = async () => {
-        const tl_name = sessionStorage.getItem("user_name");
-        try {
-            const response = await fetch('/api/TL/change_overtime', {
-                method: 'GET',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-            });
-    
-            const result = await response.json({ tl_name });
-    
-            if (result.success) {
-                setActiveOvertimeData(result.data); // Carga los datos activos en el estado
-            } else {
-                alert(result.message || 'Error al cargar las horas extras activas.');
+        fetchTechnicians();
+        }, []);
+
+        const handleInputChange = (index, field, value) => {
+            const updatedData = [...overtimeData];
+            updatedData[index][field] = value;
+            setOvertimeData(updatedData);
+        };
+
+        const handleSubmit = () => {
+            // Filtrar solo los usuarios con todos los campos necesarios (excepto comentarios, que son opcionales)
+            const dataToSave = overtimeData.filter(
+                (row) => row.option && row.date && row.start && row.end
+            );
+        
+            if (dataToSave.length === 0) {
+                alert("No hay datos válidos para guardar.");
+                return;
             }
-        } catch (error) {
-            console.error('Error al cargar las horas extras activas:', error);
-        }
-    };
+        
+            // Mostrar en consola los datos para depuración (opcional)
+            console.log("Overtime data to save:", dataToSave);
+        
+            // Llamar a la función para enviar los datos
+            addOvertime(dataToSave);
+        };
+        
+        const addOvertime = async (dataToSave) => {
+            try {
+                // Enviar la solicitud POST al servidor
+                const response = await fetch('/api/TL/add_overtime', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(dataToSave), // Enviar los datos en el cuerpo de la solicitud
+                });
+        
+                const result = await response.json();
+        
+                if (result.success) {
+                    // Manejar éxito: muestra mensaje, limpia datos o actualiza la UI
+                    alert("Datos guardados exitosamente.");
+                    // Aquí puedes limpiar el formulario o recargar datos
+                } else {
+                    // Manejar errores desde el servidor
+                    showAlert('error', 'Error', result.message || "Error al guardar los datos.");
+                }
+            } catch (error) {
+                // Manejar errores de conexión o de servidor
+                console.error("Error al guardar los datos:", error);
+                showAlert('error', 'Error', "Error de conexión al servidor.");
+            }
+        };
 
-    const handleInputChange2 = (index, field, value) => {
-        const updatedData = [...activeOvertimeData];
-        updatedData[index][field] = value;
-        setActiveOvertimeData(updatedData);
-    };
+        useEffect(() => {
+            fetchActiveOvertimeData();
+        }, []);
+        
+        const fetchActiveOvertimeData = async () => {
+            const tl_name = sessionStorage.getItem("user_name");
+            try {
+                const response = await fetch('/api/TL/change_overtime', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ tl_name }),
+                });
     
-    
+                const result = await response.json({ tl_name });
+        
+                if (result.success) {
+                    setActiveOvertimeData(result.data); // Carga los datos activos en el estado
+                } else {
+                    alert(result.message || 'Error al cargar las horas extras activas.');
+                }
+            } catch (error) {
+                console.error('Error al cargar las horas extras activas:', error);
+            }
+        };
+
+        const handleInputChange2 = (index, field, value) => {
+            console.log("Index:", index, "Field:", field, "Value:", value);
+        
+            setActiveOvertimeData((prevData) => {
+                const updatedData = [...prevData];
+                updatedData[index] = { ...updatedData[index], [field]: value };
+                return updatedData;
+            });
+        };
+
+        const handleSaveRow = async (row) => {          
+            try {
+                const response = await fetch('/api/TL/update_overtime', {
+                    method: 'PUT', 
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        id: row.id, 
+                        type_time: row.type_time,
+                        overtime_date: row.overtime_date,
+                        start_time: row.start_time,
+                        end_time: row.end_time,
+                        comments: row.comments,
+                    }),
+                });
+        
+                const result = await response.json();
+        
+                if (response.ok && result.success) {
+                    alert('Overtime updated successfully!');
+                } else {
+                    alert(result.message || 'Failed to update overtime.');
+                }
+            } catch (error) {
+                console.error('Error updating overtime:', error);
+                alert('Error updating overtime. Please try again.');
+            }
+            
+        };    
+
+    //#endregion
+
     return (
         <div className={styles.dashboard}>
             <header className={styles.header}>
@@ -1534,7 +1577,10 @@ export default function Dashboard() {
                             </button>
                             <button
                                 className={activeTab === 'modify' ? `${styles.tab} ${styles.active}` : styles.tab}
-                                onClick={() => setActiveTab('modify')}
+                                onClick={() => {
+                                    setActiveTab('modify');  // Cambia la pestaña activa
+                                    fetchActiveOvertimeData(); // Llama a la función aquí
+                                }}
                             >
                                 Modify Overtime
                             </button>
@@ -1640,6 +1686,7 @@ export default function Dashboard() {
                                     <table>
                                         <thead>
                                             <tr>
+                                                <th>#</th>
                                                 <th>User</th>
                                                 <th>Option</th>
                                                 <th>Date</th>
@@ -1652,22 +1699,22 @@ export default function Dashboard() {
                                         <tbody>
                                             {activeOvertimeData.map((row, index) => (
                                                 <tr key={index}>
-                                                    <td>{row.user_id}</td>
+                                                    <td>{row.id}</td>
+                                                    <td>{row.user_name}</td>
                                                     <td>
                                                         <select
                                                             value={row.type_time || ''}
-                                                            onChange={(e) => handleInputChange2(index, 'option', e.target.value)}
+                                                            onChange={(e) => handleInputChange2(index, 'type_time', e.target.value)}
                                                         >
-                                                            <option value="">Select</option>
-                                                            <option value="all Day">All Day</option>
-                                                            <option value="hours">Hours</option>
-                                                            <option value="reposition">Reposition</option>
+                                                            <option value="All Day">All Day</option>
+                                                            <option value="Hours">Hours</option>
+                                                            <option value="Reposition">Reposition</option>
                                                         </select>
                                                     </td>
                                                     <td>
                                                         <DatePicker
-                                                            selected={row.overtime_date ? new Date(row.overtime_date) : null}
-                                                            onChange={(date) => handleInputChange2(index, 'date', date)}
+                                                            selected={row.overtime_date ? new Date(row.overtime_date) : null} 
+                                                            onChange={(date) => handleInputChange2(index, 'overtime_date', date)}
                                                             dateFormat="yyyy-MM-dd"
                                                             className="datePickerInput"
                                                             placeholderText="Select a date"
@@ -1676,22 +1723,22 @@ export default function Dashboard() {
                                                     <td>
                                                         <input
                                                             type="time"
-                                                            value={row.start_time || ''}
-                                                            onChange={(e) => handleInputChange2(index, 'start', e.target.value)}
+                                                            value={row.start_time || ''} 
+                                                            onChange={(e) => handleInputChange2(index, 'start_time', e.target.value)} 
                                                         />
                                                     </td>
                                                     <td>
                                                         <input
                                                             type="time"
-                                                            value={row.end_time || ''}
-                                                            onChange={(e) => handleInputChange2(index, 'end', e.target.value)}
+                                                            value={row.end_time || ''} 
+                                                            onChange={(e) => handleInputChange2(index, 'end_time', e.target.value)}
                                                         />
                                                     </td>
                                                     <td>
                                                         <input
                                                             type="text"
-                                                            value={row.comments || ''}
-                                                            onChange={(e) => handleInputChange2(index, 'comments', e.target.value)}
+                                                            value={row.comments || ''} 
+                                                            onChange={(e) => handleInputChange2(index, 'comments', e.target.value)} 
                                                         />
                                                     </td>
                                                     <td>

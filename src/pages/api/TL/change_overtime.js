@@ -1,7 +1,7 @@
 import db from '../../../lib/db';
 
 export default async function handler(req, res) {
-    if (req.method !== 'GET') {
+    if (req.method !== 'POST') {
         return res.status(405).json({ message: 'Method not allowed' });
     }
 
@@ -18,14 +18,13 @@ export default async function handler(req, res) {
 
         // Query para obtener las horas extras activas
         const [overtimeRows] = await connection.query(
-            `SELECT o.id, o.user_id, o.type_time, o.overtime_date, o.start_time, o.end_time, o.comments 
+            `SELECT o.id, o.user_id, u.user_name, o.type_time, o.overtime_date, o.start_time, o.end_time, o.comments 
                 FROM overtime o
                     INNER JOIN users u ON u.id = o.user_id
                         INNER JOIN tl t ON t.id = u.tl_id
                             WHERE t.tl_name = ? and o.overtime_date >= ? `,
             [tl_name, today]
         );
-
         // Liberar la conexión al pool
         await db.release(connection);
 
