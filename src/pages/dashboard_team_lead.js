@@ -80,6 +80,7 @@ export default function Dashboard() {
     const [showPasswordChangeForm, setShowPasswordChangeForm] = useState(false);
     const [dataRows, setDataRows] = useState();
     const [dataRows_Report, setDataRows_Report] = useState();
+    const [dataRows_Overtime, setDataRows_Overtime] = useState();
     const [TL_Technitians, setTL_Technitians] = useState([]);
     const [taskOptionsByRole, setTaskOptionsByRole] = useState([]);
     const [AvailableTypeOptions, setAvailableTypeOptions] = useState([]);
@@ -935,7 +936,7 @@ export default function Dashboard() {
     //#region Overtime and Repo time
 
         /*********************************************************************************************/
-        /***                                     Login Out                                         ***/
+        /***                             Overtime and Repo time                                    ***/
         /*********************************************************************************************/
    
         const [activeTab, setActiveTab] = useState('add');
@@ -1035,11 +1036,7 @@ export default function Dashboard() {
                 showAlert('error', 'Error', "Error de conexión al servidor.");
             }
         };
-
-        useEffect(() => {
-            fetchActiveOvertimeData();
-        }, []);
-        
+     
         const fetchActiveOvertimeData = async () => {
             const tl_name = sessionStorage.getItem("user_name");
             try {
@@ -1065,7 +1062,6 @@ export default function Dashboard() {
 
         const handleInputChange2 = (index, field, value) => {
             console.log("Index:", index, "Field:", field, "Value:", value);
-        
             setActiveOvertimeData((prevData) => {
                 const updatedData = [...prevData];
                 updatedData[index] = { ...updatedData[index], [field]: value };
@@ -1102,7 +1098,58 @@ export default function Dashboard() {
                 alert('Error updating overtime. Please try again.');
             }
             
-        };    
+        };  
+        
+        const [searchOvertime, setSearchOvertime] = useState({
+            startDate: '',
+            endDate: '',
+        });
+
+        const handleSearchOvertimeFormChange = (e) => {
+            const { name, value } = e.target;
+            setSearchOvertime(prev => ({ ...prev, [name]: value }));
+        };
+
+        const handleSearchOvertimeSubmit = (e) => {
+            e.preventDefault();
+
+            if (searchOvertime.startDate == "") { 
+                showAlert('error', 'Error', 'Please select a start date.');
+                return;
+            }
+            if (searchOvertime.endDate == "") { 
+                showAlert('error', 'Error', 'Please select an end date.');
+                return;
+            }
+            
+            fetchHistoryOvertimeData();
+        };
+
+        const fetchHistoryOvertimeData = async () => {
+            const tl_name = sessionStorage.getItem("user_name");
+            const startDate = searchOvertime.startDate;
+            const endDate = searchOvertime.endDate;
+            try {
+                const response = await fetch('/api/TL/history_overtime', { 
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ tl_name, startDate, endDate}),
+                });                       
+                const result = await response.json();      
+                if (result.success) {
+                    const data = result.reports;
+                    alert(data.length);
+                    setDataRows_Overtime(data); 
+                } else {
+                    alert(result.message || "Error al actualizar la tabla.");
+                }
+            } catch (error) {
+                console.error(error);
+                alert("Error en la conexión.");
+            }
+        };
 
     //#endregion
 
@@ -1578,15 +1625,17 @@ export default function Dashboard() {
                             <button
                                 className={activeTab === 'modify' ? `${styles.tab} ${styles.active}` : styles.tab}
                                 onClick={() => {
-                                    setActiveTab('modify');  // Cambia la pestaña activa
-                                    fetchActiveOvertimeData(); // Llama a la función aquí
+                                    setActiveTab('modify');  
+                                    fetchActiveOvertimeData(); 
                                 }}
                             >
                                 Modify Overtime
                             </button>
                             <button
                                 className={activeTab === 'review' ? `${styles.tab} ${styles.active}` : styles.tab}
-                                onClick={() => setActiveTab('review')}
+                                onClick={() => {
+                                    setActiveTab('review');  
+                                }}
                             >
                                 Review Overtime
                             </button>
@@ -1682,7 +1731,7 @@ export default function Dashboard() {
                             {activeTab === 'modify' && (
                             <div>
                                 <h2>Modify Overtime</h2>
-                                    <div className={styles.tableContainer}>
+                                <div className={styles.tableContainer_modify}>
                                     <table>
                                         <thead>
                                             <tr>
@@ -1705,6 +1754,7 @@ export default function Dashboard() {
                                                         <select
                                                             value={row.type_time || ''}
                                                             onChange={(e) => handleInputChange2(index, 'type_time', e.target.value)}
+                                                            className={styles.selectInput}
                                                         >
                                                             <option value="All Day">All Day</option>
                                                             <option value="Hours">Hours</option>
@@ -1713,37 +1763,39 @@ export default function Dashboard() {
                                                     </td>
                                                     <td>
                                                         <DatePicker
-                                                            selected={row.overtime_date ? new Date(row.overtime_date) : null} 
+                                                            selected={row.overtime_date ? new Date(row.overtime_date) : null}
                                                             onChange={(date) => handleInputChange2(index, 'overtime_date', date)}
                                                             dateFormat="yyyy-MM-dd"
-                                                            className="datePickerInput"
                                                             placeholderText="Select a date"
                                                         />
                                                     </td>
                                                     <td>
                                                         <input
                                                             type="time"
-                                                            value={row.start_time || ''} 
-                                                            onChange={(e) => handleInputChange2(index, 'start_time', e.target.value)} 
+                                                            value={row.start_time || ''}
+                                                            onChange={(e) => handleInputChange2(index, 'start_time', e.target.value)}
+                                                            className={styles.timeInput}
                                                         />
                                                     </td>
                                                     <td>
                                                         <input
                                                             type="time"
-                                                            value={row.end_time || ''} 
+                                                            value={row.end_time || ''}
                                                             onChange={(e) => handleInputChange2(index, 'end_time', e.target.value)}
+                                                            className={styles.timeInput}
                                                         />
                                                     </td>
                                                     <td>
                                                         <input
                                                             type="text"
-                                                            value={row.comments || ''} 
-                                                            onChange={(e) => handleInputChange2(index, 'comments', e.target.value)} 
+                                                            value={row.comments || ''}
+                                                            onChange={(e) => handleInputChange2(index, 'comments', e.target.value)}
+                                                            className={styles.textInput}
                                                         />
                                                     </td>
                                                     <td>
                                                         <button
-                                                            className={styles.saveButton}
+                                                            className={styles.saveButton_modify}
                                                             onClick={() => handleSaveRow(row, index)}
                                                         >
                                                             Save
@@ -1759,7 +1811,72 @@ export default function Dashboard() {
                             {activeTab === 'review' && (
                             <div>
                                 <h2>Review Overtime</h2>
-                                <p>Formulario o contenido para revisar horas extra.</p>
+                                <div className={styles.container_searchForm}>
+                                    <form onSubmit={handleSearchOvertimeSubmit} className={styles.searchForm}>
+                                        <div className={styles.searchForm}> 
+                                            <label htmlFor="startDate" className={styles.searchLabel}> 
+                                                Start Date
+                                            </label>
+                                            <input
+                                                type="date"
+                                                id="startDate_overtime"
+                                                name="startDate"
+                                                value={searchOvertime.startDate}
+                                                onChange={handleSearchOvertimeFormChange}
+                                                className={styles.searchInput} 
+                                            />
+                                            <label htmlFor="endDate" className={styles.searchLabel}> 
+                                                End Date
+                                            </label>
+                                            <input
+                                                type="date"
+                                                id="endDate_overtime"
+                                                name="endDate"
+                                                value={searchOvertime.endDate}
+                                                onChange={handleSearchOvertimeFormChange}
+                                                className={styles.searchInput} 
+                                            />
+                                            <button type="submit" className={styles.searchButton}>Search</button>
+                                        </div>
+                                    </form>
+                                </div>
+                                <div className={`${styles.tableContainer} ${isEditing ? styles.shrinkTable : ''}`}>
+                                    <table className={styles.table}>
+                                        <thead>
+                                            <tr>
+                                                <th>#</th>              
+                                                <th>Technician</th>  
+                                                <th>Option</th> 
+                                                <th>Date</th>                               
+                                                <th>Start Time</th>
+                                                <th>End Time</th>
+                                                <th>Comments</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                        {Array.isArray(dataRows_Overtime) && dataRows_Overtime.length > 0 ? (
+                                            dataRows_Overtime.map((row, index) => (
+                                                <tr
+                                                    key={index}
+                                                    style={{ backgroundColor: index === highlightedRow ? '#f0f8ff' : 'transparent' }} 
+                                                >
+                                                    <td>{row.id}</td>
+                                                    <td>{row.user_name}</td>   
+                                                    <td>{row.type_time}</td>  
+                                                    <td>{row.overtime_date.split('T')[0]}</td>                     
+                                                    <td>{row.start_time}</td>
+                                                    <td>{row.end_time}</td> 
+                                                    <td>{row.comments}</td> 
+                                                </tr>
+                                            ))
+                                        ) : (
+                                            <tr>
+                                                <td colSpan="9">No data available</td>
+                                            </tr>
+                                        )}
+                                        </tbody>
+                                    </table>
+                                </div>
                             </div>
                             )}
                         </div>

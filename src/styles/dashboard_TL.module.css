@@ -690,6 +690,109 @@
     outline: none;
     box-shadow: 0px 0px 8px rgba(0, 123, 255, 0.7); /* Resaltar al enfocar */
   }
-  
-  
-  
+
+  /* Modify Overtime */
+
+/* Contenedor principal de la tabla */
+.tableContainer_modify {
+    width: 100%;
+    margin: 0 auto;
+    overflow-x: auto; /* Scroll horizontal si la tabla excede el ancho */
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    background-color: #f5f7fa; /* Gris claro */
+}
+
+/* Estilo general de la tabla */
+.tableContainer_modify table {
+    width: 100%;
+    border-collapse: collapse;
+    font-family: Arial, sans-serif;
+    font-size: 14px;
+    color: #333; /* Gris oscuro para el texto */
+}
+
+/* Encabezado */
+.tableContainer_modify thead th {
+    background-color: #0073e6; /* Azul */
+    color: #ffffff; /* Texto blanco */
+    padding: 12px 8px;
+    text-align: center;
+    text-transform: uppercase;
+    border-bottom: 2px solid #dbe2ef; /* Borde inferior gris claro */
+}
+
+/* Estilo de las celdas del cuerpo */
+.tableContainer_modify tbody td {
+    padding: 10px 8px;
+    border-bottom: 1px solid #dbe2ef; /* Borde inferior gris claro */
+    text-align: center;
+    vertical-align: middle;
+}
+
+/* Columna de Comments (más grande) */
+.tableContainer_modify tbody td:nth-child(7) {
+    width: 40%; /* Asigna mayor ancho a la columna Comments */
+    text-align: left;
+}
+
+/* Otras columnas iguales */
+.tableContainer_modify tbody td:not(:nth-child(7)) {
+    width: 8%;
+}
+
+/* Filas alternas para mejor visualización */
+.tableContainer_modify tbody tr:nth-child(odd) {
+    background-color: #f0f4f8; /* Gris muy claro */
+}
+
+.tableContainer_modify tbody tr:nth-child(even) {
+    background-color: #ffffff; /* Blanco */
+}
+
+/* Hover en filas */
+.tableContainer_modify tbody tr:hover {
+    background-color: #e1ecf7; /* Azul muy claro */
+    transition: background-color 0.3s ease;
+}
+
+/* Inputs y selects dentro de las celdas */
+.tableContainer_modify input[type="time"],
+.tableContainer_modify input[type="text"],
+.tableContainer_modify select {
+    width: 90%;
+    padding: 6px 8px;
+    font-size: 14px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    box-sizing: border-box;
+}
+
+.tableContainer_modify input:focus,
+.tableContainer_modify select:focus {
+    border-color: #0073e6;
+    outline: none;
+    box-shadow: 0 0 4px rgba(0, 115, 230, 0.5);
+}
+
+/* Botón Save */
+.saveButton_modify {
+    background-color: #f0ad4e; 
+    color: white;
+    border: none;
+    padding: 10px 20px; 
+    font-size: 16px; 
+    font-weight: bold; 
+    cursor: pointer;
+    border-radius: 6px; 
+    transition: background-color 0.3s ease, transform 0.2s ease; 
+}
+
+.saveButton_modify:hover {
+    background-color: #ec971f; 
+    transform: scale(1.05); 
+}
+
+
+
+   
