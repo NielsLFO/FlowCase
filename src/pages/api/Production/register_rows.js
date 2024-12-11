@@ -34,16 +34,18 @@ export default async function handler(req, res) {
             [user_id, today]
         );
 
+        console.log("Detecto overtime: " + overtimeResult.length);
+
         // Determinar el valor de type_case
         let type_case = 'Normal';
 
         if (overtimeResult.length > 0) {
             // Verificar si el registro actual cae dentro del rango de horas del overtime/reposition
-            const currentStartTime = start_time; // Hora inicio del registro que se va a insertar
+            const currentStartTime = start_time.split(' ')[1]; // Hora inicio del registro que se va a insertar
 
             for (const overtime of overtimeResult) {
                 const { type_time, start_time: otStartTime, end_time: otEndTime } = overtime;
-
+                console.log("Horas: " + currentStartTime +" / " + otStartTime + " / " + otEndTime);
                 if (currentStartTime >= otStartTime && currentStartTime <= otEndTime) {
                     type_case = type_time;
                     break;

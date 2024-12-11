@@ -919,6 +919,7 @@ export default function Dashboard() {
                                     <th>End Time</th> 
                                     <th>Total Time</th> 
                                     <th>Role</th> 
+                                    <th>Work Type</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -934,11 +935,12 @@ export default function Dashboard() {
                                             <td>{row.end_time}</td> 
                                             <td>{Math.floor(row.total_time / 60) + ' h ' + (row.total_time % 60) + ' min'}</td> 
                                             <td>{row.role_name}</td>
+                                            <td>{row.type_case}</td>
                                         </tr>
                                     ))
                                 ) : (
                                     <tr>
-                                        <td colSpan="9">No data available</td>
+                                        <td colSpan="10">No data available</td>
                                     </tr>
                                 )}
                             </tbody>
@@ -959,6 +961,7 @@ export default function Dashboard() {
                                     <th>End Time</th> 
                                     <th>Total Time</th> 
                                     <th>Role</th> 
+                                    <th>Work Type</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -974,11 +977,12 @@ export default function Dashboard() {
                                             <td>{row.end_time}</td> 
                                             <td>{Math.floor(row.total_time / 60) + ' h ' + (row.total_time % 60) + ' min'}</td>
                                             <td>{row.role_name}</td>
+                                            <td>{row.type_case}</td>
                                         </tr>
                                     ))
                                 ) : (
                                     <tr>
-                                        <td colSpan="9">No data available</td>
+                                        <td colSpan="10">No data available</td>
                                     </tr>
                                 )}
                             </tbody>

@@ -975,7 +975,7 @@ export default function Dashboard() {
                 }));
                 setOvertimeData(techniciansWithRoles);
                 } else {
-                alert(result.message || "Error al obtener técnicos y roles.");
+                showAlert('error', 'Error', result.message || "Error retrieving technicians and roles.");
                 }
             } catch (error) {
                 console.error("Error al obtener técnicos y roles:", error);
@@ -992,48 +992,38 @@ export default function Dashboard() {
         };
 
         const handleSubmit = () => {
-            // Filtrar solo los usuarios con todos los campos necesarios (excepto comentarios, que son opcionales)
+            // Filter only users with all the required fields (except comments, which are optional)
             const dataToSave = overtimeData.filter(
                 (row) => row.option && row.date && row.start && row.end
             );
         
             if (dataToSave.length === 0) {
-                alert("No hay datos válidos para guardar.");
+                showAlert('error', 'Error', "No valid data to save.");
                 return;
-            }
-        
-            // Mostrar en consola los datos para depuración (opcional)
-            console.log("Overtime data to save:", dataToSave);
-        
-            // Llamar a la función para enviar los datos
+            }   
             addOvertime(dataToSave);
         };
         
         const addOvertime = async (dataToSave) => {
             try {
-                // Enviar la solicitud POST al servidor
                 const response = await fetch('/api/TL/add_overtime', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
                     },
-                    body: JSON.stringify(dataToSave), // Enviar los datos en el cuerpo de la solicitud
+                    body: JSON.stringify(dataToSave), 
                 });
         
                 const result = await response.json();
         
                 if (result.success) {
-                    // Manejar éxito: muestra mensaje, limpia datos o actualiza la UI
-                    alert("Datos guardados exitosamente.");
-                    // Aquí puedes limpiar el formulario o recargar datos
+                    showAlert('success', 'Overtime', 'Data saved successfully.');
                 } else {
-                    // Manejar errores desde el servidor
-                    showAlert('error', 'Error', result.message || "Error al guardar los datos.");
+                    showAlert('error', 'Error', result.message || "Error saving the data.");
                 }
             } catch (error) {
-                // Manejar errores de conexión o de servidor
-                console.error("Error al guardar los datos:", error);
-                showAlert('error', 'Error', "Error de conexión al servidor.");
+                console.error("Error saving the data:", error);
+                showAlert('error', 'Error', "Server connection error.");
             }
         };
      
@@ -1051,12 +1041,12 @@ export default function Dashboard() {
                 const result = await response.json({ tl_name });
         
                 if (result.success) {
-                    setActiveOvertimeData(result.data); // Carga los datos activos en el estado
+                    setActiveOvertimeData(result.data); 
                 } else {
-                    alert(result.message || 'Error al cargar las horas extras activas.');
+                    showAlert('error', 'Error', result.message || 'Error loading active overtime.');
                 }
             } catch (error) {
-                console.error('Error al cargar las horas extras activas:', error);
+                console.error('Error loading active overtime:', error);
             }
         };
 
@@ -1089,13 +1079,13 @@ export default function Dashboard() {
                 const result = await response.json();
         
                 if (response.ok && result.success) {
-                    alert('Overtime updated successfully!');
+                    showAlert('success', 'Overtime', 'Overtime updated successfully!');
                 } else {
-                    alert(result.message || 'Failed to update overtime.');
+                    showAlert('error', 'Error', result.message || 'Failed to update overtime.');
                 }
             } catch (error) {
                 console.error('Error updating overtime:', error);
-                alert('Error updating overtime. Please try again.');
+                showAlert('error', 'Error', 'Error updating overtime. Please try again.');
             }
             
         };  
@@ -1140,14 +1130,13 @@ export default function Dashboard() {
                 const result = await response.json();      
                 if (result.success) {
                     const data = result.reports;
-                    alert(data.length);
                     setDataRows_Overtime(data); 
                 } else {
-                    alert(result.message || "Error al actualizar la tabla.");
+                    showAlert('success', 'Overtime', result.message || "Error updating the table.");
                 }
             } catch (error) {
                 console.error(error);
-                alert("Error en la conexión.");
+                showAlert('error', 'Error', 'Connection error.');
             }
         };
 
@@ -1301,6 +1290,7 @@ export default function Dashboard() {
                                 <th>End Time</th>
                                 <th>Total Time</th>
                                 <th>Role</th>
+                                <th>Work Type</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -1322,11 +1312,12 @@ export default function Dashboard() {
                                         <td>{row.end_time}</td>
                                         <td>{Math.floor(row.total_time / 60) + ' h ' + (row.total_time % 60) + ' min'}</td>
                                         <td>{row.role_name}</td>
+                                        <td>{row.type_case}</td>
                                     </tr>
                                 ))
                             ) : (
                                 <tr>
-                                    <td colSpan="13">No data available</td>
+                                    <td colSpan="14">No data available</td>
                                 </tr>
                             )}
                         </tbody>
@@ -1394,7 +1385,8 @@ export default function Dashboard() {
                                         <th>End Time</th>
                                         <th>Total Time</th>
                                         <th>Role</th>
-                                        <th>Actions</th>
+                                        <th>Work Type</th>
+                                        <th>Actions</th>   
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -1416,6 +1408,7 @@ export default function Dashboard() {
                                             <td>{row.end_time}</td> 
                                             <td>{Math.floor(row.total_time / 60) + ' h ' + (row.total_time % 60) + ' min'}</td> 
                                             <td>{row.role_name}</td>
+                                            <td>{row.type_case}</td>
                                             <td>
                                                 <button onClick={() => handleModifyClick(index)}>Modify</button>
                                             </td>
@@ -1423,7 +1416,7 @@ export default function Dashboard() {
                                     ))
                                 ) : (
                                     <tr>
-                                        <td colSpan="9">No data available</td>
+                                        <td colSpan="10">No data available</td>
                                     </tr>
                                 )}
                                 </tbody>
@@ -1639,7 +1632,7 @@ export default function Dashboard() {
                             >
                                 Review Overtime
                             </button>
-                            </div>
+                        </div>
 
                         {/* Contenido de las pestañas */}
                         <div className="tab-content">
@@ -1665,9 +1658,9 @@ export default function Dashboard() {
                                             <td>
                                             <Select
                                                 options={[
-                                                { value: "all-day", label: "All day" },
-                                                { value: "hours", label: "Hours" },
-                                                { value: "reposition", label: "Reposition" },
+                                                { value: "Overtime all-day", label: "All day" },
+                                                { value: "Overtime", label: "Hours" },
+                                                { value: "Reposition", label: "Reposition" },
                                                 ]}
                                                 onChange={(selected) =>
                                                 handleInputChange(index, "option", selected.value)
@@ -1879,6 +1872,34 @@ export default function Dashboard() {
                                 </div>
                             </div>
                             )}
+                        </div>
+                    </div>
+                )}
+                {selectedOption === 'Report' && !showPasswordChangeForm && (
+                    <div className="tabs-container">
+                        <div className={styles.tableSection}>
+                            <button
+                                className={activeTab === 'open_lines' ? `${styles.tab} ${styles.active}` : styles.tab}
+                                onClick={() => setActiveTab('open_lines')}
+                            >
+                                Add Overtime
+                            </button>
+                            <button
+                                className={activeTab === 'Audit' ? `${styles.tab} ${styles.active}` : styles.tab}
+                                onClick={() => {
+                                    setActiveTab('Audit');  
+                                }}
+                            >
+                                Modify Overtime
+                            </button>
+                            <button
+                                className={activeTab === '2' ? `${styles.tab} ${styles.active}` : styles.tab}
+                                onClick={() => {
+                                    setActiveTab('2');  
+                                }}
+                            >
+                                Review Overtime
+                            </button>
                         </div>
                     </div>
                 )}
