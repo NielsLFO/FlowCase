@@ -1142,6 +1142,49 @@ export default function Dashboard() {
 
     //#endregion
 
+    //#region Report Analisis
+        /*********************************************************************************************/
+        /***                                        Report                                         ***/
+        /*********************************************************************************************/
+        const [activeTab_report, setActiveTab_report] = useState('Audit');
+        const [auditData, setAuditData] = useState([]);
+
+        const fetchAuditData = async () => {
+            const tl_name = sessionStorage.getItem("user_name"); 
+            try {
+                const response = await fetch('/api/TL/get_audit_report', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ tl_name: tl_name }),  // Enviamos el tl_name como parte del cuerpo de la solicitud
+                });
+        
+                const result = await response.json();
+        
+                if (result.success) {
+                    // Procesamos los datos obtenidos
+                    console.log(result.data);
+                    setAuditData(result.data);  // Suponiendo que tienes un estado para los datos
+                } else {
+                    console.error(result.message || 'Error loading audit data.');
+                }
+            } catch (error) {
+                console.error('Error fetching audit data:', error);
+            }
+        };
+
+
+        const groupedData = auditData.reduce((acc, entry) => {
+            if (!acc[entry.tech]) {
+                acc[entry.tech] = [];
+            }
+            acc[entry.tech].push(entry);
+            return acc;
+        }, {});
+        
+
+    //#endregion
     return (
         <div className={styles.dashboard}>
             <header className={styles.header}>
@@ -1879,28 +1922,85 @@ export default function Dashboard() {
                     <div className="tabs-container">
                         <div className={styles.tableSection}>
                             <button
-                                className={activeTab === 'open_lines' ? `${styles.tab} ${styles.active}` : styles.tab}
-                                onClick={() => setActiveTab('open_lines')}
-                            >
-                                Add Overtime
-                            </button>
-                            <button
-                                className={activeTab === 'Audit' ? `${styles.tab} ${styles.active}` : styles.tab}
+                                className={activeTab_report === 'Audit' ? `${styles.tab} ${styles.active}` : styles.tab}
                                 onClick={() => {
-                                    setActiveTab('Audit');  
+                                    setActiveTab_report('Audit');  
+                                    fetchAuditData();
                                 }}
                             >
-                                Modify Overtime
+                                Audit
                             </button>
                             <button
-                                className={activeTab === '2' ? `${styles.tab} ${styles.active}` : styles.tab}
+                                className={activeTab_report === 'Open Register' ? `${styles.tab} ${styles.active}` : styles.tab}
                                 onClick={() => {
-                                    setActiveTab('2');  
+                                    setActiveTab_report('Open Register');  
                                 }}
                             >
-                                Review Overtime
+                                Open Register
+                            </button>
+                            <button
+                                className={activeTab_report === '2' ? `${styles.tab} ${styles.active}` : styles.tab}
+                                onClick={() => {
+                                    setActiveTab_report('2');  
+                                }}
+                            >
+                                Report
                             </button>
                         </div>
+                        {/* Contenido de las pestañas */}
+                        <div className="tab-content">
+                            {activeTab_report === 'Audit' && (
+                                <div id="auditReportContainer" className={styles.auditReportContainer}>
+                                    <h2 id="auditReportTitle" className={styles.auditReportTitle}>Audit</h2>
+                                    <div id="auditTechContainer" className={styles.auditTechContainer}>
+                                        {Object.keys(groupedData).map((tech, index) => (
+                                            <div key={index} className={styles.auditTechCard}>
+                                                <h3 className={styles.techName}>{tech}</h3>
+                                                <table className={styles.auditTable}>
+                                                    <thead>
+                                                        <tr>
+                                                            <th>Alias</th>
+                                                            <th>Jira Minutes</th>
+                                                            <th>Daily Minutes</th>
+                                                            <th>Difference</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        {groupedData[tech].map((entry, idx) => (
+                                                            <tr key={idx}>
+                                                                <td>{entry.alias}</td>
+                                                                <td>{entry.jira_minutes}</td>
+                                                                <td>{entry.daily_minutes}</td>
+                                                                <td
+                                                                    className={`${styles.auditDifference} ${
+                                                                        entry.difference > 0
+                                                                            ? styles.positive
+                                                                            : ''
+                                                                    }`}
+                                                                >
+                                                                    {entry.difference}
+                                                                </td>
+                                                            </tr>
+                                                        ))}
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
+                            {activeTab_report === 'Open Register' && (
+                            <div>
+                                <h2>Open Register</h2>
+                            </div>
+                            )}
+                            {activeTab_report === '2' && (
+                            <div>
+                                <h2>2</h2>
+                            </div>
+                            )}
+                        </div>
+                        
                     </div>
                 )}
             </main>
