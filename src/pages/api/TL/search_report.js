@@ -31,4 +31,4 @@ export default async function handler(req, res) {
         await db.release(connection);
         res.status(500).json({ success: false, message: 'Error en el servidor' });
     }
-}
+} 

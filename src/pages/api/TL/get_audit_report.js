@@ -16,6 +16,7 @@ export default async function handler(req, res) {
         // Ejecutamos la consulta para obtener los datos de auditoría, usando el tl_name dinámicamente
         const [auditData] = await connection.query(`
             SELECT 
+                d.row_date,
                 r.alias AS alias,
                 r.tech,
                 d.user_name,
@@ -32,7 +33,7 @@ export default async function handler(req, res) {
                 ) AS r
             JOIN 
                 ( -- Consulta para daily_reports
-                    SELECT dr.alias, u.user_name, tt.tl_name, SUM(dr.total_time) AS total_minutes
+                    SELECT dr.row_date, dr.alias, u.user_name, tt.tl_name, SUM(dr.total_time) AS total_minutes
                     FROM daily_reports dr
                     INNER JOIN users u ON dr.user_id = u.id
                     INNER JOIN tasks t ON dr.task_id = t.id
@@ -44,7 +45,8 @@ export default async function handler(req, res) {
             -- Comparación de alias entre tech y user_name (primero nombre y primer apellido)
             AND LOWER(SUBSTRING_INDEX(r.tech, ' ', 2)) = LOWER(REPLACE(d.user_name, '.', ' '))
             WHERE ABS(r.total_minutes - d.total_minutes) > 20 
-            AND d.tl_name = ?;  
+            AND d.tl_name = ?
+            ORDER BY d.row_date ASC;  
         `, [tl_name]); 
 
         // Si hay resultados, los devolvemos al frontend

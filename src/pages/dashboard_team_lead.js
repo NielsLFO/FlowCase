@@ -598,7 +598,7 @@ export default function Dashboard() {
             if (TL_Technitians.length > 0) {
                 setSearchData(prevData => ({ ...prevData, user: TL_Technitians[0].id }));
             }
-        }, [searchData.startDate, searchData.endDate]);
+        }, [searchData.startDate, searchData.endDate]); 
 
         const update_data = async (id, updatedData) => {
 
@@ -1951,7 +1951,7 @@ export default function Dashboard() {
                         <div className="tab-content">
                             {activeTab_report === 'Audit' && (
                                 <div id="auditReportContainer" className={styles.auditReportContainer}>
-                                    <h2 id="auditReportTitle" className={styles.auditReportTitle}>Audit</h2>
+                                    <h2 id="auditReportTitle" className={styles.auditReportTitle}>Audit Result</h2>
                                     <div id="auditTechContainer" className={styles.auditTechContainer}>
                                         {Object.keys(groupedData).map((tech, index) => (
                                             <div key={index} className={styles.auditTechCard}>
@@ -1959,6 +1959,7 @@ export default function Dashboard() {
                                                 <table className={styles.auditTable}>
                                                     <thead>
                                                         <tr>
+                                                            <th>Date</th>
                                                             <th>Alias</th>
                                                             <th>Jira Minutes</th>
                                                             <th>Daily Minutes</th>
@@ -1968,6 +1969,7 @@ export default function Dashboard() {
                                                     <tbody>
                                                         {groupedData[tech].map((entry, idx) => (
                                                             <tr key={idx}>
+                                                                <td>{entry.row_date.split("T")[0]}</td>
                                                                 <td>{entry.alias}</td>
                                                                 <td>{entry.jira_minutes}</td>
                                                                 <td>{entry.daily_minutes}</td>
