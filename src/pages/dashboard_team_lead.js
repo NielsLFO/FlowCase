@@ -81,6 +81,7 @@ export default function Dashboard() {
     const [dataRows, setDataRows] = useState();
     const [dataRows_Report, setDataRows_Report] = useState();
     const [dataRows_Overtime, setDataRows_Overtime] = useState();
+    const [dataRows_Open_Rows, setDataRows_Open_Rows] = useState();
     const [TL_Technitians, setTL_Technitians] = useState([]);
     const [taskOptionsByRole, setTaskOptionsByRole] = useState([]);
     const [AvailableTypeOptions, setAvailableTypeOptions] = useState([]);
@@ -1164,8 +1165,7 @@ export default function Dashboard() {
         
                 if (result.success) {
                     // Procesamos los datos obtenidos
-                    console.log(result.data);
-                    setAuditData(result.data);  // Suponiendo que tienes un estado para los datos
+                    setAuditData(result.data); 
                 } else {
                     console.error(result.message || 'Error loading audit data.');
                 }
@@ -1185,6 +1185,44 @@ export default function Dashboard() {
         
 
     //#endregion
+
+    //#region Open Rows Report
+        /*********************************************************************************************/
+        /***                                    Open Rows Report                                   ***/
+        /*********************************************************************************************/
+
+        const fetchOpenRows = async () => {
+            const tl_name = sessionStorage.getItem("user_name"); 
+            try {
+                const response = await fetch('/api/TL/get_open_rows_report', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ tl_name: tl_name }),
+                });
+        
+                const result = await response.json();
+        
+                if (result.success) {
+                    // Procesamos los datos obtenidos
+                    setDataRows_Open_Rows(result.data); 
+                } else {
+                    console.error(result.message || 'Error loading audit data.');
+                }
+            } catch (error) {
+                console.error('Error fetching audit data:', error);
+            }
+        };
+        const [isEditing_open_row, setIsEditing_open_row] = useState(false);
+        const [editData_Open_Row, setEditData_Open_Row] = useState({});
+        const handleModify_Open_Row_Click = (index) => {
+            setIsEditing_open_row(true);
+            alert("hola");
+        };
+
+    //#endregion
+
     return (
         <div className={styles.dashboard}>
             <header className={styles.header}>
@@ -1934,6 +1972,7 @@ export default function Dashboard() {
                                 className={activeTab_report === 'Open Register' ? `${styles.tab} ${styles.active}` : styles.tab}
                                 onClick={() => {
                                     setActiveTab_report('Open Register');  
+                                    fetchOpenRows();
                                 }}
                             >
                                 Open Register
@@ -1994,7 +2033,83 @@ export default function Dashboard() {
                             {activeTab_report === 'Open Register' && (
                             <div>
                                 <h2>Open Register</h2>
+                                <div className={styles.container}>
+                                    <div className={`${styles.tableContainer} ${isEditing ? styles.shrinkTable : ''}`}>
+                                        <table className={styles.table}>
+                                            <thead>
+                                                <tr>
+                                                    <th>#</th>
+                                                    <th>Date</th>                         
+                                                    <th>Technician</th>                               
+                                                    <th>Task</th>
+                                                    <th>Type</th>
+                                                    <th>Alias</th>
+                                                    <th>Comments</th>
+                                                    <th>Status</th>
+                                                    <th>Start Time</th>
+                                                    <th>End Time</th>
+                                                    <th>Total Time</th>
+                                                    <th>Role</th>
+                                                    <th>Actions</th>   
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                            {Array.isArray(dataRows_Open_Rows) && dataRows_Open_Rows.length > 0 ? (
+                                                dataRows_Open_Rows.map((row, index) => (
+                                                    <tr
+                                                        key={index}
+                                                        style={{ backgroundColor: index === highlightedRow ? '#f0f8ff' : 'transparent' }} 
+                                                    >
+                                                        <td>{row.id}</td>
+                                                        <td>{row.row_date.split('T')[0]}</td>
+                                                        <td>{row.user_name}</td>                        
+                                                        <td>{row.task_name}</td>
+                                                        <td>{row.type_value}</td>
+                                                        <td>{row.alias}</td>
+                                                        <td>{row.commment}</td>
+                                                        <td>{row.row_status}</td>
+                                                        <td>{row.start_time}</td> 
+                                                        <td>{row.end_time}</td> 
+                                                        <td>{Math.floor(row.total_time / 60) + ' h ' + (row.total_time % 60) + ' min'}</td> 
+                                                        <td>{row.role_name}</td>
+                                                        <td>
+                                                            <button onClick={() => handleModifyClick(index)}>Modify</button>
+                                                        </td>
+                                                    </tr>
+                                                ))
+                                            ) : (
+                                                <tr>
+                                                    <td colSpan="10">No data available</td>
+                                                </tr>
+                                            )}
+                                            </tbody>
+                                        </table>
+                                    </div>
+
+                                    {isEditing && (
+                                        <div className={styles.editFormContainer}> 
+                                            <form onSubmit={handleEditSubmit}>
+                                                <h3>Edit Row</h3>
+                                                <input
+                                                    type="text"
+                                                    name="end_time"
+                                                    value={editData.end_time} 
+                                                    onChange={handleEditFormChange}
+                                                    placeholder="End Time"
+                                                    required
+                                                    className="searchInput" 
+                                                    maxLength={8} 
+                                                    pattern="([01]?[0-9]|2[0-3]):([0-5][0-9]):([0-5][0-9])" 
+                                                />
+                                                <button type="submit" className={styles.editButton}>Save Changes</button> 
+                                                <button type="button" onClick={handleCancelClick} className={styles.cancel_Edit_Button}>Cancel</button>
+                                            </form>
+                                        </div>
+                                    )}
+                                </div>
+
                             </div>
+                            
                             )}
                             {activeTab_report === '2' && (
                             <div>
