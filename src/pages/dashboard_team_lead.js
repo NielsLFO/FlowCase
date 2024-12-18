@@ -1216,9 +1216,83 @@ export default function Dashboard() {
         };
         const [isEditing_open_row, setIsEditing_open_row] = useState(false);
         const [editData_Open_Row, setEditData_Open_Row] = useState({});
+        const [highlighted_Open_Row, setHighlighted_Open_Row] = useState(null);
+
+
         const handleModify_Open_Row_Click = (index) => {
             setIsEditing_open_row(true);
-            alert("hola");
+            setHighlighted_Open_Row(index);
+            let selectedRow = "";
+            selectedRow = dataRows_Open_Rows[index];
+            // Separate date and time for start_time and end_time
+            const [startDate, startTime] = selectedRow.start_time.split('T');
+            // Update editData with the separated values
+            setEditData_Open_Row({
+                ...selectedRow,
+                start_date: startDate,
+                start_time: startTime.split('.')[0], 
+            });
+        };
+
+        const handleEditSubmit_Open_Row = (e) => {
+            e.preventDefault();
+                    
+            // Concatenate date and time to create `Date` objects
+            const startTime = new Date(`${editData_Open_Row.start_date} ${editData_Open_Row.start_time}`);
+            const endTime = new Date(`${editData_Open_Row.start_date} ${editData_Open_Row.end_time}`);
+            // Verify that `startTime` is earlier than `endTime`
+            if (startTime >= endTime) {
+                showAlert('error', 'Error', 'The start time must be earlier than the end time.');
+                return;
+            }
+
+            // Calculate the elapsed time
+            const timeDifference = endTime - startTime;
+            const elapsedMinutes = Math.floor(timeDifference / 60000);
+            // Format the dates in the `YYYY-MM-DD HH:MM:SS` format
+            const formattedEndTime = formatDateTime(endTime);
+            const updatedData = {
+                end_time: formattedEndTime,     
+                totalTime: elapsedMinutes,
+            };
+
+            update_open_row_data(editData_Open_Row.id,updatedData);
+
+            // Reset the edit state
+            setIsEditing_open_row(false);
+            setEditData_Open_Row({});
+            setHighlighted_Open_Row(null);
+            
+        };
+
+        const handleEditFormChange_Open_Row = (e) => {
+            const { name, value } = e.target;
+            setEditData_Open_Row((prevState) => ({
+                ...prevState,
+                [name]: value || "",
+            })); 
+        };
+
+        const update_open_row_data = async (id, updatedData) => {
+
+            try {
+                const res = await fetch('/api/TL/open_row', {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ row_id: id, data: updatedData }), 
+                });
+                const data = await res.json();        
+                if (data.success) {
+                    showAlert('success', 'Update', 'The register was updated successfully.');
+                    fetchOpenRows();
+                } else {
+                    console.error('Error fetching types:', data.message);
+                }
+            } catch (error) {
+                console.error('Error fetching types:', error);
+            }
         };
 
     //#endregion
@@ -2034,7 +2108,7 @@ export default function Dashboard() {
                             <div>
                                 <h2>Open Register</h2>
                                 <div className={styles.container}>
-                                    <div className={`${styles.tableContainer} ${isEditing ? styles.shrinkTable : ''}`}>
+                                    <div className={`${styles.tableContainer} ${isEditing_open_row ? styles.shrinkTable : ''}`}>
                                         <table className={styles.table}>
                                             <thead>
                                                 <tr>
@@ -2058,7 +2132,7 @@ export default function Dashboard() {
                                                 dataRows_Open_Rows.map((row, index) => (
                                                     <tr
                                                         key={index}
-                                                        style={{ backgroundColor: index === highlightedRow ? '#f0f8ff' : 'transparent' }} 
+                                                        style={{ backgroundColor: index === highlighted_Open_Row ? '#f0f8ff' : 'transparent' }} 
                                                     >
                                                         <td>{row.id}</td>
                                                         <td>{row.row_date.split('T')[0]}</td>
@@ -2068,12 +2142,12 @@ export default function Dashboard() {
                                                         <td>{row.alias}</td>
                                                         <td>{row.commment}</td>
                                                         <td>{row.row_status}</td>
-                                                        <td>{row.start_time}</td> 
+                                                        <td>{row.start_time.replace('T', ' ').split('.')[0]}</td> 
                                                         <td>{row.end_time}</td> 
                                                         <td>{Math.floor(row.total_time / 60) + ' h ' + (row.total_time % 60) + ' min'}</td> 
                                                         <td>{row.role_name}</td>
                                                         <td>
-                                                            <button onClick={() => handleModifyClick(index)}>Modify</button>
+                                                            <button onClick={() => handleModify_Open_Row_Click(index)}>Modify</button>
                                                         </td>
                                                     </tr>
                                                 ))
@@ -2086,15 +2160,15 @@ export default function Dashboard() {
                                         </table>
                                     </div>
 
-                                    {isEditing && (
+                                    {isEditing_open_row && (
                                         <div className={styles.editFormContainer}> 
-                                            <form onSubmit={handleEditSubmit}>
+                                            <form onSubmit={handleEditSubmit_Open_Row}>
                                                 <h3>Edit Row</h3>
                                                 <input
                                                     type="text"
                                                     name="end_time"
-                                                    value={editData.end_time} 
-                                                    onChange={handleEditFormChange}
+                                                    value={editData_Open_Row.end_time} 
+                                                    onChange={handleEditFormChange_Open_Row}
                                                     placeholder="End Time"
                                                     required
                                                     className="searchInput" 
