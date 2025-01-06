@@ -24,29 +24,33 @@ ChartJS.register(
 export default function Dashboard() {
 
     //#region Session  
-        const router = useRouter();
+    const router = useRouter();
+    const INACTIVITY_LIMIT = 4 * 60 * 60 * 1000; // 4 hours in milliseconds
 
-        const INACTIVITY_LIMIT = 4 * 60 * 60 * 1000; // 4 hours in milliseconds
-        
-        const handleUserActivity = () => {
+    const handleUserActivity = () => {
+        if (typeof window !== 'undefined') {
             // Update the time of the last activity
             sessionStorage.setItem('lastActivity', Date.now());
-        };
-        
-        const checkInactivity = () => {
+        }
+    };
+
+    const checkInactivity = () => {
+        if (typeof window !== 'undefined') {
             const lastActivity = sessionStorage.getItem('lastActivity');
             if (lastActivity) {
                 const currentTime = Date.now();
                 const timeSinceLastActivity = currentTime - parseInt(lastActivity, 10);
-        
+
                 // If more than 4 hours have passed, redirect to the home page
                 if (timeSinceLastActivity > INACTIVITY_LIMIT) {
                     performSignOut();
                 }
             }
-        };
-        
-        useEffect(() => {
+        }
+    };
+
+    useEffect(() => {
+        if (typeof window !== 'undefined') {
             // Check if the user is authenticated
             const userEmail = sessionStorage.getItem('userEmail');
             const role = sessionStorage.getItem('roleId');
@@ -54,21 +58,23 @@ export default function Dashboard() {
                 alert(role);
                 router.push('/');
             }
-        
+
             // Set up events to track user activity
             window.addEventListener('mousemove', handleUserActivity);
             window.addEventListener('keydown', handleUserActivity);
-        
+
             // Start the interval to check for inactivity
             const interval = setInterval(checkInactivity, 60 * 1000); // Check every minute
-        
+
             // Clean up events and interval when the component unmounts
             return () => {
                 window.removeEventListener('mousemove', handleUserActivity);
                 window.removeEventListener('keydown', handleUserActivity);
                 clearInterval(interval);
             };
-        }, [router]);
+        }
+    }, [router]);
+
 
     //#endregion
 
