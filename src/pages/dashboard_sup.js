@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Bar } from 'react-chartjs-2';
 import { Chart as ChartJS, Title, Tooltip, Legend, BarElement, CategoryScale, LinearScale } from 'chart.js';
 import { FaCog } from 'react-icons/fa'; 
-import styles from '../styles/dashboard_TL.module.css';
+import styles from '../styles/dashboard_sup.module.css';
 import Snackbar from '@mui/material/Snackbar';
 import Alert from '@mui/material/Alert';
 import AlertTitle from '@mui/material/AlertTitle';
@@ -24,8 +24,10 @@ ChartJS.register(
 export default function Dashboard() {
 
     //#region Session  
-        const router = useRouter();
 
+ 
+        const router = useRouter();
+/*
         const INACTIVITY_LIMIT = 4 * 60 * 60 * 1000; // 4 hours in milliseconds
         
         const handleUserActivity = () => {
@@ -69,14 +71,14 @@ export default function Dashboard() {
                 clearInterval(interval);
             };
         }, [router]);
-
+*/
     //#endregion
 
     //#region States 
     /*********************************************************************************************/
     /***                                    state variables                                    ***/
     /*********************************************************************************************/
-    const [selectedOption, setSelectedOption] = useState('Today Team Work');
+    const [selectedOption, setSelectedOption] = useState('Roster');
     const [showPasswordChangeForm, setShowPasswordChangeForm] = useState(false);
     const [dataRows, setDataRows] = useState();
     const [dataRows_Report, setDataRows_Report] = useState();
@@ -192,7 +194,7 @@ export default function Dashboard() {
         };
 //#endregion
 
-    //#region Grafic Code
+//#region Grafic Code
 
     /*********************************************************************************************/
     /***                                    Grafic Code                                        ***/
@@ -633,7 +635,7 @@ export default function Dashboard() {
 
             const [technicians, setTechnicians] = useState([]);
             const [roles, setRoles] = useState([]);
-            const role_user = sessionStorage.getItem('roleId');
+
             const fetchAvailableRoles = async () => {
                 try {
                     const response = await fetch('/api/TL/getAvailableRoles', { 
@@ -641,7 +643,7 @@ export default function Dashboard() {
                         headers: {
                             'Content-Type': 'application/json',
                         },
-                        body: JSON.stringify({ role_user }),
+                        body: JSON.stringify({ }),
                     });                                 
                     const result = await response.json();            
                     if (result.success) {
@@ -652,7 +654,7 @@ export default function Dashboard() {
                 } catch (error) {
                     console.error(error);
                     alert("Error en la conexión.");
-                } 
+                }
             };
 
             const fetchTechniciansWithRoles = async () => {
@@ -1303,22 +1305,22 @@ export default function Dashboard() {
                 <nav className={styles.nav}>
                     <div className={styles.leftOptions}>
                         <button
-                            className={`${styles.optionButton} ${selectedOption === 'Today Team Work' ? styles.activeOption : ''}`}
-                            onClick={() => handleOptionChange('Today Team Work')}
+                            className={`${styles.optionButton} ${selectedOption === 'Roster' ? styles.activeOption : ''}`}
+                            onClick={() => handleOptionChange('Roster')}
                         >
-                            Today's Teamwork
+                            Roster
                         </button>
                         <button
-                            className={`${styles.optionButton} ${selectedOption === 'Manage Times' ? styles.activeOption : ''}`}
-                            onClick={() => handleOptionChange('Manage Times')}
+                            className={`${styles.optionButton} ${selectedOption === 'Idle Time' ? styles.activeOption : ''}`}
+                            onClick={() => handleOptionChange('Idle Time')}
                         >
-                            Manage Times
+                            Idle Time
                         </button>
                         <button
-                            className={`${styles.optionButton} ${selectedOption === 'Role Management' ? styles.activeOption : ''}`}
-                            onClick={() => handleOptionChange('Role Management')}
+                            className={`${styles.optionButton} ${selectedOption === 'Management' ? styles.activeOption : ''}`}
+                            onClick={() => handleOptionChange('Management')}
                         >
-                            Role Management
+                            Management
                         </button>
                         <button
                             className={`${styles.optionButton} ${selectedOption === 'Overtime' ? styles.activeOption : ''}`}
@@ -1327,7 +1329,7 @@ export default function Dashboard() {
                             Overtime
                         </button>
                         <button
-                            className={`${styles.optionButton} ${selectedOption === 'Report' ? styles.activeOption : ''}`}
+                            className={`${styles.optionButton} ${selectedOption === 'Reports' ? styles.activeOption : ''}`}
                             onClick={() => handleOptionChange('Report')}
                         >
                             Report 
@@ -1362,123 +1364,192 @@ export default function Dashboard() {
                         {alertConfig.message}
                     </Alert>
                 </Snackbar>
-                {selectedOption === 'Today Team Work' && !showPasswordChangeForm && (
-                    <div className={styles.mainContent}>
-                        <div className={styles.formSection}>
-                        {/* Weekly Production Section */}
-                        <div className={styles.timerSection}>
-                            <h2>Current Individual Production</h2>
-                            <Bar data={individualData} options={current_production_ChartOptions} />
+                {selectedOption === 'Roster' && !showPasswordChangeForm && (
+                    <div className="tabs-container">
+                    <div className={styles.tableSection}>
+                        <button
+                            className={activeTab_report === 'New Employee' ? `${styles.tab} ${styles.active}` : styles.tab}
+                            onClick={() => {
+                                setActiveTab_report('New Employee');  
+                                //fetchAuditData();
+                            }}
+                        >
+                            New Employee
+                        </button>
+                        <button
+                            className={activeTab_report === 'Modify Employee' ? `${styles.tab} ${styles.active}` : styles.tab}
+                            onClick={() => {
+                                setActiveTab_report('Modify Employee');  
+                                //fetchOpenRows();
+                            }}
+                        >
+                            Modify Employee
+                        </button>
+                        <button
+                            className={activeTab_report === 'Disable Employee' ? `${styles.tab} ${styles.active}` : styles.tab}
+                            onClick={() => {
+                                setActiveTab_report('Disable Employee');  
+                                //fetchOpenRows();
+                            }}
+                        >
+                            Disable Employee
+                        </button>
+                    </div>
+                    {/* Contenido de las pestañas */}
+                    <div className="tab-content">
+                    {activeTab_report === 'New Employee' && (
+                        <div id="newUserFormContainer" className={styles.newUserFormContainer}>
+                            <h2 className={styles.newUserFormTitle}>New User Form</h2>
+                            <form className={styles.newUserForm}>
+                                <div className={styles.formGroup}>
+                                    <label>Name:</label>
+                                    <input type="text" placeholder="Enter name" />
+                                </div>
+
+                                <div className={styles.formGroup}>
+                                    <label>Email:</label>
+                                    <input type="email" placeholder="Enter email" />
+                                </div>
+
+                                <div className={styles.formGroup}>
+                                    <label>Jira ID:</label>
+                                    <input type="text" placeholder="Enter Jira ID" />
+                                </div>
+
+                                <div className={styles.formGroup}>
+                                    <label>Slack ID:</label>
+                                    <input type="text" placeholder="Enter Slack ID" />
+                                </div>
+
+                                <div className={styles.formGroup}>
+                                    <label>Country:</label>
+                                    <select>
+                                        <option value="CR">CR</option>
+                                        <option value="UKR">UKR</option>
+                                        <option value="USA">USA</option>
+                                    </select>
+                                </div>
+
+                                <div className={styles.formGroup}>
+                                    <label>Role:</label>
+                                    <select>
+                                        <option value="CAD">CAD</option>
+                                        <option value="Engineer">Engineer</option>
+                                    </select>
+                                </div>
+
+                                <div className={styles.formGroup}>
+                                    <label>Team Name:</label>
+                                    <input type="text" placeholder="Agate" />
+                                </div>
+
+                                <div className={styles.formGroup}>
+                                    <label>Leader:</label>
+                                    <select>
+                                        <option value="Abisag Morales">Abisag Morales</option>
+                                    </select>
+                                </div>
+
+                                <div className={styles.formGroup}>
+                                    <label>Supervisor:</label>
+                                    <select>
+                                        <option value="Adrian Jimenez">Adrian Jimenez</option>
+                                    </select>
+                                </div>
+
+                                <div className={styles.formGroup}>
+                                    <label>LFO Start Date:</label>
+                                    <input type="date" />
+                                </div>
+
+                                <button type="submit" className={styles.submitButton}>Submit</button>
+                            </form>
                         </div>
-                        </div>
-                        <div className={styles.chartSection}>
-                            <h2>Current Production Report by Task</h2>
-                            <Bar data={groupData} options={group_ChartOptions} />
-                        </div>
-                        {/* Weekly Production Section */}
-                        <div className={styles.timerSection}>
-                            {/* Weekly Production Section */}
-                            <div className={styles.timerSection}>
-                                <h2>Idle Time Report</h2>
-                                <Bar data={individualData_Idle_Time} options={current_Idle_Time_ChartOptions} />
+                    )}
+
+                    {activeTab_report === 'Open Register' && (
+                        <div>
+                            <h2>Open Register</h2>
+                            <div className={styles.container}>
+                                <div className={`${styles.tableContainer} ${isEditing_open_row ? styles.shrinkTable : ''}`}>
+                                    <table className={styles.table}>
+                                        <thead>
+                                            <tr>
+                                                <th>#</th>
+                                                <th>Date</th>                         
+                                                <th>Technician</th>                               
+                                                <th>Task</th>
+                                                <th>Type</th>
+                                                <th>Alias</th>
+                                                <th>Comments</th>
+                                                <th>Status</th>
+                                                <th>Start Time</th>
+                                                <th>End Time</th>
+                                                <th>Total Time</th>
+                                                <th>Role</th>
+                                                <th>Actions</th>   
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                        {Array.isArray(dataRows_Open_Rows) && dataRows_Open_Rows.length > 0 ? (
+                                            dataRows_Open_Rows.map((row, index) => (
+                                                <tr
+                                                    key={index}
+                                                    style={{ backgroundColor: index === highlighted_Open_Row ? '#f0f8ff' : 'transparent' }} 
+                                                >
+                                                    <td>{row.id}</td>
+                                                    <td>{row.row_date.split('T')[0]}</td>
+                                                    <td>{row.user_name}</td>                        
+                                                    <td>{row.task_name}</td>
+                                                    <td>{row.type_value}</td>
+                                                    <td>{row.alias}</td>
+                                                    <td>{row.commment}</td>
+                                                    <td>{row.row_status}</td>
+                                                    <td>{row.start_time.replace('T', ' ').split('.')[0]}</td> 
+                                                    <td>{row.end_time}</td> 
+                                                    <td>{Math.floor(row.total_time / 60) + ' h ' + (row.total_time % 60) + ' min'}</td> 
+                                                    <td>{row.role_name}</td>
+                                                    <td>
+                                                        <button onClick={() => handleModify_Open_Row_Click(index)}>Modify</button>
+                                                    </td>
+                                                </tr>
+                                            ))
+                                        ) : (
+                                            <tr>
+                                                <td colSpan="10">No data available</td>
+                                            </tr>
+                                        )}
+                                        </tbody>
+                                    </table>
+                                </div>
+
+                                {isEditing_open_row && (
+                                    <div className={styles.editFormContainer}> 
+                                        <form onSubmit={handleEditSubmit_Open_Row}>
+                                            <h3>Edit Row</h3>
+                                            <input
+                                                type="text"
+                                                name="end_time"
+                                                value={editData_Open_Row.end_time} 
+                                                onChange={handleEditFormChange_Open_Row}
+                                                placeholder="End Time"
+                                                required
+                                                className="searchInput" 
+                                                maxLength={8} 
+                                                pattern="([01]?[0-9]|2[0-3]):([0-5][0-9]):([0-5][0-9])" 
+                                            />
+                                            <button type="submit" className={styles.editButton}>Save Changes</button> 
+                                            <button type="button" onClick={handleCancelClick} className={styles.cancel_Edit_Button}>Cancel</button>
+                                        </form>
+                                    </div>
+                                )}
                             </div>
-                        </div>       
-                    </div>
-                )}
-                 {/* Filtros */}
-                 {selectedOption === 'Today Team Work' && !showPasswordChangeForm && (
-                 <div className={styles.container}>
-                    {/* Filtros */}
-                    <div className={styles.filters}>
-                        <input
-                            type="text"
-                            name="technician"
-                            value={filters.technician}
-                            onChange={handleFilterChange}
-                            placeholder="Filter by Technician"
-                        />
-                        <input
-                            type="text"
-                            name="task"
-                            value={filters.task}
-                            onChange={handleFilterChange}
-                            placeholder="Filter by Task"
-                        />
-                        <input
-                            type="text"
-                            name="type"
-                            value={filters.type}
-                            onChange={handleFilterChange}
-                            placeholder="Filter by Type"
-                        />
-                        <input
-                            type="text"
-                            name="alias"
-                            value={filters.alias}
-                            onChange={handleFilterChange}
-                            placeholder="Filter by Alias"
-                        />
-                        <input
-                            type="text"
-                            name="status"
-                            value={filters.status}
-                            onChange={handleFilterChange}
-                            placeholder="Filter by Status"
-                        />
-                    </div>
+                        </div>
+                        )}
+                    </div> 
                 </div>
                 )}
-                {selectedOption === 'Today Team Work' && !showPasswordChangeForm && (
-                    <div className={styles.tableSection}>
-                        <table className={styles.table}>
-                        <thead>
-                            <tr>
-                                <th>#</th>
-                                <th>Date</th>
-                                <th>Technician</th>
-                                <th>Task</th>
-                                <th>Type</th>
-                                <th>Alias</th>
-                                <th>Comments</th>
-                                <th>Status</th>
-                                <th>Start Time</th>
-                                <th>End Time</th>
-                                <th>Total Time</th>
-                                <th>Role</th>
-                                <th>Work Type</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {filteredData.length > 0 ? (
-                                filteredData.map((row, index) => (
-                                    <tr
-                                        key={index}
-                                        style={{ backgroundColor: index === highlightedRow ? '#f0f8ff' : 'transparent' }}
-                                    >
-                                        <td>{row.id}</td>
-                                        <td>{row.row_date.split('T')[0]}</td>
-                                        <td>{row.user_name}</td>
-                                        <td>{row.task_name}</td>
-                                        <td>{row.type_value}</td>
-                                        <td>{row.alias}</td>
-                                        <td>{row.commment}</td>
-                                        <td>{row.row_status}</td>
-                                        <td>{row.start_time}</td>
-                                        <td>{row.end_time}</td>
-                                        <td>{Math.floor(row.total_time / 60) + ' h ' + (row.total_time % 60) + ' min'}</td>
-                                        <td>{row.role_name}</td>
-                                        <td>{row.type_case}</td>
-                                    </tr>
-                                ))
-                            ) : (
-                                <tr>
-                                    <td colSpan="14">No data available</td>
-                                </tr>
-                            )}
-                        </tbody>
-                    </table>
-                    </div>
-                )}
+                 
                 {selectedOption === 'Manage Times' && !showPasswordChangeForm && (
                     <div className={styles.container_searchForm}>
                         <form onSubmit={handleSearchSubmit} className={styles.searchForm}>

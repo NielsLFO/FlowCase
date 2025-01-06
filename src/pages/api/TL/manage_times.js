@@ -12,12 +12,11 @@ export default async function handler(req, res) {
         // Acquire a connection from the pool using `generic-pool`
         connection = await db.acquire();
 
-        // Perform the query to get the types based on `task_id` and `role_id`
         const [data] = await connection.query(`
             SELECT u.id, u.user_name from users u
             INNER JOIN tl t ON u.tl_id = t.id 
-            WHERE t.tl_name = ?
-        `, [tl_user_name]);
+            WHERE t.tl_name = ? AND u.user_name <> ?
+        `, [tl_user_name, tl_user_name]);
 
         const users = data.map(row => ({
             id: row.id,

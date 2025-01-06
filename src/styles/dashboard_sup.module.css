@@ -1,0 +1,180 @@
+.dashboard {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    font-family: Arial, sans-serif;
+}
+
+.header {
+    background-color: #333;
+    color: #fff;
+    padding: 10px 20px;
+    margin: -8px;
+    margin-bottom: 0;
+}
+
+.nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.leftOptions button,
+.rightOptions button {
+    background: none;
+    border: none;
+    color: #fff;
+    padding: 10px 20px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: background-color 0.3s;
+}
+
+.leftOptions button.activeOption,
+.rightOptions .settingsButton.activeButton {
+    background-color: #555;
+}
+
+.rightOptions .signOutButton {
+    background-color: #e74c3c;
+    color: #fff;
+    border-radius: 5px;
+}
+
+.rightOptions .settingsButton {
+    background: none;
+    border: none;
+    color: #fff;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.rightOptions .settingsButton.activeButton {
+    background-color: #555;
+}
+
+/*Buttons for overtime menu*/
+
+.tableSection {
+    display: flex;
+    justify-content: flex-start; /* Alineación a la izquierda */
+    align-items: center;
+    background-color: #f4f4f9; /* Fondo claro */
+    padding: 10px 20px;
+    border-radius: 8px;
+    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+    gap: 10px; /* Espaciado entre botones */
+    width: 98.5%;
+}
+  
+.tab {
+    background-color: #ffffff; /* Fondo del botón por defecto */
+    border: 1px solid #ccc; /* Borde gris claro */
+    color: #333; /* Color del texto */
+    font-size: 16px;
+    font-weight: bold;
+    padding: 10px 20px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+  
+.tab:hover {
+    background-color: #e6e6e6; /* Fondo al pasar el mouse */
+    border-color: #aaa; /* Cambiar borde */
+}
+  
+.tab.active {
+    background-color: #007BFF; /* Fondo azul profesional */
+    color: #fff; /* Texto blanco */
+    border-color: #007BFF; /* Bordes azules */
+}
+  
+.tab:focus {
+    outline: none;
+    box-shadow: 0px 0px 8px rgba(0, 123, 255, 0.7); /* Resaltar al enfocar */
+}
+
+
+
+
+
+
+
+
+/* dashboard_sup.module.css */
+
+/* Contenedor principal del formulario */
+.newUserFormContainer {
+    max-width: 600px;
+    margin: 0 auto;
+    padding: 20px;
+    background-color: #ffffff;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    margin-top: 4%;
+  }
+  
+  /* Título del formulario */
+  .newUserFormTitle {
+    font-size: 24px;
+    margin-bottom: 20px;
+    text-align: center;
+    color: #333;
+  }
+  
+  /* Estilos del formulario */
+  .newUserForm {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+  }
+  
+  /* Grupo de formulario */
+  .formGroup {
+    display: flex;
+    flex-direction: column;
+  }
+  
+  /* Etiquetas */
+  .formGroup label {
+    margin-bottom: 5px;
+    font-weight: bold;
+    color: #555;
+  }
+  
+  /* Estilos de inputs y selects */
+  .formGroup input,
+  .formGroup select {
+    padding: 10px;
+    font-size: 16px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    box-sizing: border-box;
+  }
+  
+  .formGroup input:focus,
+  .formGroup select:focus {
+    outline: none;
+    border-color: #4CAF50;
+    box-shadow: 0 0 5px rgba(76, 175, 80, 0.5);
+  }
+  
+  /* Botón de envío */
+  .submitButton {
+    padding: 12px;
+    font-size: 16px;
+    color: #fff;
+    background-color: #4CAF50;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    text-transform: uppercase;
+    font-weight: bold;
+  }
+  
+  .submitButton:hover {
+    background-color: #45a049;
+  }
+  

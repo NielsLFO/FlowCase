@@ -5,6 +5,7 @@ export default async function handler(req, res) {
         return res.status(405).json({ message: 'Method not allowed' });
     }
 
+    const { role_user } = req.body;
     let connection;
 
     try {
@@ -12,7 +13,7 @@ export default async function handler(req, res) {
         connection = await db.acquire();
 
         // Query the user's role
-        const [roleRows] = await connection.query('SELECT id, role_name FROM roles');
+        const [roleRows] = await connection.query('SELECT id, role_name FROM roles Where id in(1,6)');
         
         if (roleRows.length > 0) {
             await db.release(connection);
