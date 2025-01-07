@@ -22,7 +22,6 @@ ChartJS.register(
     LinearScale
 );
 export default function Dashboard() {
-
     //#region Session  
         const router = useRouter();
 
@@ -69,7 +68,6 @@ export default function Dashboard() {
                 clearInterval(interval);
             };
         }, [router]);
-
     //#endregion
 
     //#region States 
@@ -424,6 +422,7 @@ export default function Dashboard() {
                 console.error('Error fetching types:', error);
             }
         };
+        
 
         const fetchTask = async () => {
             if (sessionStorage.getItem('userEmail')) {
@@ -633,9 +632,9 @@ export default function Dashboard() {
 
             const [technicians, setTechnicians] = useState([]);
             const [roles, setRoles] = useState([]);
-            const role_user = sessionStorage.getItem('roleId');
             const fetchAvailableRoles = async () => {
                 try {
+                    const role_user = sessionStorage.getItem('roleId');
                     const response = await fetch('/api/TL/getAvailableRoles', { 
                         method: 'POST',
                         headers: {
