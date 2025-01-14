@@ -13,11 +13,13 @@ export default async function handler(req, res) {
         connection = await db.acquire();
 
         const [data] = await connection.query(`
-            SELECT u.id, u.user_name from users u
+            SELECT u.id, u.user_name 
+            FROM users u
             INNER JOIN tl t ON u.tl_id = t.id 
             WHERE t.tl_name = ? AND u.user_name <> ?
+            ORDER BY u.user_name ASC
         `, [tl_user_name, tl_user_name]);
-
+        
         const users = data.map(row => ({
             id: row.id,
             user_name: row.user_name

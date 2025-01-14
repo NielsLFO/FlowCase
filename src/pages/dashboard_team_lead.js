@@ -599,13 +599,13 @@ export default function Dashboard() {
                 alert("Error en la conexión.");
             }
         };
-
+/*
         useEffect(() => {
             if (TL_Technitians.length > 0) {
                 setSearchData(prevData => ({ ...prevData, user: TL_Technitians[0].id }));
             }
         }, [searchData.startDate, searchData.endDate]); 
-
+*/
         const update_data = async (id, updatedData) => {
 
             try {
@@ -797,17 +797,19 @@ export default function Dashboard() {
                     setDataRows(data);
 
                     // Get unique names and count cases for each technician
-                    const uniqueUsers = Array.from(new Set(data.map(item => item.user_name)));
+                    const uniqueUsers = Array.from(new Set(data.map(item => item.user_name)))
+                        .sort((a, b) => a.localeCompare(b)); // Ordenar alfabéticamente
+                    
                     const caseCounts = uniqueUsers.map(user => 
                         data.filter(item => 
                             item.user_name === user && 
                             (item.type_value === "New case" || 
-                             item.type_value === 'Detailing' || 
-                             item.type_value === 'Clinical Analysis') && 
+                            item.type_value === 'Detailing' || 
+                            item.type_value === 'Clinical Analysis') && 
                             item.row_status === "Finish"
                         ).length
                     );
-
+                
                     // Create dynamic data for the chart
                     const dynamicIndividualData = {
                         labels: uniqueUsers,
@@ -823,11 +825,13 @@ export default function Dashboard() {
                     };
                     setIndividualData(dynamicIndividualData);
 
-                    const uniqueType = Array.from(new Set(data.map(item => item.type_value)));
+                    const uniqueType = Array.from(new Set(data.map(item => item.type_value)))
+                    .sort((a, b) => a.localeCompare(b)); // Ordenar alfabéticamente
+                
                     const taskCounts = uniqueType.map(task =>
                         data.filter(item => item.type_value === task).length
                     );
-
+                
                     // Create dynamic data for the chart
                     const dynamicGroupData = {
                         labels: uniqueType,
