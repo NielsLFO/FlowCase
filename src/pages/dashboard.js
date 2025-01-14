@@ -503,10 +503,11 @@ export default function Dashboard() {
         const targetCases = 6;
         const completedCases = Array.isArray(dataRows) ? dataRows.filter(row => 
             row.task_name === 'Production' && 
-            row.type_value === 'New case' && 
+            (row.type_value === 'New case' || row.type_value === 'Detailing' || row.type_value === 'Clinical Analysis') &&
             row.alias.trim() !== '' &&
             row.row_status === "Finish"
-        ).length : 0;  
+        ).length : 0;
+         
         const chartData = {
             labels: ['Cases Completed'],
             datasets: [

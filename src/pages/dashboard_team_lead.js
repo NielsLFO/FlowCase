@@ -233,9 +233,15 @@ export default function Dashboard() {
                     text: 'Current Production Report',
                 },
             },
+            scales: {
+                y: {
+                    ticks: {
+                        stepSize: 1 
+                    }
+                }
+            }
         };
-
-
+        
         const taskColors = [
             'rgba(66, 135, 245, 0.6)',  
             'rgba(255, 166, 0, 0.6)',   
@@ -793,7 +799,13 @@ export default function Dashboard() {
                     // Get unique names and count cases for each technician
                     const uniqueUsers = Array.from(new Set(data.map(item => item.user_name)));
                     const caseCounts = uniqueUsers.map(user => 
-                        data.filter(item => item.user_name === user && item.type_value === "New case" && item.row_status == "Finish").length
+                        data.filter(item => 
+                            item.user_name === user && 
+                            (item.type_value === "New case" || 
+                             item.type_value === 'Detailing' || 
+                             item.type_value === 'Clinical Analysis') && 
+                            item.row_status === "Finish"
+                        ).length
                     );
 
                     // Create dynamic data for the chart
