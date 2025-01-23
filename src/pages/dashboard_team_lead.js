@@ -225,22 +225,23 @@ export default function Dashboard() {
             responsive: true,
             plugins: {
                 legend: {
-                    display: false,
-                    position: 'top',
+                    position: 'top', // Mostrar la leyenda arriba
                 },
                 title: {
-                    display: false,
-                    text: 'Current Production Report',
+                    display: true,
+                    text: 'Production per Technician',
                 },
             },
             scales: {
+                x: {
+                    stacked: true, // Apilar barras en el eje X
+                },
                 y: {
-                    ticks: {
-                        stepSize: 1 
-                    }
-                }
-            }
+                    stacked: true, // Apilar valores en el eje Y
+                },
+            },
         };
+        
         
         const taskColors = [
             'rgba(66, 135, 245, 0.6)',  
@@ -302,21 +303,67 @@ export default function Dashboard() {
             ],
         });
 
-            // Options for the chart
-            const current_Idle_Time_ChartOptions = {
-                responsive: true,
-                plugins: {
-                    legend: {
-                        display: false,
-                        position: 'top',
-                    },
-                    title: {
-                        display: false,
-                        text: 'Current Production Report',
+       // Opciones para apilar las barras
+        const current_Idle_Time_ChartOptions = {
+            responsive: true,
+            plugins: {
+                legend: {
+                    position: 'top', // Mostrar la leyenda arriba
+                },
+                title: {
+                    display: true,
+                    text: 'Idle Time Report per Technician (Hours)',
+                },
+            },
+            scales: {
+                x: {
+                    stacked: true, // Apilar barras en el eje X
+                },
+                y: {
+                    stacked: true, // Apilar valores en el eje Y
+                    ticks: {
+                        callback: (value) => `${value} h`, // Mostrar unidad de horas en el eje Y
                     },
                 },
-            };
-
+            },
+        };
+        // State for the task chart data
+        const [groupData_Idle_Time, setGroupData_Idle_Time] = useState({
+            labels: [],
+            datasets: [
+                {
+                    label: 'Tasks per Type',
+                    data: [],
+                    backgroundColor: taskColors,
+                    borderColor: taskColors.map(color => color.replace('0.6', '1')),
+                    borderWidth: 1,
+                },
+            ],
+        });
+        // Opciones del gráfico para agregar "h" al eje Y
+        const group_ChartOptions_Idle_Time = {
+            responsive: true,
+            plugins: {
+                legend: {
+                    position: 'top', // Mostrar la leyenda arriba
+                },
+                title: {
+                    display: true,
+                    text: 'Idle Time Report per Task Type',
+                },
+            },
+            scales: {
+                x: {
+                    stacked: true, // Apilar las barras en el eje X
+                },
+                y: {
+                    stacked: true, // Apilar los valores en el eje Y
+                    ticks: {
+                        callback: (value) => `${value} h`, // Mostrar la unidad "h" en el eje Y
+                    },
+                },
+            },
+        };
 
 
     //#endregion
@@ -796,41 +843,58 @@ export default function Dashboard() {
                     const data = result.reports;
                     setDataRows(data);
 
-                    // Get unique names and count cases for each technician
+                    // Obtener nombres únicos de técnicos
                     const uniqueUsers = Array.from(new Set(data.map(item => item.user_name)))
-                        .sort((a, b) => a.localeCompare(b)); // Ordenar alfabéticamente
-                    
-                    const caseCounts = uniqueUsers.map(user => 
-                        data.filter(item => 
-                            item.user_name === user && 
-                            (item.type_value === "New case" || 
-                            item.type_value === 'Detailing' || 
-                            item.type_value === 'Clinical Analysis') && 
+                    .sort((a, b) => a.localeCompare(b)); // Ordenar alfabéticamente
+
+                    // Definir los tipos de casos que queremos contar
+                    const caseTypes = ["Consultation", "Detailing", "Clinical Analysis", "Final MFG review"];
+
+                    // Crear un dataset para cada tipo de caso
+                    const datasets = caseTypes.map((type, index) => {
+                    const caseCountsByUser = uniqueUsers.map(user =>
+                        data.filter(item =>
+                            item.user_name === user &&
+                            item.type_value === type &&
                             item.row_status === "Finish"
                         ).length
                     );
-                
-                    // Create dynamic data for the chart
-                    const dynamicIndividualData = {
-                        labels: uniqueUsers,
-                        datasets: [
-                            {
-                                label: 'Cases per Technician',
-                                data: caseCounts,
-                                backgroundColor: techColors.slice(0, uniqueUsers.length),
-                                borderColor: techColors.slice(0, uniqueUsers.length).map(color => color.replace('0.6', '1')),
-                                borderWidth: 1,
-                            },
-                        ],
+
+                    return {
+                        label: type, // Etiqueta del tipo de caso
+                        data: caseCountsByUser,
+                        backgroundColor: techColors[index % techColors.length], // Asegurar colores distintos
+                        borderColor: techColors[index % techColors.length].replace('0.6', '1'),
+                        borderWidth: 1,
                     };
+                    });
+
+                    // Crear datos dinámicos para el gráfico
+                    const dynamicIndividualData = {
+                    labels: uniqueUsers,
+                    datasets, // Usar los datasets generados para cada tipo de caso
+                    };
+
+                    // Actualizar el estado del gráfico
                     setIndividualData(dynamicIndividualData);
 
-                    const uniqueType = Array.from(new Set(data.map(item => item.type_value)))
-                    .sort((a, b) => a.localeCompare(b)); // Ordenar alfabéticamente
-                
-                    const taskCounts = uniqueType.map(task =>
-                        data.filter(item => item.type_value === task).length
+
+                    const allowedTypes = ["Clinical Analysis", "Detailing", "Consultation", "Final MFG review"];
+
+                    // Filtrar por tipos permitidos y row_status "Finish"
+                    const filteredData = data.filter(item => 
+                        allowedTypes.includes(item.type_value) && item.row_status === "Finish"
                     );
+                    
+                    // Obtener tipos únicos ordenados alfabéticamente
+                    const uniqueType = Array.from(new Set(filteredData.map(item => item.type_value)))
+                        .sort((a, b) => a.localeCompare(b));
+                    
+                    // Contar las tareas por tipo
+                    const taskCounts = uniqueType.map(task =>
+                        filteredData.filter(item => item.type_value === task).length
+                    );
+                    
                 
                     // Create dynamic data for the chart
                     const dynamicGroupData = {
@@ -849,37 +913,83 @@ export default function Dashboard() {
                     // Update the chart state
                     setGroupData(dynamicGroupData);
 
+                    const allowedTypes_Idle_Time = ["Waiting for case", "Personal needs", "Other", "Break", "Lunch", "Electricity problem","Internet problem","Waiting for support"];
 
-                    // Sum the total "Idle_Time" for each user
-                    const idleTimeCounts = uniqueUsers.map(user => {
-                        // Filter records corresponding to "Idle_Time" and the current user
-                        const idleTimeRecords = data.filter(
-                            item => item.user_name === user && item.task_name === "Idle_Time"
-                        );
-                        // Sum the total time for this user in "Idle_Time"
-                        const totalIdleTime = idleTimeRecords.reduce((sum, record) => {
-                            // Convert total_time to an integer and sum it
-                            return sum + parseInt(record.total_time, 10);
-                        }, 0);
-                        return totalIdleTime;
-                    });
+                    // Filtrar por tipos permitidos y row_status "Finish" o "Stop"
+                    const filteredData_Idle = data.filter(item => 
+                        allowedTypes_Idle_Time.includes(item.type_value) && (item.row_status === "Finish" || item.row_status === "Stop")
+                    );
 
-                    // Create dynamic data for the chart
-                    const dynamicIndividualData_Idle_Time = {
-                        labels: uniqueUsers,
+                    // Obtener tipos únicos ordenados alfabéticamente
+                    const uniqueType_Idle = Array.from(new Set(filteredData_Idle.map(item => item.type_value)))
+                        .sort((a, b) => a.localeCompare(b));
+
+                    // Sumar el tiempo total por tipo, convertir a horas y limitar a 1 decimal
+                    const taskTimeSums_Idle = uniqueType_Idle.map(type => 
+                        filteredData_Idle
+                            .filter(item => item.type_value === type)
+                            .reduce((sum, item) => sum + ((item.total_time || 0) / 60), 0) // Convertir minutos a horas
+                            .toFixed(1) // Limitar a 1 decimal
+                    );
+
+                    // Crear datos dinámicos para el gráfico
+                    const dynamicGroupData_Idle = {
+                        labels: uniqueType_Idle,
                         datasets: [
                             {
-                                label: 'Total Idle Time per Technician',
-                                data: idleTimeCounts,
-                                backgroundColor: techColors.slice(0, uniqueUsers.length),
-                                borderColor: techColors.slice(0, uniqueUsers.length).map(color => color.replace('0.6', '1')),
+                                label: 'Total Time per Type (hours)', // Ajuste de la etiqueta
+                                data: taskTimeSums_Idle.map(Number), // Asegurarse de que los valores sean numéricos
+                                backgroundColor: taskColors.slice(0, uniqueType_Idle.length),
+                                borderColor: taskColors.slice(0, uniqueType_Idle.length).map(color => color.replace('0.6', '1')),
                                 borderWidth: 1,
                             },
                         ],
                     };
 
-                    // Update the chart state
+                    // Actualizar el estado del gráfico
+                    setGroupData_Idle_Time(dynamicGroupData_Idle);
+
+
+                   // Obtener los tipos únicos de "Idle_Time"
+                    const idleTimeTypes = Array.from(new Set(
+                        data.filter(item => item.task_name === "Idle_Time").map(item => item.type_value)
+                    )).sort((a, b) => a.localeCompare(b)); // Ordenar alfabéticamente
+
+                    // Crear un conjunto de datos para cada tipo de "Idle_Time"
+                    const idleTimeDatasets = idleTimeTypes.map((type, index) => {
+                        const idleTimeCountsByUser = uniqueUsers.map(user => {
+                            // Filtrar registros por usuario y tipo
+                            const idleTimeRecords = data.filter(
+                                item => 
+                                    item.user_name === user && 
+                                    item.task_name === "Idle_Time" &&
+                                    item.type_value === type
+                            );
+                            // Sumar el tiempo total para este usuario y tipo, convertir a horas y redondear a 1 decimal
+                            return idleTimeRecords.reduce((sum, record) => {
+                                return sum + parseInt(record.total_time, 10) / 60; // Convertir minutos a horas
+                            }, 0).toFixed(1); // Redondear el total a 1 decimal
+                        });
+
+                        return {
+                            label: type, // Etiqueta del tipo de "Idle_Time"
+                            data: idleTimeCountsByUser,
+                            backgroundColor: techColors[index % techColors.length], // Asegurar colores distintos
+                            borderColor: techColors[index % techColors.length].replace('0.6', '1'),
+                            borderWidth: 1,
+                        };
+                    });
+
+                    // Crear datos dinámicos para el gráfico
+                    const dynamicIndividualData_Idle_Time = {
+                        labels: uniqueUsers,
+                        datasets: idleTimeDatasets, // Usar idleTimeDatasets con datos en horas
+                    };
+
+                    // Actualizar el estado del gráfico
                     setIndividualData_Idle_Time(dynamicIndividualData_Idle_Time);
+
+                    
 
                 } else {
                     showAlert('error', 'Error', result.message || "Error updating the table.");
@@ -1380,24 +1490,32 @@ export default function Dashboard() {
                 {selectedOption === 'Today Team Work' && !showPasswordChangeForm && (
                     <div className={styles.mainContent}>
                         <div className={styles.formSection}>
-                        {/* Weekly Production Section */}
-                        <div className={styles.timerSection}>
-                            <h2>Current Individual Production</h2>
-                            <Bar data={individualData} options={current_production_ChartOptions} />
-                        </div>
+                            {/* Weekly Production Section */}
+                            <div className={styles.timerSection}>
+                                <h2>Current Individual Production</h2>
+                                <Bar data={individualData} options={current_production_ChartOptions} />
+                            </div>
                         </div>
                         <div className={styles.chartSection}>
                             <h2>Current Production Report by Task</h2>
                             <Bar data={groupData} options={group_ChartOptions} />
                         </div>
+                        
                         {/* Weekly Production Section */}
                         <div className={styles.timerSection}>
                             {/* Weekly Production Section */}
                             <div className={styles.timerSection}>
-                                <h2>Idle Time Report</h2>
+                                <h2>Idle Time Report per Task</h2>
+                                <Bar data={groupData_Idle_Time} options={group_ChartOptions_Idle_Time} />
+                            </div>
+                        </div>  
+                        <div className={styles.timerSection}>
+                        {/* Weekly Production Section */}
+                            <div className={styles.timerSection}>
+                                <h2>Idle Time Report per Technician</h2>
                                 <Bar data={individualData_Idle_Time} options={current_Idle_Time_ChartOptions} />
                             </div>
-                        </div>       
+                        </div>        
                     </div>
                 )}
                  {/* Filtros */}
