@@ -11,6 +11,7 @@ import { useRouter } from 'next/router';
 import Select from "react-select"; // npm install react-select
 import DatePicker from "react-datepicker"; // npm install react-datepicker
 import "react-datepicker/dist/react-datepicker.css";
+import ChartDataLabels from 'chartjs-plugin-datalabels';
 
 // Register components for the chart
 ChartJS.register(
@@ -19,7 +20,8 @@ ChartJS.register(
     Legend,
     BarElement,
     CategoryScale,
-    LinearScale
+    LinearScale,
+    ChartDataLabels
 );
 export default function Dashboard() {
     //#region Session  
@@ -228,8 +230,20 @@ export default function Dashboard() {
                     position: 'top', // Mostrar la leyenda arriba
                 },
                 title: {
-                    display: true,
+                    display: false,
                     text: 'Production per Technician',
+                },
+                datalabels: {
+                    display: (context) => {
+                        const value = context.dataset.data[context.dataIndex];
+                        return value > 0; // Mostrar solo etiquetas con valores mayores a 0
+                    },
+                    color: 'white', // Color de las etiquetas
+                    font: {
+                        weight: 'bold',
+                        size: 12,
+                    },
+                    formatter: (value) => value.toFixed(0), // Formatear sin decimales
                 },
             },
             scales: {
@@ -238,15 +252,20 @@ export default function Dashboard() {
                 },
                 y: {
                     stacked: true, // Apilar valores en el eje Y
+                    beginAtZero: true, // Asegurar que el eje Y comienza en 0
                 },
             },
         };
         
         
+        
         const taskColors = [
-            'rgba(66, 135, 245, 0.6)',  
-            'rgba(255, 166, 0, 0.6)',   
-            'rgba(231, 76, 60, 0.6)',  
+            'rgba(75, 123, 139, 0.6)',  
+            'rgba(153, 102, 255, 0.6)', 
+            'rgba(255, 159, 64, 0.6)', 
+            'rgba(54, 162, 235, 0.6)',  
+            'rgba(255, 206, 86, 0.6)',  
+            'rgba(105, 195, 140, 0.6)',   
         ];
     
         // State for the task chart data
@@ -311,8 +330,19 @@ export default function Dashboard() {
                     position: 'top', // Mostrar la leyenda arriba
                 },
                 title: {
-                    display: true,
+                    display: false,
                     text: 'Idle Time Report per Technician (Hours)',
+                },
+                datalabels: {
+                    display: (context) => {
+                        const value = context.dataset.data[context.dataIndex];
+                        return value > 0; // Mostrar solo etiquetas con valores mayores a 0
+                    },
+                    color: 'white', // Color de las etiquetas
+                    font: {
+                        weight: 'bold',
+                        size: 10,
+                    },
                 },
             },
             scales: {
@@ -324,6 +354,7 @@ export default function Dashboard() {
                     ticks: {
                         callback: (value) => `${value} h`, // Mostrar unidad de horas en el eje Y
                     },
+                    beginAtZero: true, // Asegurar que el eje Y comienza en 0
                 },
             },
         };
@@ -345,10 +376,10 @@ export default function Dashboard() {
             responsive: true,
             plugins: {
                 legend: {
-                    position: 'top', // Mostrar la leyenda arriba
+                    display: false, // Desactiva la leyenda completamente
                 },
                 title: {
-                    display: true,
+                    display: false,
                     text: 'Idle Time Report per Task Type',
                 },
             },
@@ -364,6 +395,7 @@ export default function Dashboard() {
                 },
             },
         };
+        
 
 
     //#endregion
@@ -843,77 +875,98 @@ export default function Dashboard() {
                     const data = result.reports;
                     setDataRows(data);
 
+                    // Definir colores únicos para cada tipo de tarea
+                    const taskColorMap = {
+                        "Clinical Analysis": 'rgba(75, 123, 139, 0.6)', // Azul profesional
+                        "Detailing": 'rgba(153, 102, 255, 0.6)', // Verde esmeralda
+                        "Consultation": 'rgba(255, 159, 64, 0.6)', // Amarillo dorado
+                        "Final MFG review": 'rgba(54, 162, 235, 0.6)', // Rosa coral
+                    };
+
                     // Obtener nombres únicos de técnicos
-                    const uniqueUsers = Array.from(new Set(data.map(item => item.user_name)))
-                    .sort((a, b) => a.localeCompare(b)); // Ordenar alfabéticamente
+                    const uniqueUsers = Array.from(new Set(data.map(item => item.user_name))).sort((a, b) => a.localeCompare(b));
 
                     // Definir los tipos de casos que queremos contar
-                    const caseTypes = ["Consultation", "Detailing", "Clinical Analysis", "Final MFG review"];
+                    const caseTypes = ["Clinical Analysis", "Detailing", "Consultation", "Final MFG review"];
 
                     // Crear un dataset para cada tipo de caso
-                    const datasets = caseTypes.map((type, index) => {
-                    const caseCountsByUser = uniqueUsers.map(user =>
-                        data.filter(item =>
-                            item.user_name === user &&
-                            item.type_value === type &&
-                            item.row_status === "Finish"
-                        ).length
-                    );
+                    const datasets = caseTypes.map((type) => {
+                        const caseCountsByUser = uniqueUsers.map((user) =>
+                            data.filter(
+                                (item) =>
+                                    item.user_name === user &&
+                                    item.type_value === type &&
+                                    item.row_status === "Finish"
+                            ).length
+                        );
 
-                    return {
-                        label: type, // Etiqueta del tipo de caso
-                        data: caseCountsByUser,
-                        backgroundColor: techColors[index % techColors.length], // Asegurar colores distintos
-                        borderColor: techColors[index % techColors.length].replace('0.6', '1'),
-                        borderWidth: 1,
-                    };
+                        return {
+                            label: type, // Etiqueta del tipo de caso
+                            data: caseCountsByUser,
+                            backgroundColor: taskColorMap[type], // Usar color fijo por tipo de tarea
+                            borderColor: taskColorMap[type].replace("0.6", "1"), // Borde más sólido
+                            borderWidth: 1,
+                        };
                     });
 
-                    // Crear datos dinámicos para el gráfico
+                    // Crear datos dinámicos para el gráfico por técnico
                     const dynamicIndividualData = {
-                    labels: uniqueUsers,
-                    datasets, // Usar los datasets generados para cada tipo de caso
+                        labels: uniqueUsers,
+                        datasets, // Usar los datasets generados para cada tipo de caso
                     };
 
                     // Actualizar el estado del gráfico
                     setIndividualData(dynamicIndividualData);
 
-
-                    const allowedTypes = ["Clinical Analysis", "Detailing", "Consultation", "Final MFG review"];
-
                     // Filtrar por tipos permitidos y row_status "Finish"
-                    const filteredData = data.filter(item => 
-                        allowedTypes.includes(item.type_value) && item.row_status === "Finish"
+                    const filteredData = data.filter(
+                        (item) => caseTypes.includes(item.type_value) && item.row_status === "Finish"
                     );
-                    
+
                     // Obtener tipos únicos ordenados alfabéticamente
-                    const uniqueType = Array.from(new Set(filteredData.map(item => item.type_value)))
-                        .sort((a, b) => a.localeCompare(b));
-                    
-                    // Contar las tareas por tipo
-                    const taskCounts = uniqueType.map(task =>
-                        filteredData.filter(item => item.type_value === task).length
+                    const uniqueType = Array.from(new Set(filteredData.map((item) => item.type_value))).sort((a, b) =>
+                        a.localeCompare(b)
                     );
-                    
-                
-                    // Create dynamic data for the chart
+
+                    // Contar las tareas por tipo
+                    const taskCounts = uniqueType.map((task) =>
+                        filteredData.filter((item) => item.type_value === task).length
+                    );
+
+                    // Crear datos dinámicos para el gráfico agrupado
                     const dynamicGroupData = {
                         labels: uniqueType,
                         datasets: [
                             {
-                                label: 'Tasks per Type',
+                                label: "Tasks per Type",
                                 data: taskCounts,
-                                backgroundColor: taskColors.slice(0, uniqueType.length),
-                                borderColor: taskColors.slice(0, uniqueType.length).map(color => color.replace('0.6', '1')),
+                                backgroundColor: uniqueType.map((task) => taskColorMap[task]), // Usar color fijo por tipo de tarea
+                                borderColor: uniqueType.map((task) => taskColorMap[task].replace("0.6", "1")), // Borde más sólido
                                 borderWidth: 1,
                             },
                         ],
                     };
 
-                    // Update the chart state
+                    // Actualizar el estado del gráfico
                     setGroupData(dynamicGroupData);
 
-                    const allowedTypes_Idle_Time = ["Waiting for case", "Personal needs", "Other", "Break", "Lunch", "Electricity problem","Internet problem","Waiting for support"];
+
+
+
+
+
+                    const taskColorMap_Idle_Time = {
+                        "Waiting for case": "rgba(66, 135, 245, 0.6)", // Azul profesional
+                        "Personal needs": "rgba(38, 166, 91, 0.6)", // Verde esmeralda
+                        "Other": "rgba(249, 192, 36, 0.6)", // Amarillo dorado
+                        "Break": "rgba(230, 73, 128, 0.6)", // Rosa coral
+                        "Lunch": "rgba(255, 159, 64, 0.6)", // Naranja cálido
+                        "Electricity problem": "rgba(153, 102, 255, 0.6)", // Púrpura suave
+                        "Internet problem": "rgba(75, 192, 192, 0.6)", // Verde menta
+                        "Waiting for support": "rgba(255, 99, 132, 0.6)", // Rojo claro
+                    };
+                    
+                    const allowedTypes_Idle_Time = ["Waiting for case", "Personal needs", "Other", "Break", "Lunch", "Electricity problem","Internet problem","Waiting for support","Waiting for TL Assistance"];
 
                     // Filtrar por tipos permitidos y row_status "Finish" o "Stop"
                     const filteredData_Idle = data.filter(item => 
@@ -937,10 +990,10 @@ export default function Dashboard() {
                         labels: uniqueType_Idle,
                         datasets: [
                             {
-                                label: 'Total Time per Type (hours)', // Ajuste de la etiqueta
+                                label: "Idle Time",
                                 data: taskTimeSums_Idle.map(Number), // Asegurarse de que los valores sean numéricos
-                                backgroundColor: taskColors.slice(0, uniqueType_Idle.length),
-                                borderColor: taskColors.slice(0, uniqueType_Idle.length).map(color => color.replace('0.6', '1')),
+                                backgroundColor: uniqueType_Idle.map(type => taskColorMap_Idle_Time[type] || 'rgba(0, 0, 0, 0.6)'), // Usar los colores del mapeo
+                                borderColor: uniqueType_Idle.map(type => taskColorMap_Idle_Time[type]?.replace('0.6', '1') || 'rgba(0, 0, 0, 1)'), // Asegurar bordes del mismo color
                                 borderWidth: 1,
                             },
                         ],
@@ -974,8 +1027,8 @@ export default function Dashboard() {
                         return {
                             label: type, // Etiqueta del tipo de "Idle_Time"
                             data: idleTimeCountsByUser,
-                            backgroundColor: techColors[index % techColors.length], // Asegurar colores distintos
-                            borderColor: techColors[index % techColors.length].replace('0.6', '1'),
+                            backgroundColor: taskColorMap_Idle_Time[type] || 'rgba(0, 0, 0, 0.6)', // Usar colores consistentes de taskColorMap_Idle_Time
+                            borderColor: taskColorMap_Idle_Time[type]?.replace('0.6', '1') || 'rgba(0, 0, 0, 1)', // Bordes con el mismo color
                             borderWidth: 1,
                         };
                     });
